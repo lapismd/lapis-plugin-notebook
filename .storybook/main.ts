@@ -6,6 +6,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { mergeConfig, searchForWorkspaceRoot } from "vite";
 
+import { notebookPackagesPlugin } from "../scripts/vite-notebook-packages";
+
 const storybookDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(storybookDir, "..");
 const packageLib = path.resolve(storybookDir, "../src/lib");
@@ -74,6 +76,7 @@ const config: StorybookConfig = {
   viteFinal: async (viteConfig) =>
     mergeConfig(viteConfig, {
       plugins: [
+        notebookPackagesPlugin(),
         ...(!process.env.VITEST
           ? [
               svelte({

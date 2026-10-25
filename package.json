@@ -74,6 +74,7 @@
     "@codemirror/state": "^6.7.1",
     "@codemirror/view": "^6.43.8",
     "@lapis-notes/api": "^0.1.4",
+    "@lapis-notes/markdown": "^0.1.6",
     "@lapismd/design-core": "^0.6.0",
     "svelte": "^5.0.0"
   },

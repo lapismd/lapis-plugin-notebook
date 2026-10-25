@@ -10,8 +10,9 @@ export const PluginWorkspaceExample = `<script lang="ts">
   const layout = {
     main: { id: "main", type: "split", direction: "vertical", sizes: [100],
       children: [{ id: "notebook-tabs", type: "tabs", currentTab: 0, children: [
-        { id: "note-welcome", type: "leaf",
-          state: { type: "markdown", state: { file: "welcome.md" }, title: "welcome" } },
+        { id: "notebook-main", type: "leaf",
+          state: { type: "notebook", state: { file: "Getting Started.notebook.md" },
+                   title: "Getting Started" } },
       ] }],
     },
     left: { id: "left", type: "split", direction: "vertical", sizes: [100],
@@ -23,7 +24,7 @@ export const PluginWorkspaceExample = `<script lang="ts">
         { id: "search", type: "leaf", state: { type: "search", state: {}, title: "Search" } },
       ] }], width: "0px" },
     bottom: { id: "bottom", type: "tabs", currentTab: 0, children: [], height: "0px" },
-    floating: [], active: "note-welcome",
+    floating: [], active: "notebook-main",
   };
   const app = new App({
     version: "1.0.0",

@@ -42,6 +42,11 @@ private `packages/*` support-package sources to
 sub-package contract, and Storybook sources stay on
 [Notebook](plugins/notebook/index.md).
 
+Private sub-package specifiers resolve from TypeScript source through
+`scripts/vite-notebook-packages.ts` (shared by the Vitest projects and the
+Storybook Vite pipeline) plus matching tsconfig paths, keeping the published
+root manifest free of `workspace:` dependencies per LN-NB-006.
+
 The six private support packages ported from the legacy notebook
 (`notebook-core`, `notebook-stdlib`, `notebook-input`, `notebook-duckdb`,
 `notebook-duckdb-assets`, `notebook-worker`) remain unpublished workspace

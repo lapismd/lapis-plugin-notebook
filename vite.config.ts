@@ -5,6 +5,8 @@ import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 
+import { notebookPackagesPlugin } from "./scripts/vite-notebook-packages";
+
 const packageDir = path.dirname(fileURLToPath(import.meta.url));
 const internationalizedDate = path.resolve(
   packageDir,
@@ -50,7 +52,7 @@ export default defineConfig({
   test: {
     projects: [
       {
-        plugins: [svelte({ preprocess: vitePreprocess() })],
+        plugins: [notebookPackagesPlugin(), svelte({ preprocess: vitePreprocess() })],
         resolve: {
           alias: {
             $lib: path.resolve(packageDir, "src/lib"),

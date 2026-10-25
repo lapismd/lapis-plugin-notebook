@@ -17,6 +17,15 @@ desktop, and the hosted Rust server share one persistence path. The legacy
 Electron native-DuckDB sidecar is out of scope; a future transport-independent
 native services crate requires its own specification and lane intake first.
 
+Implementation status: Stage 2 registers the host surface — the plugin class
+loads through the public lifecycle, persists versioned settings through
+`loadData`/`saveData`, registers the `notebook.autorun` metadata property
+type, the file-keyed notebook view, the editor-view contribution, the
+`.notebook.md` extension association, the cell slash-menu editor suggest,
+the settings tab, and the authoring commands. Execution, cancellation,
+output persistence, safe-mode gating, and status-bar context keys remain
+later-stage requirements below.
+
 ## Requirements
 
 | ID | Requirement |

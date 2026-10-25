@@ -22,14 +22,15 @@
 | LPN-SPEC-018 | Implemented | `.storybook/vitest.setup.ts` installs the fatal Svelte diagnostic guard through teardown without allowlists. |
 | LPN-SPEC-019 | Implemented | `pnpm validation:all` runs the classified lanes sequentially in one worker and refuses selectors. |
 | LN-NB-001 | Implemented | `manifest.json` and `package.json` match the `packageManifest` validator (`pnpm spec:validate`). |
-| LN-NB-002 | Planned | Stage 0 ships the loading skeleton (`src/lib/notebook-plugin.ts`); registrations land with the documents and runtime stages. |
+| LN-NB-002 | Implemented | Stage 2 `onload` registers the file-keyed `notebook` view, editor-view contribution, `.notebook.md` extension, cell editor suggest, settings tab, and six authoring commands; the Shell story play asserts each through layout restore. |
 | LN-NB-003 | Implemented | `src/lib/application-ownership.test.ts` audits plugin, story, and support-package sources; wired into `check` and `spec:check`. |
-| LN-NB-004 | Planned | The published-bundle exclusion audit lands with the Stage 2 bundled dist. |
-| LN-NB-005 | Planned | Stage acceptance records accumulate under `spec/records/` as slices land. |
-| LN-NB-010 | Planned | Fixtures seed `.notebook.md` identity; the file-type registration lands with the Stage 2 plugin skeleton. |
-| LN-NB-011 | Planned | Parser port with legacy regression tests lands in Stage 2. |
-| LN-NB-012 | Planned | Frontmatter normalization port lands in Stage 2. |
-| LN-NB-013 | Planned | Round-trip edit commands port in Stage 2 with legacy regression tests. |
+| LN-NB-004 | Planned | The published-bundle exclusion audit lands with the bundling lane (LN-NB-006); Stage 2 imports stay on published api/markdown/design-core surfaces. |
+| LN-NB-005 | Implemented | Stage 0–2 records under `spec/records/2026-10-25-*` carry lane evidence and status flips followed executed acceptance. |
+| LN-NB-006 | Planned | Source resolution ships via `scripts/vite-notebook-packages.mjs` + tsconfig paths; the inlining bundle lane lands before the publication gate. |
+| LN-NB-010 | Implemented | `notebook-path.ts`/`notebook-file.ts` ported with legacy tests; `registerExtensions(["notebook.md"])` + editor-view `filenamePatterns` proven by the Shell story opening the fixture in `NotebookView`. |
+| LN-NB-011 | Implemented | `parse/parse-notebook-document.ts` ported verbatim; `parse-notebook-document.test.ts` green in the unit lane. |
+| LN-NB-012 | Implemented | `model/notebook-frontmatter.ts` ported verbatim; `notebook-frontmatter.test.ts` green in the unit lane. |
+| LN-NB-013 | Implemented | `append-cell-template`, `ensure-notebook-frontmatter`, `create-demo-notebooks`, and `notebook-cell-suggest` ported with their four legacy test suites green. |
 | LN-NB-014 | Planned | Analysis and graph port lands with the Stage 1 support packages and Stage 4 session wiring. |
 | LN-NB-020 | Planned | Worker/in-process transport port lands in Stage 4. |
 | LN-NB-021 | Planned | Graph reactivity and autorun land in Stage 4. |

@@ -43,9 +43,13 @@ function workspaceLayout() {
           stacked: false,
           currentTab: 0,
           children: [
-            leaf("note-welcome", "welcome", "file-text", "markdown", {
-              file: NOTEBOOK_FIXTURE_PATHS.welcome,
-            }),
+            leaf(
+              "notebook-main",
+              "Getting Started",
+              "square-terminal",
+              "notebook",
+              { file: NOTEBOOK_FIXTURE_PATHS.gettingStarted },
+            ),
           ],
         },
       ],
@@ -92,7 +96,7 @@ function workspaceLayout() {
       height: "0px",
     },
     floating: [],
-    active: "note-welcome",
+    active: "notebook-main",
   };
 }
 

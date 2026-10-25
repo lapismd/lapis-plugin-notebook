@@ -4,7 +4,11 @@
   import { expect, waitFor, within } from "storybook/test";
 
   import PluginWorkspaceDemo from "./PluginWorkspaceDemo.svelte";
-  import { NotebookPlugin, NOTEBOOK_PLUGIN_ID } from "../lib";
+  import {
+    NotebookPlugin,
+    NotebookView,
+    NOTEBOOK_PLUGIN_ID,
+  } from "../lib";
   import { NOTEBOOK_FIXTURE_PATHS } from "./notebook-fixtures";
   import { PluginWorkspaceExample } from "./PluginWorkspace.example-sources";
 
@@ -94,6 +98,34 @@
       app.vault.getFileByPath(NOTEBOOK_FIXTURE_PATHS.gettingStarted),
     ).toBeTruthy();
     expect(app.vault.getFileByPath(NOTEBOOK_FIXTURE_PATHS.welcome)).toBeTruthy();
+
+    // The `.notebook.md` file-type association routes the seeded notebook
+    // into the plugin-owned NotebookView (registerExtensions +
+    // registerEditorView + registerView end-to-end through layout restore).
+    await waitFor(() => {
+      const activeView = app.workspace.activeLeaf?.view;
+      expect(activeView).toBeInstanceOf(NotebookView);
+      expect(activeView?.getViewType()).toBe("notebook");
+    });
+
+    // Stage 2 authoring commands are registered under the plugin id prefix.
+    for (const commandId of [
+      "enable-notebook-for-active-note",
+      "create-demo-notebooks",
+      "insert-notebook-code-cell",
+      "insert-notebook-input-cell",
+      "insert-notebook-sql-cell",
+      "insert-notebook-markdown-cell",
+    ]) {
+      expect(
+        app.commands.commands[`${NOTEBOOK_PLUGIN_ID}:${commandId}`],
+        `missing command ${commandId}`,
+      ).toBeTruthy();
+    }
+
+    // Settings initialized with the documented defaults through loadData.
+    expect(notebookPlugin.getSettings().execution.autoRunStaleOnCellChange)
+      .toBeTypeOf("boolean");
 
     // The shell renders the real public workspace chrome.
     expect(

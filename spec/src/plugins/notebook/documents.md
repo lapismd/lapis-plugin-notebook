@@ -13,6 +13,11 @@ identifier references in TypeScript/JavaScript cells and `{{name}}` or
 directed graph. The graph drives execution order, stale propagation, and the
 dependencies panel; duplicate definitions and cycles are document errors.
 
+Implementation status: the file identity, directive parser, frontmatter
+normalization, and round-trip edit commands (LN-NB-010–013) are ported with
+their legacy regression suites; the analysis and graph consumers
+(LN-NB-014) activate with the runtime stage.
+
 ## Requirements
 
 | ID | Requirement |

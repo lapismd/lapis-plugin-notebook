@@ -7,6 +7,38 @@
       "$lib": ["./src/lib"],
       "$lib/*": ["./src/lib/*"],
       "@lapis-notes/lapis-plugin-notebook": ["./src/lib/index.ts"],
+      "@lapis-notes/notebook-core": ["./packages/core/src/index.ts"],
+      "@lapis-notes/notebook-core/*": [
+        "./packages/core/src/*/index.ts",
+        "./packages/core/src/*"
+      ],
+      "@lapis-notes/notebook-stdlib": ["./packages/stdlib/src/index.ts"],
+      "@lapis-notes/notebook-stdlib/*": [
+        "./packages/stdlib/src/*/index.ts",
+        "./packages/stdlib/src/*"
+      ],
+      "@lapis-notes/notebook-input": ["./packages/input/src/index.ts"],
+      "@lapis-notes/notebook-input/*": [
+        "./packages/input/src/*/index.ts",
+        "./packages/input/src/*"
+      ],
+      "@lapis-notes/notebook-duckdb": ["./packages/duckdb/src/index.ts"],
+      "@lapis-notes/notebook-duckdb/*": [
+        "./packages/duckdb/src/*/index.ts",
+        "./packages/duckdb/src/*"
+      ],
+      "@lapis-notes/notebook-duckdb-assets": [
+        "./packages/duckdb-assets/src/index.ts"
+      ],
+      "@lapis-notes/notebook-duckdb-assets/*": [
+        "./packages/duckdb-assets/src/*/index.ts",
+        "./packages/duckdb-assets/src/*"
+      ],
+      "@lapis-notes/notebook-worker": ["./packages/worker/src/index.ts"],
+      "@lapis-notes/notebook-worker/*": [
+        "./packages/worker/src/*/index.ts",
+        "./packages/worker/src/*"
+      ],
       "svelte": ["./node_modules/svelte"],
       "svelte/*": ["./node_modules/svelte/*"]
     },
