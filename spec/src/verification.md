@@ -31,7 +31,7 @@
 | LN-NB-011 | Implemented | `parse/parse-notebook-document.ts` ported verbatim; `parse-notebook-document.test.ts` green in the unit lane. |
 | LN-NB-012 | Implemented | `model/notebook-frontmatter.ts` ported verbatim; `notebook-frontmatter.test.ts` green in the unit lane. |
 | LN-NB-013 | Implemented | `append-cell-template`, `ensure-notebook-frontmatter`, `create-demo-notebooks`, and `notebook-cell-suggest` ported with their four legacy test suites green. |
-| LN-NB-014 | Planned | Analysis and graph port lands with the Stage 1 support packages and Stage 4 session wiring. |
+| LN-NB-014 | Implemented | `runtime/analysis/*` and `runtime/notebook-graph.ts` ported verbatim over `notebook-core/graph`; legacy graph, worker-engine, and viewof suites green in the unit lane (52 files / 227 tests). |
 | LN-NB-020 | Planned | Worker/in-process transport port lands in Stage 4. |
 | LN-NB-021 | Planned | Graph reactivity and autorun land in Stage 4. |
 | LN-NB-022 | Planned | Cancellation and progress land in Stage 4. |

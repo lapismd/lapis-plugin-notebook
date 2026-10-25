@@ -53,3 +53,10 @@ The six private support packages ported from the legacy notebook
 members. Their host-neutrality boundaries are specified in
 [Runtime](plugins/notebook/runtime.md); a future native services crate needs
 its own specification and lane intake before it lands.
+
+The tracked lockfile MUST be regenerated without local pnpm hooks
+(`pnpm install --lockfile-only --ignore-pnpmfile`) so it stays registry-pure
+and matches the Docker workers' frozen `--ignore-pnpmfile` installation;
+local development then relinks sibling sources with
+`pnpm install --lockfile=false`. A lockfile carrying pnpmfile checksums or
+sibling `file:` specifiers fails the worker install fail-closed.

@@ -22,9 +22,19 @@ loads through the public lifecycle, persists versioned settings through
 `loadData`/`saveData`, registers the `notebook.autorun` metadata property
 type, the file-keyed notebook view, the editor-view contribution, the
 `.notebook.md` extension association, the cell slash-menu editor suggest,
-the settings tab, and the authoring commands. Execution, cancellation,
-output persistence, safe-mode gating, and status-bar context keys remain
-later-stage requirements below.
+the settings tab, and the authoring commands.
+
+The complete execution logic is ported verbatim under `src/lib/runtime/`
+with its nine legacy regression suites green: dependency analysis, graph,
+session and session manager, runtime controller/registry/status, output
+store, interpolation, the shared worker engine, worker client with
+transport-eligibility policy, runtime protocol and worker entry, the
+DuckDB-WASM service with app-table and vault-file registration, and the
+plugin runtime-asset resolver. The legacy Electron native-DuckDB sidecar
+provider is excluded; the provider seam remains per LN-NB-025. Plugin
+wiring (run commands, cancellation surfaces, persistence and safe-mode
+activation, packaged worker assets) and the cell UI land in the following
+slices.
 
 ## Requirements
 

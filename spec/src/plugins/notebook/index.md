@@ -13,7 +13,10 @@ its six private support packages from `legacy-lapis-notes`. Ported behavior
 keeps its legacy regression evidence; presentation remaps onto public
 `@lapismd/design-core` exports instead of re-creating primitives. The runtime
 plugin id `lapis-notebook` is preserved from the legacy plugin so persisted
-plugin data keys remain compatible.
+plugin data keys remain compatible. The DuckDB-WASM engine dependency is
+pinned exactly at `1.33.1-dev45.0` in root dependencies per LPN-SPEC-004 so
+query behavior cannot drift independently from the ported compatibility
+tests.
 
 This chapter is the package contract and the only normative MUST table for
 package identity, host registration, and ownership. The following chapters
