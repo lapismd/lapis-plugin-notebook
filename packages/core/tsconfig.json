@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "$lib": ["./src"],
+      "$lib/*": ["./src/*"],
+      "@lapis-notes/notebook-core": ["./src/index.ts"],
+      "@lapis-notes/notebook-core/*": ["./src/*/index.ts", "./src/*"]
+    },
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": [],
+    "strict": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "declaration": true,
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/__tests__/**/*.ts"]
+}

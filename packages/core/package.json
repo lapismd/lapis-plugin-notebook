@@ -1,0 +1,49 @@
+{
+  "name": "@lapis-notes/notebook-core",
+  "private": true,
+  "version": "0.0.0",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./graph": {
+      "types": "./src/graph.ts",
+      "import": "./src/graph.ts",
+      "default": "./src/graph.ts"
+    },
+    "./execution": {
+      "types": "./src/execution.ts",
+      "import": "./src/execution.ts",
+      "default": "./src/execution.ts"
+    },
+    "./model": {
+      "types": "./src/model.ts",
+      "import": "./src/model.ts",
+      "default": "./src/model.ts"
+    },
+    "./outputs": {
+      "types": "./src/outputs.ts",
+      "import": "./src/outputs.ts",
+      "default": "./src/outputs.ts"
+    },
+    "./session": {
+      "types": "./src/session.ts",
+      "import": "./src/session.ts",
+      "default": "./src/session.ts"
+    },
+    "./runtime-features": {
+      "types": "./src/runtime-features.ts",
+      "import": "./src/runtime-features.ts",
+      "default": "./src/runtime-features.ts"
+    },
+    "./language-service": {
+      "types": "./src/language-service.ts",
+      "import": "./src/language-service.ts",
+      "default": "./src/language-service.ts"
+    }
+  }
+}

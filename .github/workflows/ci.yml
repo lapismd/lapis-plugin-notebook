@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: node scripts/validation/install-tools.mjs --ci
+      - name: Select the exact CI source revision
+        run: |
+          jj git init --colocate .
+          jj --ignore-immutable edit "$GITHUB_SHA"
+      - run: pnpm validation:check
+      - run: pnpm validation:smoke
+      - run: pnpm spec:check
+      - run: pnpm check
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm publint
+      - run: pnpm test:storybook
+      - run: pnpm build-storybook

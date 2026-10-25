@@ -1,0 +1,33 @@
+body.sb-main-fullscreen #storybook-root {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 1.5rem;
+}
+
+.docs-story {
+  overflow: visible !important;
+}
+
+.docs-story .sb-story {
+  box-sizing: border-box;
+  padding: 1rem 2.5rem;
+}
+
+.notebook-story-frame {
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--ui-border, var(--border));
+  border-radius: var(--ui-radius, 0.5rem);
+  background: var(--ui-background, var(--background));
+}
+
+.notebook-story-frame--md {
+  max-width: 28rem;
+  padding: 1rem;
+}
+
+.notebook-story-frame--xl {
+  max-width: 36rem;
+  padding: 1rem;
+}

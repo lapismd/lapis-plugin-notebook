@@ -1,0 +1,47 @@
+{
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "ignoreDeprecations": "5.0",
+    "paths": {
+      "$lib": ["./src/lib"],
+      "$lib/*": ["./src/lib/*"],
+      "@lapis-notes/lapis-plugin-notebook": ["./src/lib/index.ts"],
+      "svelte": ["./node_modules/svelte"],
+      "svelte/*": ["./node_modules/svelte/*"]
+    },
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "allowJs": true,
+    "checkJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": false,
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "types": ["vite/client"]
+  },
+  "include": [
+    "src/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.js",
+    "src/**/*.svelte",
+    "packages/*/src/**/*.d.ts",
+    "packages/*/src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.stories.ts",
+    "src/**/*.stories.svelte",
+    "src/**/*.example-sources.ts",
+    "src/**/*.story-play.ts",
+    "packages/*/src/**/*.test.ts",
+    "packages/*/src/**/__tests__/**"
+  ]
+}

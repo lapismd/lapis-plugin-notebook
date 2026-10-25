@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "$lib": ["./src"],
+      "$lib/*": ["./src/*"],
+      "@lapis-notes/notebook-stdlib": ["./src/index.ts"],
+      "@lapis-notes/notebook-stdlib/*": ["./src/*/index.ts", "./src/*"]
+    },
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "strict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts"]
+}

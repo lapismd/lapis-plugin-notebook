@@ -1,0 +1,16 @@
+{
+  "name": "@lapis-notes/notebook-worker",
+  "private": true,
+  "version": "0.0.0",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./command-broker": "./src/command-broker.ts",
+    "./host-request-broker": "./src/host-request-broker.ts",
+    "./host-request-responder": "./src/host-request-responder.ts",
+    "./protocol": "./src/protocol.ts",
+    "./runtime-policy": "./src/runtime-policy.ts",
+    "./shell": "./src/shell.ts"
+  }
+}

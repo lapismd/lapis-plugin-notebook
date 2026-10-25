@@ -1,0 +1,12 @@
+node_modules/
+dist/
+storybook-static/
+spec/book/
+.svelte-kit/
+.cache/storybook/
+.env.storybook.local
+AGENTS.override.md
+.cursor/
+*.tgz
+*.tsbuildinfo
+.local/

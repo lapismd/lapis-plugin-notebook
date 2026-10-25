@@ -1,0 +1,132 @@
+{
+  "name": "@lapis-notes/lapis-plugin-notebook",
+  "version": "0.1.0",
+  "description": "Executable .notebook.md notebooks with reactive cells and rich outputs for Lapis Notes",
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lapismd/lapis-plugin-notebook.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/validation.mjs run build",
+    "check": "node scripts/validation.mjs run check",
+    "check:app-ownership": "node scripts/validation.mjs run check:app-ownership",
+    "check:no-tailwind": "node scripts/validation.mjs run check:no-tailwind",
+    "check:svelte": "node scripts/validation.mjs run check:svelte",
+    "check:types": "node scripts/validation.mjs run check:types",
+    "test": "node scripts/validation.mjs run test",
+    "test:storybook": "node scripts/validation.mjs run test:storybook",
+    "build-storybook": "node scripts/validation.mjs run build-storybook",
+    "publint": "node scripts/validation.mjs run publint",
+    "prepack": "node scripts/validation.mjs run prepack",
+    "spec:build": "node scripts/validation.mjs run spec:build",
+    "spec:check": "node scripts/validation.mjs run spec:check",
+    "spec:first": "node scripts/validation.mjs run spec:first",
+    "spec:validate": "node scripts/validation.mjs run spec:validate",
+    "storybook": "WATCHPACK_POLLING=250 node scripts/storybook-run.mjs --no-open --config-dir .storybook",
+    "storybook:stop": "bash scripts/storybook-stop.sh",
+    "storybook:restart": "bash scripts/storybook-restart.sh",
+    "check:validation-routing": "node scripts/validation.mjs run check:validation-routing",
+    "check:storybook-parity": "node scripts/validation.mjs run check:storybook-parity",
+    "validation:check": "node scripts/validation.mjs run validation:check",
+    "validation:all": "node scripts/validation.mjs run validation:all",
+    "validation:smoke": "node scripts/validation.mjs run validation:smoke",
+    "validation": "node scripts/validation.mjs",
+    "validation:doctor": "node scripts/validation.mjs doctor",
+    "validation:images": "node scripts/validation.mjs images",
+    "validation:clean": "node scripts/validation.mjs clean"
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*",
+    "!dist/**/*.stories.*",
+    "!dist/**/*.example-sources.*",
+    "!dist/**/*.story-play.*"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "dependencies": {
+    "@lucide/svelte": "^0.523.0",
+    "yaml": "^2.9.0"
+  },
+  "peerDependencies": {
+    "@codemirror/state": "^6.7.1",
+    "@codemirror/view": "^6.43.8",
+    "@lapis-notes/api": "^0.1.4",
+    "@lapismd/design-core": "^0.6.0",
+    "svelte": "^5.0.0"
+  },
+  "devDependencies": {
+    "@codemirror/autocomplete": "6.20.3",
+    "@codemirror/commands": "6.10.4",
+    "@codemirror/lang-markdown": "6.5.2",
+    "@codemirror/lang-yaml": "6.1.3",
+    "@codemirror/language": "6.12.4",
+    "@codemirror/lint": "6.9.7",
+    "@codemirror/search": "6.7.1",
+    "@codemirror/state": "6.7.1",
+    "@codemirror/view": "6.43.8",
+    "@fontsource-variable/dm-sans": "^5.2.8",
+    "@fontsource-variable/source-code-pro": "5.2.7",
+    "@internationalized/date": "3.12.2",
+    "@lapis-notes/api": "0.1.4",
+    "@lapis-notes/file-explorer": "0.1.2",
+    "@lapis-notes/markdown": "0.1.6",
+    "@lapis-notes/search": "0.1.3",
+    "@lapis-notes/ui": "0.1.3",
+    "@lapis-notes/workspace": "0.2.1",
+    "@lapismd/design-core": "0.6.0",
+    "@lapismd/mira": "0.1.1",
+    "@lapismd/spec-validator": "^0.1.4",
+    "@lezer/common": "1.5.2",
+    "@lezer/highlight": "1.2.3",
+    "@lezer/lr": "1.4.10",
+    "@lezer/markdown": "1.7.2",
+    "@storybook/addon-a11y": "10.5.7",
+    "@storybook/addon-docs": "10.5.7",
+    "@storybook/addon-svelte-csf": "5.1.2",
+    "@storybook/addon-themes": "10.5.7",
+    "@storybook/addon-vitest": "10.5.7",
+    "@storybook/svelte-vite": "10.5.7",
+    "@sveltejs/package": "2.5.0",
+    "@sveltejs/vite-plugin-svelte": "5.1.1",
+    "@tailwindcss/vite": "4.1.12",
+    "@tsconfig/svelte": "5.0.5",
+    "@types/node": "^22.15.0",
+    "@vitest/browser": "4.1.10",
+    "@vitest/browser-playwright": "4.1.10",
+    "aria-query": "5.3.2",
+    "bits-ui": "2.20.2",
+    "publint": "0.3.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "storybook": "10.5.7",
+    "svelte": "5.56.10",
+    "svelte-check": "4.3.1",
+    "tailwindcss": "4.1.12",
+    "typescript": "~5.8.3",
+    "vite": "6.4.3",
+    "vitest": "4.1.10"
+  }
+}

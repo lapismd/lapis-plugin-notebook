@@ -1,0 +1,91 @@
+.lapis-notebook-input {
+  width: 100%;
+}
+
+.lapis-notebook-input__mount {
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+
+.lapis-notebook-input--range .lapis-notebook-input__mount {
+  min-width: 12rem;
+}
+
+.lapis-notebook-input--textarea .lapis-notebook-input__mount {
+  align-items: stretch;
+}
+
+.lapis-notebook-input--table .lapis-notebook-input__mount {
+  align-items: stretch;
+}
+
+.lapis-notebook-input__table {
+  width: 100%;
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  border-radius: 0.75rem;
+}
+
+.lapis-notebook-input__table-grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  font-size: 0.875rem;
+}
+
+.lapis-notebook-input__table-grid th,
+.lapis-notebook-input__table-grid td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+  text-align: left;
+  vertical-align: top;
+}
+
+.lapis-notebook-input__table-grid tbody tr {
+  cursor: pointer;
+}
+
+.lapis-notebook-input__table-grid tbody tr[data-selected="true"] {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.lapis-notebook-input__table-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lapis-notebook-input__table-sort::after {
+  content: "";
+  opacity: 0.45;
+}
+
+.lapis-notebook-input__table-sort[data-direction="asc"]::after {
+  content: "▲";
+  opacity: 0.75;
+  font-size: 0.7em;
+}
+
+.lapis-notebook-input__table-sort[data-direction="desc"]::after {
+  content: "▼";
+  opacity: 0.75;
+  font-size: 0.7em;
+}
+
+.lapis-notebook-input__table-select-header,
+.lapis-notebook-input__table-select-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.lapis-notebook-input__table-empty {
+  padding: 0.75rem;
+  color: color-mix(in srgb, currentColor 65%, transparent);
+}

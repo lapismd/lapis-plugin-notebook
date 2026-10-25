@@ -1,0 +1,25 @@
+{
+  "name": "@lapis-notes/notebook-stdlib",
+  "private": true,
+  "version": "0.0.0",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./bootstrap": "./src/bootstrap.ts",
+    "./builtins": "./src/builtins.ts",
+    "./dependencies": "./src/dependencies.ts",
+    "./dom": "./src/dom.ts",
+    "./files": "./src/files.ts",
+    "./generators": "./src/generators.ts",
+    "./lapis": "./src/lapis.ts",
+    "./promises": "./src/promises.ts",
+    "./runtime-features": "./src/runtime-features.ts"
+  },
+  "dependencies": {
+    "@lapis-notes/notebook-core": "workspace:*",
+    "@observablehq/plot": "^0.6.17",
+    "d3": "^7.9.0",
+    "htl": "^0.3.1"
+  }
+}

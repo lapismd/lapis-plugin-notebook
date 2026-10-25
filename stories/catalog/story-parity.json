@@ -1,0 +1,5 @@
+{
+  "src/stories/PluginWorkspace.stories.svelte": {
+    "kind": "application"
+  }
+}

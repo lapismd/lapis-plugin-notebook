@@ -1,0 +1,14 @@
+{
+  "name": "@lapis-notes/notebook-duckdb-assets",
+  "private": true,
+  "version": "0.0.0",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./assets": "./src/assets.ts"
+  },
+  "dependencies": {
+    "@duckdb/duckdb-wasm": "1.33.1-dev45.0"
+  }
+}

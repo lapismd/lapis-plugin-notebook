@@ -1,0 +1,8 @@
+/*
+ * Notebook plugin production styles.
+ *
+ * Stage 0 ships no component paint. The staged port adds notebook-owned
+ * `notebook-` prefixed BEM classes and `--notebook-*` variables mapped onto
+ * Design Core semantic tokens; Tailwind utility strings are forbidden in
+ * production sources (pnpm check:no-tailwind).
+ */

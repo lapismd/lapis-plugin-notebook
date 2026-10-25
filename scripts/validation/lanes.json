@@ -1,0 +1,22 @@
+{
+  "validation:all": "node scripts/validation/all.mjs",
+  "build": "pnpm run prepack",
+  "check": "pnpm check:validation-routing && pnpm check:storybook-parity && pnpm spec:validate && pnpm check:app-ownership && pnpm check:no-tailwind && pnpm check:svelte && pnpm check:types",
+  "check:app-ownership": "vitest run --project unit src/lib/application-ownership.test.ts",
+  "check:no-tailwind": "node scripts/check-no-tailwind.mjs",
+  "check:svelte": "svelte-check --tsconfig ./tsconfig.app.json --fail-on-warnings --output human",
+  "check:types": "tsc -p tsconfig.node.json --noEmit",
+  "test": "vitest run --project unit --passWithNoTests --maxWorkers=1 --no-file-parallelism",
+  "test:storybook": "node scripts/test-storybook-batches.mjs",
+  "build-storybook": "NODE_OPTIONS=\"${NODE_OPTIONS:---max-old-space-size=8192}\" storybook build --config-dir .storybook --output-dir storybook-static",
+  "publint": "pnpm run prepack",
+  "prepack": "svelte-package --tsconfig ./tsconfig.pack.json && publint",
+  "spec:build": "spec-validator build",
+  "spec:check": "pnpm check:validation-routing && pnpm check:storybook-parity && spec-validator check && pnpm check:app-ownership",
+  "spec:first": "spec-validator first",
+  "spec:validate": "spec-validator validate",
+  "check:validation-routing": "node scripts/validation/check-routing.mjs",
+  "check:storybook-parity": "node scripts/spec-validation/check-storybook-parity.mjs",
+  "validation:check": "vitest run --project unit scripts/validation.test.mjs scripts/spec-validation/storybook-parity.test.mjs --maxWorkers=1 --no-file-parallelism",
+  "validation:smoke": "node scripts/validation/smoke.mjs"
+}

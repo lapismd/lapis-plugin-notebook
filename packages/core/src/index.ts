@@ -1,0 +1,72 @@
+export type {
+  NotebookExecutionOptions,
+  NotebookExecutionResult,
+  NotebookFileReaderProvider,
+  NotebookJavaScriptLikeCompileLanguage,
+  NotebookJavaScriptLikeCompileProvider,
+  NotebookJavaScriptLikeCompileRequest,
+  NotebookJavaScriptLikeCompileResult,
+  NotebookRuntimeDependencyLoader,
+} from "./execution";
+export type {
+  NotebookCell,
+  NotebookCellAttributes,
+  NotebookCellBlock,
+  NotebookCellLanguage,
+  NotebookCellRange,
+  NotebookCellRunMode,
+  NotebookDocument,
+  NotebookDocumentBlock,
+  NotebookFrontmatter,
+  NotebookMarkdownBlock,
+  NotebookMode,
+} from "./model";
+export type {
+  NotebookCellExecutionState,
+  NotebookCellRuntimeState,
+  NotebookExecutionCheckpoint,
+  NotebookExecutionPhase,
+  NotebookExecutionPhaseStatus,
+  NotebookExecutionProgressEvent,
+  NotebookExecutionRunState,
+} from "./session";
+export type { NotebookRuntimeFeatures } from "./runtime-features";
+export {
+  buildNotebookGraphFromCells,
+  collectDependencyClosure,
+  collectStaleDescendants,
+  type NotebookCellAnalysisLike,
+  type NotebookGraph,
+  type NotebookGraphCellLike,
+  type NotebookGraphNode,
+} from "./graph";
+export type {
+  NotebookChartLibrary,
+  NotebookChartOutput,
+  NotebookDomOutput,
+  NotebookErrorOutput,
+  NotebookHtmlOutput,
+  NotebookImageOutput,
+  NotebookInputOutput,
+  NotebookInputOutputSource,
+  NotebookMarkdownOutput,
+  NotebookOutput,
+  NotebookOutputKind,
+  NotebookTableColumn,
+  NotebookTableColumnarData,
+  NotebookTableColumnType,
+  NotebookTableOptions,
+  NotebookTableOutput,
+  NotebookTableRecord,
+  NotebookTableSchemaMeta,
+  NotebookTextOutput,
+} from "./outputs";
+export {
+  buildNotebookTypeScriptVirtualDocument,
+  mapNotebookCellPositionToVirtual,
+  mapVirtualRangeToNotebookCell,
+  type NotebookMappedPosition,
+  type NotebookMappedRange,
+  type NotebookVirtualDocumentSegment,
+  type NotebookVirtualTypeScriptDocument,
+} from "./language-service";

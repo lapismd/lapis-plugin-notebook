@@ -1,0 +1,22 @@
+{
+  "name": "@lapis-notes/notebook-input",
+  "private": true,
+  "version": "0.0.0",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./dom-runtime": "./src/dom-runtime.ts",
+    "./input-node": "./src/input-node.ts",
+    "./observable-viewof": "./src/observable-viewof.ts",
+    "./styles.css": "./src/styles.css",
+    "./view-runtime": "./src/view-runtime.ts"
+  },
+  "dependencies": {
+    "@lapis-notes/notebook-stdlib": "workspace:*"
+  },
+  "peerDependencies": {
+    "@lapis-notes/ui": "^0.1.3",
+    "svelte": "^5.0.0"
+  }
+}
