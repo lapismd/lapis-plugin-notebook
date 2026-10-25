@@ -34,7 +34,10 @@ stringify, render service, dataframe types/utils/export/formatting with
 `vega-embed` pinned through the root manifest) lands first with its legacy
 suites; Svelte presentation follows per family, remapped onto public Design
 Core primitives with Tailwind utilities converted to notebook-owned native
-CSS at copy time.
+CSS at copy time. The dataframe family and the output renderers are ported;
+markdown outputs render through the public `MarkdownEmbed` with explicitly
+threaded `App` and `sourcePath`. Dead legacy component variants that nothing
+imports are excluded and recorded in `PROVENANCE.md`.
 
 ## Requirements
 

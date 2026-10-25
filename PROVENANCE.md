@@ -12,5 +12,10 @@ gates, and CI) is copied from `lapis-plugin-tasks` and renamed. Copied
 component names, notebook-owned BEM classes, and `--notebook-*` variables are
 retained for visual comparison with the legacy plugin; legacy
 `@lapis-notes/ui` primitive imports are remapped to Design Core rather than
-forked. The legacy Electron native-DuckDB sidecar provider is excluded; the
-provider seam is retained per `spec/src/plugins/notebook/runtime.md`.
+forked, and Tailwind utility markup is converted to notebook-owned native CSS
+in `src/lib/styles.css`. The legacy Electron native-DuckDB sidecar provider
+is excluded; the provider seam is retained per
+`spec/src/plugins/notebook/runtime.md`. Excluded dead legacy render variants
+(nothing imports them in the legacy tree): `DataFrameCell.svelte`,
+`DataFrameColumnHeader.svelte`, `DataFramePagination.svelte`,
+`DataFrameToolbar.svelte`.
