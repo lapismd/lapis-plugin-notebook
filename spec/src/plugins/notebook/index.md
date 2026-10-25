@@ -27,6 +27,15 @@ describe the ported model:
 - [Runtime](./runtime.md): execution transports, reactivity, cancellation,
   persistence, safe mode, DuckDB staging, and support-package boundaries
 
+The render layer ports in two motions: host-neutral cell/dataframe logic
+(actions, interaction, selection, source mapping, renderer registry, value
+stringify, render service, dataframe types/utils/export/formatting with
+`date-fns`, `@tanstack/table-core`, `@tanstack/svelte-virtual`, and
+`vega-embed` pinned through the root manifest) lands first with its legacy
+suites; Svelte presentation follows per family, remapped onto public Design
+Core primitives with Tailwind utilities converted to notebook-owned native
+CSS at copy time.
+
 ## Requirements
 
 | ID | Requirement |
