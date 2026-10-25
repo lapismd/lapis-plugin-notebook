@@ -1,8 +1,11 @@
 # Specification Governance
 
 Tracked dependencies use registry Design Core `0.6.0` and Mira `0.1.1`.
-Source ownership and public contracts remain unchanged. Shared specification
-tooling resolves `@lapismd/spec-validator@0.1.4` from npm.
+Explicit temporary source acceptance follows LPN-SPEC-014 with verified
+sibling archives in isolated worker installations; publication and consumer
+adoption remain separate gates. Source ownership and public contracts remain
+unchanged. Shared specification tooling resolves
+`@lapismd/spec-validator@0.1.4` from npm.
 
 ## Requirements
 

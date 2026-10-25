@@ -70,6 +70,38 @@ Verified: lockfile shows a single `api@0.1.4(83433a6…)` suffix; pristine
 `pnpm install --frozen-lockfile --ignore-pnpmfile` + `svelte-check` = 0
 errors 0 warnings.
 
+## Temporary archive acceptance (LPN-SPEC-014)
+
+The Docker `test:storybook` lane then failed on a genuine upstream a11y
+defect: published `@lapis-notes/markdown@0.1.6` renders the Outline empty
+state `<p class="markdown-sidebar-panel__empty">` inside the
+`<ul data-ui-part="sidebar-menu">`, violating the axe `list` rule in the
+shell's mounted Markdown view (floating outline). The sibling source already
+restructured this (`{:else}` sibling of `Sidebar.Menu` inside
+`Sidebar.Content`), but the fix is unpublished; npm has no release beyond
+0.1.6. The axe gate stays at `test: "error"` — no rule was disabled.
+
+Acceptance uses the documented archive mechanism:
+`.local/validation/packages.json` (gitignored) copies the verified
+`lapis-plugin-tasks` cohort manifest — 13 sibling tarballs (`api@0.1.4`,
+`ui@0.1.3`, `workspace@0.2.1`, `file-explorer@0.1.2`,
+`language-service@0.1.1`, `mira-editor@0.0.3`, `mira-plugin-ai@0.0.3`,
+`mira-plugin-mermaid@0.0.3`, `mira@0.1.1`, `source-editor@0.1.2`,
+`markdown@0.1.6`, `search@0.1.3`, `design-core@0.6.0`), all sha256-verified
+again on 2026-10-25. The cohort `markdown@0.1.6` tarball was inspected and
+carries the fixed outline structure. Tracked manifests and the registry
+lockfile are unchanged; archives apply only inside the isolated worker
+installation and are recorded in the run report.
+
+Flagged follow-ups (user-owned gates):
+- GitHub CI has no archive access, so hosted `test:storybook` will fail
+  against published `markdown@0.1.6` until `lapis-plugins` publishes a
+  release containing the outline fix. The whole cohort is candidate material
+  for that release wave.
+- `lapis-plugin-tasks` carries the same duplicate-kernel and stale-markdown
+  exposure in its currently tracked state (reproduced above); its owners can
+  apply the same override and cohort acceptance.
+
 ## Validation (native override `LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native`)
 
 Before/after failure counts: every lane started red only where noted and ended
@@ -91,5 +123,16 @@ green; no pre-existing failures were inherited (new repository).
 | `pnpm build-storybook` | static build succeeded |
 | `node scripts/validation.mjs doctor` | remote daemon reachable via `omarchy` SSH context |
 
-Docker `validation:all` on the remote worker is the authoritative gate and is
-recorded separately once complete.
+## Authoritative Docker gate
+
+`pnpm validation:all` passed end-to-end on the remote `omarchy` worker with
+archive acceptance: run `lapis-notebook-run-7f521afa-d52b-43d9-99e4-0de8ddae6542`
+(snapshot of the tracked revision, frozen registry install plus the 13
+checksum-verified cohort tarballs). All lanes green: routing 20/0, parity 1/0,
+spec validate + mdbook + spec-first, app-ownership 1/1, no-tailwind clean,
+svelte-check 0/0 (converged single kernel instance), types clean, unit tests,
+build + publint, static Storybook build, and `test:storybook` 1/1
+(`Plugins/Notebook/Shell` → Workspace, axe clean). The earlier failing run
+`lapis-notebook-run-fa8976cb…` (pre-convergence svelte-check) and
+`lapis-notebook-run-9836bc21…` (pre-archive axe list violation) remain in the
+run reports as before/after evidence: 2 failures → 0.
