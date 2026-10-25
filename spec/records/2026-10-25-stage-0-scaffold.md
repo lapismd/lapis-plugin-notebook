@@ -43,6 +43,33 @@
   for Storybook shell resolution (Tasks ships them as runtime deps; they move
   to dependencies when ported runtime source imports them).
 
+## Duplicate kernel-instance finding (Docker gate)
+
+The first Docker `validation:all` failed `check:svelte` with two errors:
+`App`/`PluginConstructor` from two materialized `@lapis-notes/api@0.1.4`
+instances were nominally incompatible (private `unloaders` declarations).
+Cause: published `api@0.1.4` declares `@lapismd/design-core ^0.3.2` and
+`@lapismd/mira ~0.0.3` peers while the family pins `0.6.0`/`0.1.1`; the root
+importer resolves the newer pins (unmet-peer warning) while nested
+`workspace@0.2.1`/`file-explorer@0.1.2` contexts auto-install design-core
+0.3.5, splitting the api peer suffix. Local `.pnpmfile.cjs` source links
+converge everything and mask the split; only the registry-pure Docker install
+exposes it.
+
+Reproduced identically in a pristine registry install of `lapis-plugin-tasks`
+at its currently tracked state (same two errors, instances `f8139fe…` vs
+`41dffb2…`); Tasks' last green Docker `check` (16:42) predates its 18:38
+lockfile refresh. Reported to the user as a family finding with owner
+`lapis-plugin-tasks` (same override fix) and root cause in the next
+`@lapis-notes/api` release's peer ranges.
+
+Fix (LPN-SPEC-005 extension): workspace overrides converge
+`@lapismd/design-core` `0.6.0`, `@lapismd/mira` `0.1.1`, and
+`@lapis-notes/ui` `0.1.3` so one api instance serves typecheck and runtime.
+Verified: lockfile shows a single `api@0.1.4(83433a6…)` suffix; pristine
+`pnpm install --frozen-lockfile --ignore-pnpmfile` + `svelte-check` = 0
+errors 0 warnings.
+
 ## Validation (native override `LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native`)
 
 Before/after failure counts: every lane started red only where noted and ended
