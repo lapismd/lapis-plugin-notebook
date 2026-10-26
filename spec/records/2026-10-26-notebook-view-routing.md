@@ -51,3 +51,10 @@ table cells inside the reading surface. The input stylesheet now mirrors
 those scopes with the input table class added (outranking them), resetting
 cells to row separators only; verified live: container 1px all sides, cells
 0/0/0/1, last row 0.
+
+## Docker acceptance for the border reset
+
+Authoritative Docker `validation:all` passed for `9d11fa44` — run
+`lapis-notebook-run-6f783fa9-f470-451c-947d-10e672019ae4` (28 stories, 290
+unit tests, bundle lane with exclusion audit, all spec gates on the
+registry-pure worker with the cohort archives).
