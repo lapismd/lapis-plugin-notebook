@@ -147,3 +147,14 @@ uses (exposed in the settings tab alongside the default-tab and orientation
 dropdowns). Cycle and duplicate-definition errors render through the panel's
 snapshot error branches; their detection is covered by the ported graph and
 data suites. LN-NB-009 flips to Implemented; no Planned rows remain.
+
+## Docker acceptance
+
+- Panel-suite state (`f0b18e06`): authoritative Docker `validation:all`
+  passed on the remote `omarchy` worker — run
+  `lapis-notebook-run-71b05ca2-39d5-4513-910a-e65220433d5d`.
+- Final accumulated state (`04a9770f`, includes the LN-NB-009 acceptance and
+  the handoff record): Docker `validation:all` passed — run
+  `lapis-notebook-run-24999a7d-7123-4271-a825-8f7cb49c7422`. All 25 stories,
+  290 unit tests, the bundle lane with its exclusion audit, and every spec
+  gate are green on the registry-pure worker with the cohort archives.

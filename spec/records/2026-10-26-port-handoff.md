@@ -11,7 +11,7 @@
 | 4 | Runtime wiring: worker transport, run/clear commands, status bar, safe mode, persistence; cancellation + autorun acceptance | Done (Docker `012fe4e6`, `49be9b9a`) |
 | 5 | Inputs surface: viewof, Design Core input mounts with `aria-label`, targeted input-change rerun | Done |
 | 6 | DuckDB-WASM: SQL cells, app-table snapshots, asset paths | Done (Docker `49be9b9a` includes `b55a5e21` bundle state) |
-| 7 | Panels: inspector/dependencies/packages + six-placement story suites + bundle lane | Done (Docker run for `f0b18e06` in flight at writing; final state `4d87b898`) |
+| 7 | Panels: inspector/dependencies/packages + six-placement story suites + bundle lane | Done (Docker `71b05ca2` for `f0b18e06`; final state `04a9770f` validated by Docker `24999a7d`) |
 | 8 | Native Rust services crate | Deferred by plan until the R6/R7 host boundary stabilizes |
 | 9 | Consumer acceptance (web host, Tauri desktop, hosted Rust server) | Not started — see checklist below |
 
