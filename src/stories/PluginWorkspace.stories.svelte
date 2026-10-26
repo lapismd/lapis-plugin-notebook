@@ -289,3 +289,58 @@
     );
   }}
 />
+
+<Story
+  name="Query data"
+  args={{
+    displayMode: "desktop",
+    notebookMode: "preview",
+    notebookPath: NOTEBOOK_FIXTURE_PATHS.dataQueries,
+  }}
+  play={async ({ canvasElement }) => {
+    await waitForReady(canvasElement);
+    const app = storyApp(canvasElement);
+
+    await waitFor(
+      () => {
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="basic"]'),
+        ).toBeTruthy();
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="notes"]'),
+        ).toBeTruthy();
+      },
+      { timeout: 15_000 },
+    );
+
+    // SQL cells run on DuckDB-WASM resolved through the plugin asset
+    // paths, in-process per the eligibility policy.
+    await app.commands.executeCommand(
+      `${NOTEBOOK_PLUGIN_ID}:run-active-notebook`,
+    );
+    await waitFor(
+      () => {
+        const basic = canvasElement.querySelector(
+          '[data-notebook-cell="basic"]',
+        );
+        expect(basic?.textContent ?? "").toContain("42");
+        expect(basic?.textContent ?? "").toContain("lapis");
+      },
+      { timeout: 45_000 },
+    );
+
+    // App-derived tables register from vault snapshots as read-only
+    // lapis.* tables.
+    await waitFor(
+      () => {
+        const notes = canvasElement.querySelector(
+          '[data-notebook-cell="notes"]',
+        );
+        const text = notes?.textContent ?? "";
+        expect(text).toMatch(/note_count/);
+        expect(text).toMatch(/[1-9][0-9]*/);
+      },
+      { timeout: 30_000 },
+    );
+  }}
+/>

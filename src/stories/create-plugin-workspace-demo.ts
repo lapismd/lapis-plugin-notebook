@@ -195,6 +195,10 @@ export async function bootPluginWorkspaceDemo(
       "The Notebook workspace fixture could not resolve NotebookPlugin.",
     );
   }
+  // Story fixture setup: statically registered plugins have no host-assigned
+  // folder, so the DuckDB-WASM assets resolve against the Storybook
+  // staticDirs mount (see .storybook/main.ts).
+  notebookPlugin.basePath = "/duckdb-assets";
   const stopWatchingMetadata = app.metadataTypeManager.trackChanges();
   await app.metadataCache.load();
   const searchPlugin = app.plugins.plugins.get("search");

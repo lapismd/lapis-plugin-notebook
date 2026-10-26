@@ -62,6 +62,14 @@ const linkedSingletonPackages = [
 
 const config: StorybookConfig = {
   stories: ["../stories/**/*.mdx", "../src/**/*.stories.@(js|ts|svelte)"],
+  staticDirs: [
+    {
+      // DuckDB-WASM engine assets served at the plugin basePath the story
+      // harness sets, matching NOTEBOOK_DUCKDB_ASSET_PATHS.
+      from: "../node_modules/@duckdb/duckdb-wasm/dist",
+      to: "/duckdb-assets/duckdb",
+    },
+  ],
   addons: [
     "@storybook/addon-docs",
     "@storybook/addon-a11y",
@@ -127,6 +135,7 @@ const config: StorybookConfig = {
         include: [
           "aria-query",
           "typescript",
+          "@duckdb/duckdb-wasm",
           "bits-ui",
           "@lapismd/design-core > bits-ui",
           "@internationalized/date",

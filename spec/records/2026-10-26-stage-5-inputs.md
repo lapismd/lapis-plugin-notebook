@@ -44,3 +44,20 @@
 - Unit: 61 files / 267 tests (startup-thin audit included).
 - `svelte-check` 0/0; `test:storybook` 4/4 (Workspace, Run notebook, Safe
   mode, Run inputs) with axe clean.
+
+## Stage 6 — DuckDB-WASM acceptance (same session)
+
+`Data Queries.notebook.md` fixture (plain `SELECT 42 AS answer, 'lapis' AS
+source` plus `SELECT count(*) FROM lapis.notes`) and the fifth shell story
+`Query data`: SQL cells execute on DuckDB-WASM through the in-process
+transport per eligibility policy, engine assets resolve through the plugin
+asset paths (story harness pins `basePath` to the Storybook `staticDirs`
+mount of `@duckdb/duckdb-wasm/dist`; hosts use the plugin asset server),
+tables render through the dataframe viewer, and the app-derived `lapis.notes`
+snapshot table answers the count query — LN-NB-025 Implemented (vault-file
+registration and the remaining snapshot tables ride the ported
+register-app-tables suites). Storybook `optimizeDeps` prebundles
+`@duckdb/duckdb-wasm` under `noDiscovery`.
+
+Full native suite after the slice: test:storybook 5/5, unit 267/267 across 61
+files, svelte-check 0/0.

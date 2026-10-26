@@ -68,10 +68,37 @@ Count is {{count}}.
 :::
 `;
 
+export const NOTEBOOK_FIXTURE_DATA_QUERIES = `---
+notebook:
+  version: 1
+  autorun: false
+  mode: lazy
+---
+
+# Data Queries
+
+:::cell{#basic lang="sql"}
+
+\`\`\`sql
+SELECT 42 AS answer, 'lapis' AS source
+\`\`\`
+
+:::
+
+:::cell{#notes lang="sql"}
+
+\`\`\`sql
+SELECT count(*) AS note_count FROM lapis.notes
+\`\`\`
+
+:::
+`;
+
 export const NOTEBOOK_FIXTURE_PATHS = {
   welcome: "welcome.md",
   gettingStarted: "Getting Started.notebook.md",
   interactiveInputs: "Interactive Inputs.notebook.md",
+  dataQueries: "Data Queries.notebook.md",
 } as const;
 
 export function notebookWorkspaceMarkdownFixtures(): Array<{
@@ -87,6 +114,10 @@ export function notebookWorkspaceMarkdownFixtures(): Array<{
     {
       path: NOTEBOOK_FIXTURE_PATHS.interactiveInputs,
       raw: NOTEBOOK_FIXTURE_INTERACTIVE_INPUTS,
+    },
+    {
+      path: NOTEBOOK_FIXTURE_PATHS.dataQueries,
+      raw: NOTEBOOK_FIXTURE_DATA_QUERIES,
     },
   ];
 }
