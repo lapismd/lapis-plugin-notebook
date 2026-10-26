@@ -36,8 +36,8 @@
 | LN-NB-021 | Planned | Graph reactivity and autorun land in Stage 4. |
 | LN-NB-022 | Planned | Cancellation and progress land in Stage 4. |
 | LN-NB-023 | Implemented | `Run notebook` story asserts `appDatabase.getNotebookState` holds per-cell typed state after execution; output-store fingerprint suite green. |
-| LN-NB-024 | Planned | Safe-mode gating lands in Stage 4. |
+| LN-NB-024 | Implemented | `Safe mode` story toggles `app.safeMode.disableNotebookExecution`, runs the command, and asserts no interpolated output and no persisted notebook state; the gate reads the host contract live. |
 | LN-NB-025 | Planned | DuckDB-WASM slice lands in Stage 6; the provider seam ports with it. |
-| LN-NB-026 | Planned | Startup-thin audit lands with the Stage 4 runtime wiring. |
+| LN-NB-026 | Implemented | `startup-thin.test.ts` audits the static-import boundary for DuckDB/TypeScript/htl/d3/Plot (dynamic-only outside the allowlisted lazy service); the `Run notebook` story shows the compiler loading only at first execution. |
 | LN-NB-027 | Planned | Support-package boundary audits land in Stage 1. |
 | LN-NB-028 | Implemented | `Run notebook` story runs a TypeScript cell through the lazily loaded compiler with `display()` capture; worker-engine suites cover module rewriting and dependency-descriptor validation. |

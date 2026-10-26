@@ -101,3 +101,19 @@ their own executed acceptance.
   stories (Stage 4 completion).
 - DuckDB-WASM slice (Stage 6), inputs/stdlib surface stories (Stage 5),
   packages registry (Stage 7), publication bundle (LN-NB-006).
+
+## Follow-up acceptance (same stage)
+
+- Docker `validation:all` passed for the wiring commit `83cd3ed6` on the
+  remote worker (run `lapis-notebook-run-012fe4e6-36b8-497d-94cf-26e9bad5013f`),
+  proving the execution story against the registry-pure install plus the
+  bridged markdown cohort tarball.
+- `Safe mode` story added: toggles `app.safeMode.disableNotebookExecution`,
+  executes the run command, and asserts the interpolation never renders and
+  no notebook state persists (LN-NB-024 Implemented).
+- `startup-thin.test.ts` audits the static-import boundary for
+  DuckDB-WASM/TypeScript/htl/d3/Plot across `src/lib` and `packages/*/src`
+  with a single allowlisted lazy-boundary file
+  (`runtime/duckdb/notebook-duckdb-service.ts`, itself only dynamically
+  reachable). All heavy modules port as lazy `import()` calls, matching the
+  legacy startup-thin rule (LN-NB-026 Implemented).

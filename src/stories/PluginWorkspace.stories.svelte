@@ -192,3 +192,37 @@
     );
   }}
 />
+
+<Story
+  name="Safe mode"
+  args={{ displayMode: "desktop", notebookMode: "preview" }}
+  play={async ({ canvasElement }) => {
+    await waitForReady(canvasElement);
+    const app = storyApp(canvasElement);
+
+    await waitFor(
+      () => {
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="calc"]'),
+        ).toBeTruthy();
+      },
+      { timeout: 15_000 },
+    );
+
+    // Safe Mode blocks notebook execution through the host contract.
+    app.safeMode.disableNotebookExecution = true;
+    await app.commands.executeCommand(
+      `${NOTEBOOK_PLUGIN_ID}:run-active-notebook`,
+    );
+
+    const summary = canvasElement.querySelector(
+      '[data-notebook-cell="summary"]',
+    );
+    expect(summary?.textContent ?? "").not.toContain("The answer is 42");
+    expect(
+      await app.appDatabase.getNotebookState(
+        NOTEBOOK_FIXTURE_PATHS.gettingStarted,
+      ),
+    ).toBeUndefined();
+  }}
+/>
