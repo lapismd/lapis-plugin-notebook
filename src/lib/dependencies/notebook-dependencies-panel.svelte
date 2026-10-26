@@ -1084,7 +1084,7 @@
                   </div>
 
                   <div
-                    class="notebook-dependencies__g05004bba"
+                    class="notebook-dependencies__g05004bba notebook-dependencies__snippet-body"
                   >
                     <NotebookDependencyCodeSnippet
                       source={node.cell.source}
@@ -1225,7 +1225,7 @@
 
                   {#if selectedGraphNode}
                     <div
-                      class="notebook-dependencies__g4eb74f2f"
+                      class="notebook-dependencies__g4eb74f2f notebook-dependencies__snippet-body"
                     >
                       <NotebookDependencyCodeSnippet
                         source={selectedGraphNode.cell.source}

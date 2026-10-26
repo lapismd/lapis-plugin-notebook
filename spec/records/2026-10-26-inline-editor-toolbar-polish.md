@@ -56,3 +56,15 @@ round-trip.
 
 Authoritative Docker `validation:all` passed for `a613cd27` — run
 `lapis-notebook-run-172e9375-bd68-41d5-b3d9-8c8eb32fb256`.
+
+## Expandable section bodies on the body surface
+
+User feedback: in the variables/packages/dependencies panels the collapsible
+section headers keep their current tint, but expanded bodies should read on
+the white body/document surface. Implemented in `src/lib/styles.css` with
+structural selectors (`.notebook-inspector details > summary + *`,
+`.notebook-packages details > summary + *`) plus a semantic
+`notebook-dependencies__snippet-body` class on the two dependencies
+selection-snippet wrappers, all painting
+`var(--background-primary, var(--card))`. Verified live in all three panel
+stories: bodies rgb(255,255,255), summaries/sections unchanged.

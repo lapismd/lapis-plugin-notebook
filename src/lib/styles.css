@@ -4088,3 +4088,12 @@
 .notebook-cell__body--busy {
   opacity: 0.7;
 }
+
+/* Expanded section bodies read on the white body/document surface while the
+   collapsible headers keep the panel tint (variables, packages, and the
+   dependencies selection snippets). */
+.notebook-inspector details > summary + *,
+.notebook-packages details > summary + *,
+.notebook-dependencies__snippet-body {
+  background: var(--background-primary, var(--card));
+}
