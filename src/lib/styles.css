@@ -4070,3 +4070,11 @@
   align-items: center;
   padding: 0.5rem;
 }
+
+.notebook-cell__row--hidden {
+  display: none;
+}
+
+.notebook-cell__body--busy {
+  opacity: 0.7;
+}

@@ -58,6 +58,22 @@
     return root.__lapisApp;
   }
 
+  async function pollUntil(
+    predicate: () => Promise<boolean> | boolean,
+    timeoutMs = 15_000,
+  ): Promise<void> {
+    const startedAt = Date.now();
+    for (;;) {
+      if (await predicate()) {
+        return;
+      }
+      if (Date.now() - startedAt > timeoutMs) {
+        throw new Error("pollUntil timed out");
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+
   async function waitForReady(canvasElement: HTMLElement) {
     const canvas = within(canvasElement);
     await waitFor(
@@ -341,6 +357,139 @@
         expect(text).toMatch(/[1-9][0-9]*/);
       },
       { timeout: 30_000 },
+    );
+  }}
+/>
+
+<Story
+  name="Cancel execution"
+  args={{
+    displayMode: "desktop",
+    notebookMode: "preview",
+    notebookPath: NOTEBOOK_FIXTURE_PATHS.slow,
+  }}
+  play={async ({ canvasElement }) => {
+    await waitForReady(canvasElement);
+    const app = storyApp(canvasElement);
+
+    await waitFor(
+      () => {
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="slow"]'),
+        ).toBeTruthy();
+      },
+      { timeout: 15_000 },
+    );
+
+    const { getNotebookRenderService } = await import(
+      "../lib/render/notebook-render-service"
+    );
+    const service = getNotebookRenderService();
+    expect(service).toBeTruthy();
+
+    // Start a long-running cell through the render service (the same path
+    // the cell stop action uses), then cancel: the checkpoint rolls back and
+    // the worker runtime terminates without completing the cell.
+    const runPromise = service!.runCell(NOTEBOOK_FIXTURE_PATHS.slow, "slow");
+    await pollUntil(async () => {
+      const rendered = await service!.getRenderedCell(
+        NOTEBOOK_FIXTURE_PATHS.slow,
+        "slow",
+      );
+      return rendered?.state === "running" || rendered?.state === "scheduled";
+    });
+    const cancelled = await service!.cancelExecution(
+      NOTEBOOK_FIXTURE_PATHS.slow,
+    );
+    expect(cancelled).toBe(true);
+    await runPromise.catch(() => undefined);
+
+    await pollUntil(async () => {
+      const rendered = await service!.getRenderedCell(
+        NOTEBOOK_FIXTURE_PATHS.slow,
+        "slow",
+      );
+      return rendered?.state !== "running" && rendered?.state !== "scheduled";
+    });
+    const rendered = await service!.getRenderedCell(
+      NOTEBOOK_FIXTURE_PATHS.slow,
+      "slow",
+    );
+    expect(rendered?.state).not.toBe("completed");
+    const slow = canvasElement.querySelector('[data-notebook-cell="slow"]');
+    // The cancelled run leaves the output row hidden; the source preview
+    // legitimately still shows the display("done") code text.
+    const outputRow = slow?.querySelector(".notebook-cell__row--output");
+    expect(
+      outputRow?.classList.contains("notebook-cell__row--hidden"),
+    ).toBe(true);
+  }}
+/>
+
+<Story
+  name="Autorun stale cells"
+  args={{
+    displayMode: "desktop",
+    notebookMode: "preview",
+    notebookPath: NOTEBOOK_FIXTURE_PATHS.autorun,
+  }}
+  play={async ({ canvasElement }) => {
+    await waitForReady(canvasElement);
+    const app = storyApp(canvasElement);
+
+    await waitFor(
+      () => {
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="show"]'),
+        ).toBeTruthy();
+      },
+      { timeout: 15_000 },
+    );
+
+    await app.commands.executeCommand(
+      `${NOTEBOOK_PLUGIN_ID}:run-active-notebook`,
+    );
+    await waitFor(
+      () => {
+        const show = canvasElement.querySelector(
+          '[data-notebook-cell="show"]',
+        );
+        expect(show?.textContent ?? "").toContain("n is 7.");
+      },
+      { timeout: 45_000 },
+    );
+
+    // Editing the upstream cell source marks descendants stale; the note's
+    // autorun frontmatter reruns them debounced without another command.
+    const file = app.vault.getFileByPath(NOTEBOOK_FIXTURE_PATHS.autorun);
+    expect(file).toBeTruthy();
+    await app.vault.process(file!, (source) =>
+      source.replace("const n = 7;", "const n = 9;"),
+    );
+    const { getNotebookRenderService } = await import(
+      "../lib/render/notebook-render-service"
+    );
+    const service = getNotebookRenderService();
+
+    // The view re-poll after the file change reloads the document, marks the
+    // edited cell and its descendants stale, and the settings-gated autorun
+    // reruns them debounced.
+    await pollUntil(async () => {
+      const rendered = await service!.getRenderedCell(
+        NOTEBOOK_FIXTURE_PATHS.autorun,
+        "value",
+      );
+      return rendered?.state === "stale";
+    });
+
+    await waitFor(
+      () => {
+        const show = canvasElement.querySelector(
+          '[data-notebook-cell="show"]',
+        );
+        expect(show?.textContent ?? "").toContain("n is 9.");
+      },
+      { timeout: 45_000 },
     );
   }}
 />

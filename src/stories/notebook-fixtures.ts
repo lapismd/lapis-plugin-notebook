@@ -94,11 +94,59 @@ SELECT count(*) AS note_count FROM lapis.notes
 :::
 `;
 
+export const NOTEBOOK_FIXTURE_SLOW = `---
+notebook:
+  version: 1
+  autorun: false
+  mode: lazy
+---
+
+# Slow Notebook
+
+:::cell{#slow lang="ts"}
+
+\`\`\`ts
+await new Promise((resolve) => setTimeout(resolve, 30000));
+display("done");
+\`\`\`
+
+:::
+`;
+
+export const NOTEBOOK_FIXTURE_AUTORUN = `---
+notebook:
+  version: 1
+  autorun: true
+  mode: lazy
+---
+
+# Autorun Notebook
+
+:::cell{#value lang="ts"}
+
+\`\`\`ts
+const n = 7;
+display(n);
+\`\`\`
+
+:::
+
+:::cell{#show lang="md"}
+
+\`\`\`md
+n is {{n}}.
+\`\`\`
+
+:::
+`;
+
 export const NOTEBOOK_FIXTURE_PATHS = {
   welcome: "welcome.md",
   gettingStarted: "Getting Started.notebook.md",
   interactiveInputs: "Interactive Inputs.notebook.md",
   dataQueries: "Data Queries.notebook.md",
+  slow: "Slow Notebook.notebook.md",
+  autorun: "Autorun Notebook.notebook.md",
 } as const;
 
 export function notebookWorkspaceMarkdownFixtures(): Array<{
@@ -118,6 +166,14 @@ export function notebookWorkspaceMarkdownFixtures(): Array<{
     {
       path: NOTEBOOK_FIXTURE_PATHS.dataQueries,
       raw: NOTEBOOK_FIXTURE_DATA_QUERIES,
+    },
+    {
+      path: NOTEBOOK_FIXTURE_PATHS.slow,
+      raw: NOTEBOOK_FIXTURE_SLOW,
+    },
+    {
+      path: NOTEBOOK_FIXTURE_PATHS.autorun,
+      raw: NOTEBOOK_FIXTURE_AUTORUN,
     },
   ];
 }

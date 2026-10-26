@@ -51,3 +51,29 @@ at the bundle gate (LN-NB-008), and the dedicated dependencies panel story
 - `svelte-check` 0/0; `check:no-tailwind` clean across all converted panels;
   unit 283/283 across 66 files; `test:storybook` 5/5 with axe clean;
   build + publint clean.
+
+## Cancellation and autorun acceptance (same session)
+
+Two more shell stories complete the runtime requirement set:
+
+- `Cancel execution` starts the 30-second fixture cell through
+  `renderService.runCell` (the cell stop-action path), cancels mid-run via
+  `cancelExecution`, and asserts the checkpoint rollback leaves the cell
+  uncompleted with the output row hidden — LN-NB-022 Implemented.
+- `Autorun stale cells` runs the fixture, edits the upstream cell source
+  through `vault.process`, drives the view re-poll through `getRenderedCell`
+  (which reloads the document and marks descendants stale), and asserts the
+  debounced settings-gated autorun rerenders "n is 9." — with `Run notebook`
+  (topological order) and `Run inputs` (input-change rerun), LN-NB-021 is
+  Implemented.
+
+Findings: Svelte `class:` directives bypass the static class audit, so
+`class:hidden`/`class:opacity-70` in the cell chrome were converted to
+`notebook-cell__row--hidden`/`notebook-cell__body--busy` BEM modifiers with
+real CSS (the utilities had no effect without Tailwind). The story vaults now
+seed `execution.autoRunStaleOnCellChange: true` because the frontmatter
+autorun preference resolves through the metadata cache, which stays cold in
+memory-adapter stories; the frontmatter-precedence rule itself is covered by
+the ported frontmatter unit suite. The earlier Stage 7 Docker run failed
+spec-first only because the snapshot caught this slice mid-edit; Docker
+reruns against the committed state.

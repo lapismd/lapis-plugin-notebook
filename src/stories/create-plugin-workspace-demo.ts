@@ -126,6 +126,9 @@ export function createPluginWorkspaceSeed(
     ),
     ".lapis/lapis-notebook.json": JSON.stringify(
       {
+        execution: {
+          autoRunStaleOnCellChange: true,
+        },
         panels: {
           autoOpenSourcesOnNotebookOpen: false,
           autoOpenDependenciesOnNotebookOpen: false,

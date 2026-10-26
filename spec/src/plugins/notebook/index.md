@@ -56,14 +56,17 @@ plugin (render-service registration, cell directive post-processor, run and
 clear commands, status-bar context keys, safe-mode gating, input-rerun and
 stale-autorun scheduling, notebook-state persistence) with panels, packages,
 and the TypeScript language provider deferred to their stages. The
-`Plugins/Notebook/Shell` family carries five App-backed stories over three
+`Plugins/Notebook/Shell` family carries seven App-backed stories over five
 seeded notebook fixtures: the boot registration acceptance, `Run notebook`,
 which executes through the worker transport and asserts rendered outputs,
 interpolation, and persisted notebook state, `Safe mode`, which proves the
 host execution-disable gate, `Run inputs`, which proves the in-process DOM
-runtime, Design Core input mounting, and input-change rerun, and `Query
+runtime, Design Core input mounting, and input-change rerun, `Query
 data`, which proves SQL cells on DuckDB-WASM resolved through the plugin
-asset paths plus the `lapis.notes` snapshot table. A static-import audit
+asset paths plus the `lapis.notes` snapshot table, `Cancel execution`, which
+proves mid-run cancellation with checkpoint rollback, and `Autorun stale
+cells`, which proves edit-triggered stale marking and the debounced
+settings-gated autorun. A static-import audit
 keeps the heavy runtime modules behind lazy boundaries.
 
 ## Requirements

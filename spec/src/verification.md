@@ -36,8 +36,8 @@
 | LN-NB-013 | Implemented | `append-cell-template`, `ensure-notebook-frontmatter`, `create-demo-notebooks`, and `notebook-cell-suggest` ported with their four legacy test suites green. |
 | LN-NB-014 | Implemented | `runtime/analysis/*` and `runtime/notebook-graph.ts` ported verbatim over `notebook-core/graph`; legacy graph, worker-engine, and viewof suites green in the unit lane (52 files / 227 tests). |
 | LN-NB-020 | Implemented | `Run notebook` story executes through the dedicated worker transport end-to-end (engine logs + rendered outputs); eligibility policy and broker suites green in the unit lane. |
-| LN-NB-021 | Planned | Execution order proven by `Run notebook`; input-change targeted rerun proven by `Run inputs`; edit-triggered stale marking and autorun debounce await their own acceptance. |
-| LN-NB-022 | Planned | Cancellation and progress land in Stage 4. |
+| LN-NB-021 | Implemented | `Run notebook` proves topological order; `Run inputs` proves input-change targeted rerun; `Autorun stale cells` proves edit-triggered stale marking of descendants and the debounced settings-gated autorun. |
+| LN-NB-022 | Implemented | `Cancel execution` story starts a 30s cell through the render service, cancels mid-run, and asserts the checkpoint rollback leaves the cell uncompleted with the output row hidden; the worker runtime terminates (cancelExecution awaits the pending run). |
 | LN-NB-023 | Implemented | `Run notebook` story asserts `appDatabase.getNotebookState` holds per-cell typed state after execution; output-store fingerprint suite green. |
 | LN-NB-024 | Implemented | `Safe mode` story toggles `app.safeMode.disableNotebookExecution`, runs the command, and asserts no interpolated output and no persisted notebook state; the gate reads the host contract live. |
 | LN-NB-025 | Implemented | `Query data` story runs SQL cells on DuckDB-WASM (pinned 1.33.1-dev45.0) resolved through the plugin asset paths and queries `lapis.notes` from vault snapshots; register-app-tables and vault-file suites green; the native provider seam remains open (Electron sidecar excluded). |

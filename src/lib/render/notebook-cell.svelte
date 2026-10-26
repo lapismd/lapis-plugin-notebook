@@ -600,7 +600,7 @@
             </div>
           {/if}
 
-          <div class:opacity-70={isBusy}>
+          <div class:notebook-cell__body--busy={isBusy}>
             {#if editingSource}
               <NotebookCellSourceEditor
                 value={localSource}
@@ -700,7 +700,7 @@
   <!-- Output section -->
   <div
     class={`notebook-cell__row notebook-cell__row--output ${sectionRowClass}`}
-    class:hidden={!hasOutputs}
+    class:notebook-cell__row--hidden={!hasOutputs}
     onfocusin={selectCell}
   >
     <!-- Left rail: accent strip plus the empty rail space under the menu button toggle collapse -->

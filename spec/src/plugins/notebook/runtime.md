@@ -40,9 +40,9 @@ autorun scheduling are registered. The `Plugins/Notebook/Shell` `Run
 notebook` story proves the worker transport, TypeScript evaluation with
 `display()` capture, `{{name}}` interpolation (variable definitions win over
 cell-id output values only when names do not collide), MarkdownEmbed output
-rendering, and notebook-state persistence. Safe-mode and startup-thin acceptance
-have since landed as governed stories and audits; cancellation acceptance
-and the packaged worker asset path remain open, the latter landing with the
+rendering, and notebook-state persistence. Safe-mode, startup-thin,
+cancellation, and autorun acceptance have since landed as governed stories
+and audits; the packaged worker asset path remains open, landing with the
 publication bundle. DOM-backed notebooks execute through the in-process
 runtime: the `Run inputs` story proves the viewof input mount on Design Core
 primitives with `aria-label` wired from the input's `label` option, and the
