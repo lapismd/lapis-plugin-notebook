@@ -37,7 +37,11 @@ Core primitives with Tailwind utilities converted to notebook-owned native
 CSS at copy time. The dataframe family and the output renderers are ported;
 markdown outputs render through the public `MarkdownEmbed` with explicitly
 threaded `App` and `sourcePath`. Dead legacy component variants that nothing
-imports are excluded and recorded in `PROVENANCE.md`.
+imports are excluded and recorded in `PROVENANCE.md`. The panel logic layer
+(inspector data and DuckDB catalog snapshots, dependencies data and graph
+layout engine, packages data and npm registry client) is ported with its five
+legacy suites; the panel Svelte surfaces and view registrations follow with
+their Design Core conversions.
 
 Cell chrome and plugin wiring complete the render stage: the CodeMirror cell
 source editor, the cell chrome with rails/collapse/run action/status footer,
@@ -66,3 +70,5 @@ keeps the heavy runtime modules behind lazy boundaries.
 | LN-NB-004 | The published runtime MUST consume host facilities only through published first-party exports: `@lapis-notes/api`, `@lapismd/design-core`, and the peer-resolved `@lapis-notes/markdown` view surface. It MUST NOT depend on `@stevejuma/ui` or `@lapis-server/*`. Package Storybook MAY depend on workspace hosts for `Plugins/Notebook/Shell`. |
 | LN-NB-005 | Each staged port slice MUST land with its canonical specification update, ported or new regression tests, Storybook coverage under `Plugins/Notebook/*`, and a verification-row status change supported by executed lane evidence. Statuses MUST NOT advance ahead of executed acceptance. |
 | LN-NB-006 | Private `packages/*` sub-packages MUST resolve from TypeScript source through the shared Vite resolver and tsconfig paths so the published root manifest stays portable. The published plugin bundle MUST inline all private sub-package sources before any publication gate; a source-resolution `dist` is development-only and MUST NOT be published. |
+| LN-NB-007 | The inspector, dependencies, and packages surfaces MUST register as movable side-panel views with `ViewAccess.command` classification and concise open commands, mounting their Svelte panels through the owned local-component mount helper. Each panel MUST have the six-placement story coverage required by the family Storybook contract before its verification row advances. |
+| LN-NB-009 | The dependencies panel MUST render the derived per-note cell DAG through the in-repo layout engine, honoring the persisted orientation and wheel-zoom settings, and MUST keep cycle and duplicate-definition errors visible as document errors. |

@@ -27,6 +27,9 @@
 | LN-NB-004 | Planned | The published-bundle exclusion audit lands with the bundling lane (LN-NB-006); Stage 2 imports stay on published api/markdown/design-core surfaces. |
 | LN-NB-005 | Implemented | Stage 0–2 records under `spec/records/2026-10-25-*` carry lane evidence and status flips followed executed acceptance. |
 | LN-NB-006 | Planned | Source resolution ships via `scripts/vite-notebook-packages.mjs` + tsconfig paths; the inlining bundle lane lands before the publication gate. |
+| LN-NB-007 | Planned | Panel logic and five legacy suites ported; Svelte surfaces, view registrations, and six-placement stories land with the panel conversion slices. |
+| LN-NB-008 | Planned | Registry client and data modules ported with both legacy suites; settings persistence and manifest network permission land with the packages panel slice. |
+| LN-NB-009 | Planned | Graph layout engine ported with its legacy suite; the panel surface and settings wiring land with the dependencies panel slice. |
 | LN-NB-010 | Implemented | `notebook-path.ts`/`notebook-file.ts` ported with legacy tests; `registerExtensions(["notebook.md"])` + editor-view `filenamePatterns` proven by the Shell story opening the fixture in `NotebookView`. |
 | LN-NB-011 | Implemented | `parse/parse-notebook-document.ts` ported verbatim; `parse-notebook-document.test.ts` green in the unit lane. |
 | LN-NB-012 | Implemented | `model/notebook-frontmatter.ts` ported verbatim; `notebook-frontmatter.test.ts` green in the unit lane. |

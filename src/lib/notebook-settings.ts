@@ -2,10 +2,9 @@ import type {
   NotebookDependencyResolverDescriptor,
   NotebookUserDependencyDescriptor,
 } from "@lapis-notes/notebook-stdlib";
-// Stage 2 adaptation: the legacy type lives in the dependencies-graph layout
-// module, which ports with the Stage 3 dependencies panel. This declaration
-// is byte-identical to that module's export; Stage 3 restores the import.
-export type NotebookDependencyGraphOrientation = "horizontal" | "vertical";
+import type { NotebookDependencyGraphOrientation } from "./dependencies/notebook-dependencies-graph";
+
+export type { NotebookDependencyGraphOrientation };
 
 export type NotebookDependencyViewTab = "minimap" | "graph";
 
