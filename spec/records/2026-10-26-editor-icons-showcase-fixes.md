@@ -71,3 +71,11 @@ asynchronously after the run resolves, so post-run assertions poll.
 Validation (native): svelte-check 0/0; check:no-tailwind clean; unit 290/290;
 test:storybook 27/27 with strict axe; build + bundle exclusion audit green;
 spec:validate 43 requirements.
+
+## Docker acceptance
+
+Authoritative Docker `validation:all` passed for commit `b777cb58` on the
+remote `omarchy` worker — run
+`lapis-notebook-run-ea2f7427-5122-4cbf-b470-e197f65d7b44` (27 stories, 290
+unit tests, bundle lane with exclusion audit, all spec gates on the
+registry-pure worker with the cohort archives).
