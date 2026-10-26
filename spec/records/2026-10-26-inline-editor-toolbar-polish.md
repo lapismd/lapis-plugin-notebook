@@ -95,3 +95,11 @@ snippets showed no syntax colors because the standard lezer
 `@lapismd/mira/codemirror` plus the `mira-code-editor` scope class
 (keywords rgb(124,58,237), numbers rgb(180,83,9) verified live). `@lapismd/mira`
 joins the root peers and the manifest shared-dependency mirror.
+
+## Docker acceptance for the section anatomy commit
+
+Authoritative Docker `validation:all` passed for `8d4d734b` — run
+`lapis-notebook-run-067e05cc-1c34-418f-8b1f-d3755c065ddb` (28 stories, 290
+unit tests, bundle lane with exclusion audit and the externalized
+`@lapismd/mira/codemirror`, all spec gates on the registry-pure worker with
+the cohort archives).
