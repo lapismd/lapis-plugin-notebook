@@ -266,7 +266,8 @@
 .notebook-inspector,
 .notebook-dependencies,
 .notebook-packages {
-  background: var(--background-primary, var(--background));
+  /* Panel roots stay transparent: the WorkspaceViewHost owns surface paint
+     per the family panel contract. */
   color: var(--notebook-normal-color);
 }
 
@@ -3905,8 +3906,10 @@
 }
 
 .notebook-dependencies__tab--active {
-  background: var(--interactive-accent);
-  color: var(--text-on-accent, white);
+  /* Design Core's curated primary pair meets WCAG AA contrast; the legacy
+     accent/text-on-accent pairing measured 4.25:1. */
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .notebook-dependencies__minimap-row {
@@ -3925,8 +3928,10 @@
 
 .notebook-dependencies__minimap-row--selected,
 .notebook-dependencies__minimap-row--selected:hover {
-  background: var(--interactive-accent);
-  color: var(--text-on-accent, white);
+  /* Design Core's curated primary pair meets WCAG AA contrast; the legacy
+     accent/text-on-accent pairing measured 4.25:1. */
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .notebook-dependencies__orientation {
@@ -3947,8 +3952,10 @@
 
 .notebook-dependencies__orientation--active,
 .notebook-dependencies__orientation--active:hover {
-  background: var(--interactive-accent);
-  color: var(--text-on-accent, white);
+  /* Design Core's curated primary pair meets WCAG AA contrast; the legacy
+     accent/text-on-accent pairing measured 4.25:1. */
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .notebook-dependencies__graph {

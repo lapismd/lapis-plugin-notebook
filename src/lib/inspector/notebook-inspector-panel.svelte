@@ -201,7 +201,10 @@
   }
 </script>
 
-<div class="notebook-inspector notebook-inspector__ge62249fa">
+<div
+  class="notebook-inspector notebook-inspector__ge62249fa"
+  data-testid="notebook-inspector-panel"
+>
   {#if !snapshot}
     <div class="notebook-inspector__g47990fce">
       {#if loading}

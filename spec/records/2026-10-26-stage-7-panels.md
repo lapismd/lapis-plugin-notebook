@@ -100,3 +100,39 @@ list is a Stage 9 consumer-acceptance step).
 Entry-chunk weight (16.6MB, datasets + vega/d3/Plot) matches the legacy
 bundle scale; dataset trimming and chunk splitting remain recorded
 follow-ups, not gates.
+
+## Six-placement panel story suite (LN-NB-007 Implemented)
+
+`Plugins/Notebook/Panels/{Variables,Dependencies,Packages}` — 18 svelte-csf
+stories over a notebook-scaled adaptation of the family panel harness:
+`panel-placements.ts` builds the six persisted layouts (the panel under test
+plus the seeded Getting Started notebook as required document context),
+`NotebookPanelDemo.svelte` boots the real App/workspace, and
+`panel-story-helpers.ts` asserts single panel instance, destination
+`WorkspaceViewHost`, workspace surface, transparent-root paint contract,
+sidebar side/group-header semantics, viewport fill (fixed-position demo, no
+reliance on Storybook body classes — the addon-vitest canvas has neither
+`sb-main-fullscreen` nor `#storybook-root`), and per-story Show Code source.
+
+Accessibility findings fixed in notebook-owned code during acceptance:
+active tab/orientation/minimap-selected states now use Design Core's curated
+`--primary`/`--primary-foreground` pair (the legacy accent/on-accent pairing
+measured 4.25:1, below AA); the read-only dependency code snippet names its
+CodeMirror content element; the graph surface became `role="application"`
+(a labelled focusable diagram-editor container — svelte-ignore comments
+document the deliberate pattern) after `role="button"` tripped
+label-content-name-mismatch on inner visible text; edge labels now include
+their visible variable-count chips.
+
+Product fixes the stories surfaced: panel views seed a refresh at
+registration and on layout-ready (deferred view creation can land after the
+workspace file-open events), and panel context resolution falls back to any
+open notebook leaf when a main-area panel tab holds the active leaf — the
+legacy active-leaf-only resolution assumed sidebar panels. Axe context is
+scoped to the demo root because Storybook's docs-source highlight chrome
+sits outside it in test mode.
+
+Full native suite after the slice: check chain green (routing 21 lanes /
+story composition 4 families, 0 findings; svelte-check 0/0; no-tailwind
+clean), unit 290/290, test:storybook 25/25 with axe clean, build + bundle
+audit green, spec:validate 43 requirements.

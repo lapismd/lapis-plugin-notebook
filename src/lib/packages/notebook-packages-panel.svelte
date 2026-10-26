@@ -464,7 +464,10 @@
   }
 </script>
 
-<div class="notebook-packages notebook-packages__ge62249fa">
+<div
+  class="notebook-packages notebook-packages__ge62249fa"
+  data-testid="notebook-packages-panel"
+>
   <header class="notebook-packages__header notebook-packages__g50b7a829">
     <Search
       bind:value={query}

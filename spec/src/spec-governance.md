@@ -64,7 +64,11 @@ peers onto `@lapismd/design-core` (its lazy UI runtime mounts Design Core
 input/slider/switch/textarea primitives); support packages MUST NOT peer
 onto retired legacy UI surfaces.
 
-The tracked lockfile MUST be regenerated without local pnpm hooks
+Every executable story file MUST stay registered in
+`stories/catalog/story-parity.json` with its family kind; the four notebook
+families are the App-backed shell acceptance and the three six-placement
+panel suites, all recorded as `application` coverage of the public
+WorkspaceShell. The tracked lockfile MUST be regenerated without local pnpm hooks
 (`pnpm install --lockfile-only --ignore-pnpmfile`) so it stays registry-pure
 and matches the Docker workers' frozen `--ignore-pnpmfile` installation;
 local development then relinks sibling sources with

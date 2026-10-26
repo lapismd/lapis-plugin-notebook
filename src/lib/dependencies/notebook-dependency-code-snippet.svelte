@@ -45,7 +45,13 @@
       EditorState.readOnly.of(true),
       EditorView.editable.of(false),
       EditorView.lineWrapping,
-      EditorView.contentAttributes.of({ tabindex: "-1", spellcheck: "false" }),
+      EditorView.contentAttributes.of({
+        tabindex: "-1",
+        spellcheck: "false",
+        // Read-only CodeMirror renders role=textbox; name it for axe
+        // (aria-input-field-name) since no visible <label> is associated.
+        "aria-label": `${lang} cell source (read-only)`,
+      }),
       EditorView.editorAttributes.of({
         class: "mod-cm6 mod-inline mod-notebook-dependency-snippet",
       }),

@@ -112,6 +112,7 @@ function workspaceLayout(
 export function createPluginWorkspaceSeed(
   notebookMode: "preview" | "source" = "source",
   notebookPath: string = NOTEBOOK_FIXTURE_PATHS.gettingStarted,
+  layoutOverride?: Record<string, unknown>,
 ): Record<string, string> {
   return {
     ".lapis/app.json": JSON.stringify(
@@ -138,7 +139,7 @@ export function createPluginWorkspaceSeed(
       2,
     ),
     ".lapis/workspace.json": JSON.stringify(
-      workspaceLayout(notebookMode, notebookPath),
+      layoutOverride ?? workspaceLayout(notebookMode, notebookPath),
       null,
       2,
     ),
@@ -154,6 +155,7 @@ export function createPluginWorkspaceSeed(
 export async function bootPluginWorkspaceDemo(
   notebookMode: "preview" | "source" = "source",
   notebookPath: string = NOTEBOOK_FIXTURE_PATHS.gettingStarted,
+  layoutOverride?: Record<string, unknown>,
 ): Promise<{
   app: App;
   dispose: () => Promise<void>;
@@ -162,7 +164,7 @@ export async function bootPluginWorkspaceDemo(
     version: "0.0.1-story",
     configPath: ".lapis/app.json",
     adapter: new MemoryVaultAdapter(
-      createPluginWorkspaceSeed(notebookMode, notebookPath),
+      createPluginWorkspaceSeed(notebookMode, notebookPath, layoutOverride),
       {
         name: "Notebook Plugin Workspace",
         vaultId: "notebook-plugin-workspace",

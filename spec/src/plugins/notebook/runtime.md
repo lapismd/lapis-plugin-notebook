@@ -55,7 +55,12 @@ events, honor the panel auto-open settings, and degrade with a warning
 instead of unhandled rejection when catalog or registry probing fails on
 hosts without resolvable assets or network. The plugin asset URL fallback
 anchors root-relative plugin paths at the document origin for browser hosts
-without an asset server.
+without an asset server. Panel context resolution falls back from the active
+leaf to any open notebook leaf, because panel views are main-area tabs in the
+current workspace and can hold the active leaf themselves (the legacy
+sidebar assumption no longer holds); views additionally seed a refresh at
+registration and once the layout is ready, since deferred view creation can
+land after the workspace file-open events have fired.
 
 ## Requirements
 

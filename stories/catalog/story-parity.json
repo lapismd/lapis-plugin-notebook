@@ -1,5 +1,14 @@
 {
   "src/stories/PluginWorkspace.stories.svelte": {
     "kind": "application"
+  },
+  "src/stories/panels/VariablesPanels.stories.svelte": {
+    "kind": "application"
+  },
+  "src/stories/panels/DependenciesPanels.stories.svelte": {
+    "kind": "application"
+  },
+  "src/stories/panels/PackagesPanels.stories.svelte": {
+    "kind": "application"
   }
 }

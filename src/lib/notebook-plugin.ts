@@ -762,6 +762,16 @@ export class NotebookPlugin extends Plugin {
     await this.runtimes.terminate(sourcePath);
   }
 
+  private findAnyNotebookFile(): TFile | null {
+    for (const leaf of this.app.workspace.getLeavesOfType(NotebookViewType)) {
+      const file = this.getNotebookFile(leaf);
+      if (file) {
+        return file;
+      }
+    }
+    return null;
+  }
+
   private getNotebookFile(
     leaf: { view?: unknown } | null | undefined,
   ): TFile | null {
@@ -1315,6 +1325,16 @@ export class NotebookPlugin extends Plugin {
     view: NotebookInspectorRefreshableView,
   ): () => void {
     this.inspectorViews.add(view);
+    // Views can mount before or after the workspace layout events settle
+    // (layout restore ordering is host-dependent), so seed the panel on
+    // registration and again once the layout is ready; later workspace
+    // events keep it current.
+    void view.refreshView();
+    this.app.workspace.onLayoutReady(() => {
+      if (this.inspectorViews.has(view)) {
+        void view.refreshView();
+      }
+    });
     return () => {
       this.inspectorViews.delete(view);
     };
@@ -1324,6 +1344,16 @@ export class NotebookPlugin extends Plugin {
     view: NotebookDependenciesRefreshableView,
   ): () => void {
     this.dependenciesViews.add(view);
+    // Views can mount before or after the workspace layout events settle
+    // (layout restore ordering is host-dependent), so seed the panel on
+    // registration and again once the layout is ready; later workspace
+    // events keep it current.
+    void view.refreshView();
+    this.app.workspace.onLayoutReady(() => {
+      if (this.dependenciesViews.has(view)) {
+        void view.refreshView();
+      }
+    });
     return () => {
       this.dependenciesViews.delete(view);
     };
@@ -1333,6 +1363,16 @@ export class NotebookPlugin extends Plugin {
     view: NotebookPackagesRefreshableView,
   ): () => void {
     this.packagesViews.add(view);
+    // Views can mount before or after the workspace layout events settle
+    // (layout restore ordering is host-dependent), so seed the panel on
+    // registration and again once the layout is ready; later workspace
+    // events keep it current.
+    void view.refreshView();
+    this.app.workspace.onLayoutReady(() => {
+      if (this.packagesViews.has(view)) {
+        void view.refreshView();
+      }
+    });
     return () => {
       this.packagesViews.delete(view);
     };
@@ -1695,7 +1735,13 @@ export class NotebookPlugin extends Plugin {
     file: TFile;
     document: NotebookDocument;
   } | null> {
-    const file = this.getNotebookFile(this.app.workspace.activeLeaf);
+    // Panel context resolves the active notebook leaf, falling back to any
+    // open notebook when a panel itself holds the active leaf (panel views
+    // are main-area tabs in the current workspace, unlike the legacy
+    // sidebars where the document leaf kept active status).
+    const file =
+      this.getNotebookFile(this.app.workspace.activeLeaf) ??
+      this.findAnyNotebookFile();
     if (!file) {
       return null;
     }

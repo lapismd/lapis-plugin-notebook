@@ -729,7 +729,10 @@
   }
 </script>
 
-<div class="notebook-dependencies notebook-dependencies__ge62249fa">
+<div
+  class="notebook-dependencies notebook-dependencies__ge62249fa"
+  data-testid="notebook-dependencies-panel"
+>
   {#if !snapshot}
     <div class="notebook-dependencies__g47990fce">
       {#if loading}
@@ -944,6 +947,14 @@
           </div>
         </div>
 
+        <!--
+          Diagram-editor surface: role=application with a labelled focusable
+          container holding the individually focusable node/edge buttons.
+          Svelte's heuristic treats `application` as noninteractive; axe passes
+          this structure under the story's strict a11y gating.
+        -->
+        <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+        <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <div
           use:observeGraphViewport
           class={`notebook-dependencies__graph${graphDrag ? " notebook-dependencies__graph--dragging" : ""}`}
@@ -955,7 +966,7 @@
           onpointerup={finishGraphPointerInteraction}
           onpointercancel={finishGraphPointerInteraction}
           onlostpointercapture={finishGraphPointerInteraction}
-          role="button"
+          role="application"
           tabindex="0"
           aria-label="Notebook dependency graph"
         >
@@ -979,7 +990,7 @@
                   <g
                     role="button"
                     tabindex="0"
-                    aria-label={`Select dependency from ${edge.edge.source} to ${edge.edge.target}`}
+                    aria-label={`Select dependency from ${edge.edge.source} to ${edge.edge.target}, ${edge.edge.variables.length} variable${edge.edge.variables.length === 1 ? "" : "s"}: ${edge.edge.variables.join(", ")}`}
                     onclick={(event) => handleGraphEdgeClick(event, edge.id)}
                     onkeydown={(event) =>
                       handleGraphEdgeKeyDown(event, edge.id)}
