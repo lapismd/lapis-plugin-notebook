@@ -160,3 +160,12 @@ body with 12/16 padding, matching the reference.
 Lanes: svelte-check 0/0, `pnpm check` green, 290 unit tests green,
 Storybook 29/29 (12 + 6 + 11, native runtime), `pnpm build` + bundle
 exclusion audit green, `pnpm spec:validate` green.
+
+## Docker acceptance for the panel group commit
+
+Authoritative Docker `validation:all` passed for `718ef0c4` — run
+`lapis-notebook-run-1be9d79d-3b04-4133-8256-01d30b6b3074` (29 stories
+including the new `Panel group` acceptance, 290 unit tests, static
+Storybook build, bundle lane with exclusion audit, spec validate/mdbook/
+spec-first, routing audit 21 lanes 0 findings, story parity 4 families,
+App-ownership audit green).
