@@ -120,6 +120,11 @@ export function auditRouting(scripts, lanes) {
       "WATCHPACK_POLLING=250 node scripts/storybook-run.mjs --no-open --config-dir .storybook",
     "storybook:stop": "bash scripts/storybook-stop.sh",
     "storybook:restart": "bash scripts/storybook-restart.sh",
+    // Spec discovery is host-local by design: it shells out to the system
+    // qmd binary and the checkout-local .qmd index, and MUST NOT run in CI
+    // or Docker lanes (LPN-SPEC-020).
+    "spec:index": "spec-validator index",
+    "spec:search": "spec-validator search",
     validation: "node scripts/validation.mjs",
     "validation:doctor": "node scripts/validation.mjs doctor",
     "validation:images": "node scripts/validation.mjs images",

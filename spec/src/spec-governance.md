@@ -1,11 +1,15 @@
 # Specification Governance
 
-Tracked dependencies use registry Design Core `0.6.0` and Mira `0.1.1`.
-Explicit temporary source acceptance follows LPN-SPEC-014 with verified
-sibling archives in isolated worker installations; publication and consumer
-adoption remain separate gates. Source ownership and public contracts remain
-unchanged. Shared specification tooling resolves
-`@lapismd/spec-validator@0.1.4` from npm.
+Tracked dependencies use registry Design Core `0.7.0` and Mira `0.1.2`, with
+the published Lapis host cohort at `@lapis-notes/api@0.2.0`,
+`@lapis-notes/ui@0.1.4`, `@lapis-notes/workspace@0.3.0`,
+`@lapis-notes/file-explorer@0.2.0`, `@lapis-notes/markdown@0.1.7`, and
+`@lapis-notes/search@0.1.3`. Explicit temporary source acceptance follows
+LPN-SPEC-014 with verified sibling archives in isolated worker installations;
+publication and consumer adoption remain separate gates. Source ownership and
+public contracts remain unchanged. Shared specification tooling resolves the
+Deno-free `@lapismd/spec-validator@0.2.0` from npm; QMD-backed specification
+search uses the spec-validator-pinned system `qmd` binary (LPN-SPEC-020).
 
 ## Requirements
 
@@ -29,11 +33,21 @@ unchanged. Shared specification tooling resolves
 | LPN-SPEC-017 | Every Docker worker MUST have finite CPU, memory and shared-memory limits and a per-checkout lease. Reports MUST retain source, image, tool, argument and outcome identities with available outputs and combined logs. Cleanup MUST collect reports before deleting stopped owned runs and MUST NOT prune global data or delete another checkout's containers.                                                                                                                                |
 | LPN-SPEC-018 | Browser acceptance MUST fail on Svelte runtime diagnostics from console warnings or errors, including mount, interaction and teardown. The guard MUST install before story hooks, retain original diagnostic stacks until post-test and post-file assertions without interrupting framework cleanup, and preserve console output without suppression or allowlisting.                                                                                                                          |
 | LPN-SPEC-019 | The classified validation:all command MUST execute the existing check, unit test, build, publint, static Storybook, complete catalog and specification lanes sequentially within one Docker snapshot and dependency installation. It MUST preserve first-failure propagation, refuse aggregate selectors and retain every individual command and exact target.                                                                                                                                   |
+| LPN-SPEC-020 | Specification discovery MUST be QMD-backed: a tracked `.qmd/index.yml` collection over `spec/src`, root `spec:index` and `spec:search` tasks kept as reviewed native development exceptions out of Docker lanes and CI, and `spec-validator doctor` verifying collection config, system binary, and native index health. Search MAY degrade to the printed `rg` fallback only when QMD is unavailable. |
 
 Aggregate validation shares the outer worker's single lease, exact snapshot and
 installation. Inner gates use the native execution port inside that worker;
 they MUST NOT create nested workers or silently omit a gate. Reports retain the
 actual installed pnpm graph separately from the tracked registry lock.
+
+Specification discovery runs host-local: `pnpm spec:search -- "<topic>"`
+queries the tracked `lapis-plugin-notebook-spec` QMD collection over
+`spec/src` through the system `qmd` binary that spec-validator pins, and
+`pnpm spec:index` rebuilds the local index after chapter edits. Both root
+scripts are reviewed native development exceptions in the routing audit and
+MUST NOT enter Docker lanes or CI. `spec-validator doctor` reports the
+collection config, binary, and native-index health; agents prefer `spec:search`
+over raw `rg` scans of `spec/src` and run `doctor` after tooling updates.
 
 `spec-first` maps notebook document model, parser, and file-identity sources to
 [Documents](plugins/notebook/documents.md); execution, commands, settings, and

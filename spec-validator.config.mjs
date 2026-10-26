@@ -15,6 +15,7 @@ export default defineConfig(tableRequirements(), {
     bookIgnore: "LPN-SPEC-001",
     packageManifest: "LN-NB-001",
     storybookMirrors: "LPN-SPEC-009",
+    qmd: "LPN-SPEC-020",
     specFirst: "LPN-SPEC-002",
     internal: "LPN-SPEC-003",
   },
@@ -53,6 +54,7 @@ export default defineConfig(tableRequirements(), {
       previewPath: ".storybook/preview.ts",
       verifyOrder: true,
     },
+    qmd: { collection: "lapis-plugin-notebook-spec" },
     packageManifest: {
       name: "@lapis-notes/lapis-plugin-notebook",
       version: "0.1.0",

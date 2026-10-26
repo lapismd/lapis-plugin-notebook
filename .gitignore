@@ -10,3 +10,4 @@ AGENTS.override.md
 *.tgz
 *.tsbuildinfo
 .local/
+.qmd/index.sqlite*

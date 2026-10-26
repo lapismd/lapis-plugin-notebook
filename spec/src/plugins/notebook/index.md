@@ -11,7 +11,14 @@ contract, which the shared Rust core already publishes
 The plugin is a staged port of the legacy `@lapis-notes/notebook` package and
 its six private support packages from `legacy-lapis-notes`. Ported behavior
 keeps its legacy regression evidence; presentation remaps onto public
-`@lapismd/design-core` exports instead of re-creating primitives. The runtime
+`@lapismd/design-core` exports instead of re-creating primitives. The tracked
+dependency cohort resolves published registry versions — peers
+`@lapismd/design-core@^0.7.0`, `@lapis-notes/api@^0.2.0`, and
+`@lapis-notes/markdown@^0.1.7`, with the Storybook host cohort pinned in
+development at `@lapis-notes/ui@0.1.4`, `@lapis-notes/workspace@0.3.0`,
+`@lapis-notes/file-explorer@0.2.0`, `@lapis-notes/search@0.1.3`, and
+`@lapismd/mira@0.1.2`; local sibling source snapshots MAY replace matching
+installs through `.pnpmfile.cjs` per LPN-SPEC-005. The runtime
 plugin id `lapis-notebook` is preserved from the legacy plugin so persisted
 plugin data keys remain compatible. The DuckDB-WASM engine dependency is
 pinned exactly at `1.33.1-dev45.0` in root dependencies per LPN-SPEC-004 so
