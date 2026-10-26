@@ -35,3 +35,19 @@ with the `Run notebook now` header action in the DOM.
 
 Validation (native): Workspace story green with the regression; full gates
 run with the slice commit.
+
+## Docker acceptance for the routing commit
+
+Authoritative Docker `validation:all` passed for `d36df323` — run
+`lapis-notebook-run-302668f6-fd10-4d61-8802-d4690f49dc5a`.
+
+## Follow-up: input table double perimeter
+
+Browser review of the System Guide table input showed double borders on the
+left/right/top: the markdown package styles document tables inside rendered
+markdown surfaces (`.markdown-rendered :is(th, td),
+.markdown-preview-surface .markdown :is(th, td)`), which reached the input
+table cells inside the reading surface. The input stylesheet now mirrors
+those scopes with the input table class added (outranking them), resetting
+cells to row separators only; verified live: container 1px all sides, cells
+0/0/0/1, last row 0.

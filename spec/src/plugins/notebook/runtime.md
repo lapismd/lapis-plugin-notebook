@@ -45,7 +45,10 @@ cancellation, and autorun acceptance have since landed as governed stories
 and audits; the packaged worker asset path remains open, landing with the
 publication bundle. The input package's table surface rebinds Mira's
 `--table-preview-spacing` so document-table typography does not gap input
-tables inside their rounded containers. DOM-backed notebooks execute through the in-process
+tables inside their rounded containers, and overrides the markdown package's
+document-table cell borders (scoped mirrors of its `.markdown-rendered` and
+`.markdown-preview-surface` selectors) so input tables keep a single rounded
+outline with row separators instead of double perimeters. DOM-backed notebooks execute through the in-process
 runtime: the `Run inputs` story proves the viewof input mount on Design Core
 primitives with `aria-label` wired from the input's `label` option, and the
 debounced targeted rerun of downstream cells on input change.

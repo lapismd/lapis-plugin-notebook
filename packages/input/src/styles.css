@@ -103,3 +103,28 @@
   padding: 0.75rem;
   color: color-mix(in srgb, currentColor 65%, transparent);
 }
+
+/* The markdown package styles document tables inside rendered markdown
+   surfaces with full-perimeter cell borders; input tables keep only the
+   rounded container outline and row separators. These selectors mirror the
+   markdown scopes with the input table class added so they outrank them. */
+.markdown-rendered table.lapis-notebook-input__table-grid :is(th, td),
+.markdown-preview-surface .markdown table.lapis-notebook-input__table-grid
+  :is(th, td) {
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.markdown-rendered
+  table.lapis-notebook-input__table-grid
+  tbody
+  tr:last-child
+  :is(th, td),
+.markdown-preview-surface
+  .markdown
+  table.lapis-notebook-input__table-grid
+  tbody
+  tr:last-child
+  :is(th, td) {
+  border-bottom: 0;
+}
