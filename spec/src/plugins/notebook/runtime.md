@@ -64,7 +64,16 @@ appeared for leaves opened through explicit layout state. The panel surfaces are
 `open-notebook-packages-view`), refresh on controller, layout, and leaf
 events, honor the panel auto-open settings, and degrade with a warning
 instead of unhandled rejection when catalog or registry probing fails on
-hosts without resolvable assets or network. The plugin asset URL fallback
+hosts without resolvable assets or network. The default panel presentation
+is one right-sidebar group named `Notebook` holding Variables, Dependencies,
+and Packages, gated by the `panels.openPanelGroupOnNotebookOpen` setting
+(default on). Because the host controller projects sidebar groups from the
+layout present at boot and plugin `onload` runs before
+`workspace.loadLayout()`, the plugin seeds the group into the persisted
+layout file during `onload` through the public vault read/modify surface;
+first-run hosts without a layout file fall back to a runtime
+`toJson`/vault/`loadLayout` patch on first notebook open, which the host
+persists for subsequent boots. The plugin asset URL fallback
 anchors root-relative plugin paths at the document origin for browser hosts
 without an asset server. The plugin registers its run-all icon with both the
 api icon registry and the Design Core workspace icon registry (the header

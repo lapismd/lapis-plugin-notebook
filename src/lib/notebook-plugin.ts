@@ -369,8 +369,27 @@ export class NotebookPlugin extends Plugin {
     this.registerExtensions(["notebook.md"], NotebookViewType);
     this.registerEditorSuggest(new NotebookCellSuggest(this.app), "markdown");
     this.registerNotebookCellMarkdownPostProcessor();
+    void this.seedNotebookPanelGroupLayout();
 
     this.app.workspace.onLayoutReady(() => {
+      if (
+        this.settings.panels.openPanelGroupOnNotebookOpen &&
+        this.getNotebookFile(this.app.workspace.activeLeaf)
+      ) {
+        // Layout restore can discard or refuse runtime group moves made while
+        // loading; retry once the workspace has settled. Both calls are
+        // idempotent (existing leaves/groups are reused).
+        void this.ensureNotebookPanelGroup();
+        // The host controller re-projects sidebar groups after the layout
+        // settles; moves made inside the load window can be missed, so retry
+        // on a short ladder. All calls are idempotent.
+        const retries = [300, 1500].map((delay) =>
+          setTimeout(() => {
+            void this.ensureNotebookPanelGroup();
+          }, delay),
+        );
+        this.register(() => retries.forEach((timer) => clearTimeout(timer)));
+      }
       void this.refreshOpenNotebookViews();
       void this.syncNotebookStatusBar();
       void this.refreshNotebookInspectorViews();
@@ -963,6 +982,10 @@ export class NotebookPlugin extends Plugin {
       return;
     }
 
+    if (this.settings.panels.openPanelGroupOnNotebookOpen) {
+      await this.ensureNotebookPanelGroup();
+      return;
+    }
     if (this.settings.panels.autoOpenSourcesOnNotebookOpen) {
       await this.openNotebookInspector(false);
     }
@@ -1659,6 +1682,174 @@ export class NotebookPlugin extends Plugin {
       Array.from(this.packagesViews, (view) => view.refreshView()),
     );
   }
+
+  public readonly NOTEBOOK_PANEL_GROUP_NAME = "Notebook";
+
+  /**
+   * Default panel presentation: variables, dependencies, and packages live
+   * together in one right-sidebar group. The host controller projects
+   * sidebar groups from layout state, so the plugin patches the persisted
+   * layout once per session (only when the group is absent) through the
+   * public toJson/vault/loadLayout path — the same restore path
+   * layout-seeded groups use.
+   */
+  private notebookPanelGroupSeeded = false;
+
+  private buildNotebookPanelGroupJson(): Record<string, unknown> {
+    return {
+      id: "notebook-panel-group",
+      type: "sidebar-group",
+      name: this.NOTEBOOK_PANEL_GROUP_NAME,
+      icon: "square-terminal",
+      collapsed: {},
+      panelSizes: {},
+      children: [
+        {
+          id: "notebook-group-inspector",
+          type: "leaf",
+          state: {
+            type: NotebookInspectorViewType,
+            state: {},
+            icon: "variable",
+            title: "Variables",
+          },
+        },
+        {
+          id: "notebook-group-dependencies",
+          type: "leaf",
+          state: {
+            type: NotebookDependenciesViewType,
+            state: {},
+            icon: "workflow",
+            title: "Dependencies",
+          },
+        },
+        {
+          id: "notebook-group-packages",
+          type: "leaf",
+          state: {
+            type: NotebookPackagesViewType,
+            state: {},
+            icon: "package",
+            title: "Packages",
+          },
+        },
+      ],
+    };
+  }
+
+  /**
+   * The host controller projects sidebar groups from the layout present at
+   * boot, and plugin onload runs before `workspace.loadLayout()`: patching
+   * the persisted layout file here makes the group part of the initial
+   * restore. First-run hosts without a layout file fall back to the
+   * runtime ensure path (persisted by the host for the next boot).
+   */
+  private async seedNotebookPanelGroupLayout(): Promise<void> {
+    if (!this.settings.panels.openPanelGroupOnNotebookOpen) {
+      return;
+    }
+    const layoutFile = this.app.vault.getFileByPath(".lapis/workspace.json");
+    if (!layoutFile) {
+      return;
+    }
+    const raw = await this.app.vault.cachedRead(layoutFile);
+    let layout: {
+      right?: {
+        children?: Array<{ type?: string; children?: unknown[] }>;
+        width?: string;
+      };
+    };
+    try {
+      layout = JSON.parse(raw);
+    } catch {
+      return;
+    }
+    const serialized = JSON.stringify(layout);
+    if (serialized.includes("notebook-panel-group")) {
+      return;
+    }
+    const right = layout.right;
+    if (!right || typeof right !== "object") {
+      return;
+    }
+    let tabs = right.children?.find((child) => child?.type === "tabs") as
+      | { id?: string; type?: string; children?: unknown[] }
+      | undefined;
+    if (!tabs) {
+      tabs = { id: "notebook-group-tabs", type: "tabs", children: [] };
+      right.children = [...(right.children ?? []), tabs];
+    }
+    if (right.width === "0px" || right.width === undefined) {
+      right.width = "22rem";
+    }
+    // A zero-sized dock (empty-dock layouts) never intersects the lazy pane
+    // mount observers; normalize the split sizes for the restored children.
+    const rightRecord = right as { sizes?: number[]; children?: unknown[] };
+    if (
+      !Array.isArray(rightRecord.sizes) ||
+      rightRecord.sizes.length !== (rightRecord.children ?? []).length
+    ) {
+      const count = (rightRecord.children ?? []).length || 1;
+      rightRecord.sizes = Array.from({ length: count }, () => 100 / count);
+    }
+    tabs.children = [...(tabs.children ?? []), this.buildNotebookPanelGroupJson()];
+    await this.app.vault.modify(layoutFile, JSON.stringify(layout));
+  }
+
+  private async ensureNotebookPanelGroup(): Promise<void> {
+    if (this.notebookPanelGroupSeeded) {
+      return;
+    }
+    this.notebookPanelGroupSeeded = true;
+    const workspace = this.app.workspace;
+    if (workspace.getSidebarGroup("right", this.NOTEBOOK_PANEL_GROUP_NAME)) {
+      return;
+    }
+
+    const layout = workspace.toJson() as {
+      right?: {
+        children?: Array<{ type?: string; children?: unknown[] }>;
+        width?: string;
+      };
+    };
+    const right = layout.right;
+    if (!right) {
+      return;
+    }
+    let tabs = right.children?.find((child) => child?.type === "tabs") as
+      | { id?: string; type?: string; children?: unknown[] }
+      | undefined;
+    if (!tabs) {
+      tabs = { id: "notebook-group-tabs", type: "tabs", children: [] };
+      right.children = [...(right.children ?? []), tabs];
+    }
+    if (right.width === "0px" || right.width === undefined) {
+      right.width = "22rem";
+    }
+    // A zero-sized dock (empty-dock layouts) never intersects the lazy pane
+    // mount observers; normalize the split sizes for the restored children.
+    const rightRecord = right as { sizes?: number[]; children?: unknown[] };
+    if (
+      !Array.isArray(rightRecord.sizes) ||
+      rightRecord.sizes.length !== (rightRecord.children ?? []).length
+    ) {
+      const count = (rightRecord.children ?? []).length || 1;
+      rightRecord.sizes = Array.from({ length: count }, () => 100 / count);
+    }
+    tabs.children = [
+      ...(tabs.children ?? []),
+      this.buildNotebookPanelGroupJson(),
+    ];
+
+    const layoutFile = this.app.vault.getFileByPath(".lapis/workspace.json");
+    if (!layoutFile) {
+      return;
+    }
+    await this.app.vault.modify(layoutFile, JSON.stringify(layout));
+    await workspace.loadLayout();
+  }
+
 
   private async openNotebookInspector(reveal: boolean): Promise<void> {
     const leaves = this.app.workspace.getLeavesOfType(

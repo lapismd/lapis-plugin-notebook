@@ -2,12 +2,12 @@
   import { javascript } from "@codemirror/lang-javascript";
   import { markdown } from "@codemirror/lang-markdown";
   import { sql } from "@codemirror/lang-sql";
-  import { syntaxHighlighting } from "@codemirror/language";
+  import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
   import { EditorState, type Extension } from "@codemirror/state";
   import { EditorView } from "@codemirror/view";
   // Mira scopes its CodeMirror token colors to cm-* classes; its public
   // class highlighter produces them (the standard lezer one emits tok-*).
-  import { miraClassHighlighter as classHighlighter } from "@lapismd/mira/codemirror";
+  import { tags } from "@lezer/highlight";
   import type { NotebookCellLanguage } from "../model/notebook-cell";
 
   let {
@@ -38,15 +38,24 @@
     }
   }
 
+  // Notebook-owned token palette for the read-only snippet: AA-contrast
+  // colors on the white body surface, independent of host editor themes.
+  const notebookSnippetHighlightStyle = HighlightStyle.define([
+    { tag: [tags.keyword, tags.modifier, tags.controlKeyword], color: "#7c3aed" },
+    { tag: [tags.number, tags.bool, tags.atom], color: "#b45309" },
+    { tag: [tags.string, tags.special(tags.string)], color: "#15803d" },
+    { tag: [tags.comment], color: "#6b7280" },
+    { tag: [tags.function(tags.variableName)], color: "#1d4ed8" },
+    { tag: [tags.typeName, tags.className], color: "#0f766e" },
+    { tag: [tags.operator, tags.punctuation], color: "#475569" },
+  ]);
+
   function createExtensions(): Extension[] {
     return [
-      syntaxHighlighting(classHighlighter),
+      syntaxHighlighting(notebookSnippetHighlightStyle),
       resolveLanguageExtension(lang),
       EditorState.readOnly.of(true),
       EditorView.editable.of(false),
-      // Mira scopes its CodeMirror token colors under .mira-code-editor;
-      // opt the read-only snippet into the same scope.
-      EditorView.editorAttributes.of({ class: "mira-code-editor" }),
       EditorView.lineWrapping,
       EditorView.contentAttributes.of({
         tabindex: "-1",

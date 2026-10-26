@@ -31,3 +31,14 @@ body.sb-main-fullscreen #storybook-root {
   max-width: 36rem;
   padding: 1rem;
 }
+
+/* Canvas/test mode fills the viewport for every app-backed demo root
+   (shell and panel stories alike) without relying on Storybook body classes
+   or #storybook-root sizing; docs pages keep their framed height. */
+html:not(:has(.docs-story)) .plugin-workspace-demo {
+  position: fixed;
+  inset: 0;
+  width: auto;
+  height: auto;
+  max-height: none;
+}

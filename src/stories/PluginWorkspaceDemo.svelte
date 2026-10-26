@@ -13,10 +13,12 @@
     displayMode = "desktop",
     notebookMode = "source",
     notebookPath = NOTEBOOK_FIXTURE_PATHS.gettingStarted,
+    panelGroupLayout = false,
   }: {
     displayMode?: WorkspaceShellProps["displayMode"];
     notebookMode?: "preview" | "source";
     notebookPath?: string;
+    panelGroupLayout?: boolean;
   } = $props();
 
   let app = $state<App | null>(null);
@@ -35,7 +37,13 @@
 
   onMount(() => {
     let cancelled = false;
-    const runtimePromise = bootPluginWorkspaceDemo(notebookMode, notebookPath);
+    const runtimePromise = bootPluginWorkspaceDemo(
+    notebookMode,
+    notebookPath,
+    undefined,
+    undefined,
+    panelGroupLayout,
+  );
     void runtimePromise
       .then((runtime) => {
         if (cancelled) return;

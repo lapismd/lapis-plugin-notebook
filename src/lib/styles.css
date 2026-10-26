@@ -36,7 +36,10 @@
     var(--notebook-accent) 42%,
     var(--notebook-surface-background-active)
   );
-  --notebook-warning-color: var(--text-warning);
+  /* AA-contrast status palette (legacy --text-* tokens measure below 4.5:1
+     on the white body surface, and unselected rows composite at 0.95
+     opacity); the .dark override below keeps dark themes accessible. */
+  --notebook-warning-color: #b45309;
   --notebook-warning-background: color-mix(
     in srgb,
     var(--notebook-accent) 12%,
@@ -47,7 +50,7 @@
     var(--notebook-accent) 32%,
     var(--notebook-surface-border)
   );
-  --notebook-error-color: var(--text-error);
+  --notebook-error-color: #b91c1c;
   --notebook-error-background: color-mix(
     in srgb,
     var(--notebook-error-color) 10%,
@@ -58,7 +61,7 @@
     var(--notebook-error-color) 34%,
     var(--notebook-surface-border)
   );
-  --notebook-success-color: var(--text-success);
+  --notebook-success-color: #166534;
   --notebook-control-background: var(--background-primary, var(--background));
   --notebook-control-background-hover: var(
     --background-modifier-hover,
@@ -4120,4 +4123,84 @@
 .notebook-dependencies [data-graph-controls] {
   right: 1rem;
   bottom: 1rem;
+}
+
+/* Section anatomy: the section carries no padding so the grey header and
+   white body run full-bleed to the section edges; padding lives inside the
+   header and body instead. */
+.notebook-inspector__section {
+  padding: 0;
+}
+
+.notebook-inspector__section > details > summary {
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+}
+
+.notebook-inspector__section > details > summary + * {
+  margin-top: 0;
+  padding: 0.75rem 1rem;
+}
+
+.notebook-packages details.notebook-packages__section > summary + * {
+  padding-top: 0.75rem;
+}
+
+/* Dependencies selection snippets read as full-bleed white bodies under
+   their section rather than inset cards. */
+.notebook-dependencies__snippet-body {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0.75rem 1rem;
+  background: var(--background-primary, var(--card));
+}
+
+/* Dark-theme counterparts of the AA status palette. */
+.dark .notebook-view,
+.dark .notebook-cell,
+.dark .notebook-output,
+.dark .notebook-dataframe,
+.dark .notebook-inspector,
+.dark .notebook-dependencies,
+.dark .notebook-packages {
+  --notebook-warning-color: #fbbf24;
+  --notebook-error-color: #f87171;
+  --notebook-success-color: #4ade80;
+}
+
+/* Static AA-contrast status label colors (declared directly so no token
+   pipeline can downgrade them; the .dark block below mirrors them). */
+.notebook-cell__status--completed .notebook-cell__status-label {
+  color: #166534;
+}
+
+.notebook-cell__status--error .notebook-cell__status-label {
+  color: #b91c1c;
+}
+
+.notebook-cell__status--scheduled .notebook-cell__status-label,
+.notebook-cell__status--stale .notebook-cell__status-label {
+  color: #b45309;
+}
+
+.notebook-cell__status--idle .notebook-cell__status-label {
+  color: #52525b;
+}
+
+.dark .notebook-cell__status--completed .notebook-cell__status-label {
+  color: #4ade80;
+}
+
+.dark .notebook-cell__status--error .notebook-cell__status-label {
+  color: #f87171;
+}
+
+.dark .notebook-cell__status--scheduled .notebook-cell__status-label,
+.dark .notebook-cell__status--stale .notebook-cell__status-label {
+  color: #fbbf24;
+}
+
+.dark .notebook-cell__status--idle .notebook-cell__status-label {
+  color: #a1a1aa;
 }

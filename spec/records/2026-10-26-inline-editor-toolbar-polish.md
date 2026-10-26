@@ -103,3 +103,60 @@ Authoritative Docker `validation:all` passed for `8d4d734b` — run
 unit tests, bundle lane with exclusion audit and the externalized
 `@lapismd/mira/codemirror`, all spec gates on the registry-pure worker with
 the cohort archives).
+
+## Default panel group presentation (user review round four)
+
+User request: the default view should present Variables, Packages, and
+Dependencies together in one right-sidebar group. New setting
+`panels.openPanelGroupOnNotebookOpen` (default on) with a settings-tab
+toggle row.
+
+Runtime group creation was investigated first and rejected: `ensureSideLeaf`
+group placement, `getOrCreateSidebarGroup` + `moveLeafToSidebarGroup`, and
+`registerSidebarView` placement all updated the workspace model (group with
+three leaves, dock opened at 22rem) but the host controller projects sidebar
+group panes only from layout state, so the panel views never attached
+(`containerEl` built, testids absent). The supported path is layout: plugin
+`onload` runs before `workspace.loadLayout()`, so the plugin seeds the group
+JSON (id `notebook-panel-group`, three fixed leaf ids) into the persisted
+`.lapis/workspace.json` through the public vault read/modify surface;
+first-run hosts without a layout file fall back to a one-shot runtime
+`toJson`/vault-modify/`loadLayout` patch on first notebook open, which the
+host persists for subsequent boots. The demo harness gained a
+`panelGroupLayout` seed option and a `Panel group` story asserts the group
+(by `data-sidebar-group-id`) with all three panels mounted inside.
+
+Making the story root fill the viewport (a shared storybook.css rule pinning
+`.plugin-workspace-demo` in canvas mode, required for the group's
+lazy-mounted panes to intersect) exposed pre-existing a11y debt that
+zero-sized renders had hidden from axe:
+
+- Mira's numbered code-block hljs palette fails color-contrast upstream
+  (`#b85c15`, 4.27:1; already flagged to the Mira owner). The shell axe
+  context now excludes that upstream chrome (`.mira-code-block`); everything
+  else stays scanned.
+- Legacy status tones sit below AA on the white body surface, and
+  `.notebook-cell__row--unselected` composites at 0.95 opacity (success
+  measured 4.44:1). Replaced with a static AA palette — success `#166534`,
+  error `#b91c1c`, warning `#b45309`, idle `#52525b` — plus `.dark`
+  overrides; `light-dark()` was avoided because the vitest CSS pipeline
+  downleveled it.
+- The collapsed-source click-to-edit wrapper was `role=button` with a short
+  aria-label around arbitrary code text — unfixable for label-in-name
+  (WCAG 2.5.3). De-roled to a mouse-only enhancement (svelte-ignore
+  annotated); keyboard/AT keep the toolbar Edit action.
+
+The dependency-snippet highlighting moved from `miraClassHighlighter` to a
+notebook-owned CodeMirror `HighlightStyle` with AA token colors: the Mira
+import pulled its editor theme CSS into every importing graph (the source of
+the shell-story hljs exposure). `@lapismd/mira` left the peers and the
+manifest shared-dependency mirror; it stays a devDependency only so the
+Storybook `optimizeDeps.include` sibling-prebundle entries resolve.
+
+The Variables (inspector) section anatomy was confirmed live by computed
+metrics: section padding 0, grey `#fafafa` summary with 12/16 padding, white
+body with 12/16 padding, matching the reference.
+
+Lanes: svelte-check 0/0, `pnpm check` green, 290 unit tests green,
+Storybook 29/29 (12 + 6 + 11, native runtime), `pnpm build` + bundle
+exclusion audit green, `pnpm spec:validate` green.

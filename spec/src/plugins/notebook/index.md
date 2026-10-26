@@ -67,11 +67,23 @@ and dependencies panels read as full-bleed units: grey family headers
 (`--background-primary-alt`) over white bodies (`--background-primary`)
 running to the section border separator, with the dependencies selection
 snippets carrying a semantic `notebook-dependencies__snippet-body` class.
-The snippet editors opt into Mira's `.mira-code-editor` token-color scope
-through the public `miraClassHighlighter` (the standard lezer highlighter
-emits unstyled `tok-*` classes), which adds `@lapismd/mira` to the peer and
-dev surfaces; the graph's floating controls regained their edge insets and
-the graph meta row its 12px muted typography after conversion gaps.
+The snippet editors use a notebook-owned CodeMirror `HighlightStyle` with
+AA-contrast token colors on the white body surface (an earlier
+`miraClassHighlighter` opt-in pulled Mira's editor theme CSS into every
+importing graph and exposed its sub-AA hljs palette); the graph's floating
+controls regained their edge insets and the graph meta row its 12px muted
+typography after conversion gaps. Cell status tones use a static AA palette
+(`#166534`/`#b91c1c`/`#b45309`, `.dark` overrides) because legacy `--text-*`
+tokens fall below 4.5:1 on the white body surface and unselected rows
+composite at 0.95 opacity. The collapsed source preview's click-to-edit
+layer is a mouse-only enhancement without button role: its visible text is
+arbitrary source code, which can never satisfy WCAG label-in-name, while
+keyboard and AT users keep the toolbar Edit action. Story-side, the shell
+axe context excludes Mira's numbered code-block chrome (`.mira-code-block`,
+upstream hljs palette flagged to the Mira owner), and a shared storybook
+stylesheet pins every app-backed demo root to the viewport in canvas mode so
+lazy-mounted sidebar-group panes intersect without relying on Storybook
+body classes.
 
 Cell chrome and plugin wiring complete the render stage: the CodeMirror cell
 source editor, the cell chrome with rails/collapse/run action/status footer,
@@ -80,7 +92,7 @@ plugin (render-service registration, cell directive post-processor, run and
 clear commands, status-bar context keys, safe-mode gating, input-rerun and
 stale-autorun scheduling, notebook-state persistence) with panels, packages,
 and the TypeScript language provider deferred to their stages. The
-`Plugins/Notebook/Shell` family carries ten App-backed stories over eight
+`Plugins/Notebook/Shell` family carries eleven App-backed stories over eight
 seeded notebook fixtures — including the legacy System Guide, Notebook
 Gallery, and Input Types showcases (every UI-backed input factory) (async cells, vault FileAttachments, relative ESM imports,
 viewof text/table/range inputs, md/html interpolation, stdlib helpers,
@@ -95,7 +107,11 @@ data`, which proves SQL cells on DuckDB-WASM resolved through the plugin
 asset paths plus the `lapis.notes` snapshot table, `Cancel execution`, which
 proves mid-run cancellation with checkpoint rollback, and `Autorun stale
 cells`, which proves edit-triggered stale marking and the debounced
-settings-gated autorun. The `Workspace` story additionally regression-tests
+settings-gated autorun. The `Panel group` story proves the default
+presentation: the demo seeds the `Notebook` sidebar group into the initial
+layout (the host contract the runtime seeding targets) and the story asserts
+Variables, Dependencies, and Packages all mount inside one group. The
+`Workspace` story additionally regression-tests
 generic file-open routing: `determineViewTypeForPath` resolves notebook
 files to the notebook view type, and opening one through a plain leaf yields
 `NotebookView` with its run-all header action. A static-import audit

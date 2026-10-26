@@ -614,20 +614,15 @@
                 onCommit={commitSourceEdit}
               />
             {:else}
+              <!--
+                Mouse-only convenience layer for click-to-edit. It must not be
+                a button: its visible text is arbitrary source code, which can
+                never satisfy WCAG label-in-name (2.5.3). The keyboard and AT
+                path is the toolbar's Edit action.
+              -->
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
               <div
-                role="button"
-                tabindex="0"
-                aria-label="Edit notebook cell source"
-                title="Edit notebook cell source"
-                onkeydown={(event) => {
-                  if (event.key !== "Enter" && event.key !== " ") {
-                    return;
-                  }
-
-                  event.preventDefault();
-                  event.stopPropagation();
-                  startEditingSource();
-                }}
                 onclick={(event) => {
                   event.stopPropagation();
                   startEditingSource();

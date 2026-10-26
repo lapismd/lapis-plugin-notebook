@@ -20,6 +20,7 @@ export interface NotebookPluginSettings {
   panels: {
     autoOpenSourcesOnNotebookOpen: boolean;
     autoOpenDependenciesOnNotebookOpen: boolean;
+    openPanelGroupOnNotebookOpen: boolean;
   };
   runtimeDependencies: NotebookUserDependencyDescriptor[];
 }
@@ -50,6 +51,7 @@ export const DEFAULT_NOTEBOOK_SETTINGS: NotebookPluginSettings = {
   panels: {
     autoOpenSourcesOnNotebookOpen: true,
     autoOpenDependenciesOnNotebookOpen: false,
+    openPanelGroupOnNotebookOpen: true,
   },
   runtimeDependencies: [],
 };

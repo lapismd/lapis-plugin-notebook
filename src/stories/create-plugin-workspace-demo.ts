@@ -32,9 +32,44 @@ function leaf(
   };
 }
 
+function notebookPanelGroupJson() {
+  return {
+    id: "notebook-panel-group",
+    type: "sidebar-group",
+    name: "Notebook",
+    icon: "square-terminal",
+    collapsed: {
+      "notebook-group-inspector": false,
+      "notebook-group-dependencies": false,
+      "notebook-group-packages": false,
+    },
+    panelSizes: {
+      "notebook-group-inspector": 100,
+      "notebook-group-dependencies": 100,
+      "notebook-group-packages": 100,
+    },
+    children: [
+      leaf(
+        "notebook-group-inspector",
+        "Variables",
+        "variable",
+        "notebook-session",
+      ),
+      leaf(
+        "notebook-group-dependencies",
+        "Dependencies",
+        "workflow",
+        "notebook-dependencies",
+      ),
+      leaf("notebook-group-packages", "Packages", "package", "notebook-packages"),
+    ],
+  };
+}
+
 function workspaceLayout(
   notebookMode: "preview" | "source",
   notebookPath: string,
+  panelGroupLayout = false,
 ) {
   return {
     main: {
@@ -63,40 +98,66 @@ function workspaceLayout(
         },
       ],
     },
-    left: {
-      id: "left",
-      type: "split",
-      direction: "vertical",
-      sizes: [100],
-      children: [
-        {
-          id: "left-tabs",
-          type: "tabs",
-          stacked: false,
-          currentTab: 0,
+    left: panelGroupLayout
+      ? {
+          id: "left",
+          type: "split",
+          direction: "vertical",
+          sizes: [100],
+          children: [],
+          width: "0px",
+        }
+      : {
+          id: "left",
+          type: "split",
+          direction: "vertical",
+          sizes: [100],
           children: [
-            leaf("file-explorer", "Files", "folder-closed", "file-explorer"),
+            {
+              id: "left-tabs",
+              type: "tabs",
+              stacked: false,
+              currentTab: 0,
+              children: [
+                leaf("file-explorer", "Files", "folder-closed", "file-explorer"),
+              ],
+            },
           ],
+          width: "16rem",
         },
-      ],
-      width: "16rem",
-    },
-    right: {
-      id: "right",
-      type: "split",
-      direction: "vertical",
-      sizes: [100],
-      children: [
-        {
-          id: "right-tabs",
-          type: "tabs",
-          stacked: false,
-          currentTab: 0,
-          children: [leaf("search", "Search", "search", "search")],
+    right: panelGroupLayout
+      ? {
+          id: "right",
+          type: "split",
+          direction: "vertical",
+          sizes: [100],
+          children: [
+            {
+              id: "right-tabs",
+              type: "tabs",
+              stacked: false,
+              currentTab: 0,
+              children: [notebookPanelGroupJson()],
+            },
+          ],
+          width: "24rem",
+        }
+      : {
+          id: "right",
+          type: "split",
+          direction: "vertical",
+          sizes: [100],
+          children: [
+            {
+              id: "right-tabs",
+              type: "tabs",
+              stacked: false,
+              currentTab: 0,
+              children: [leaf("search", "Search", "search", "search")],
+            },
+          ],
+          width: "0px",
         },
-      ],
-      width: "0px",
-    },
     bottom: {
       id: "bottom",
       type: "tabs",
@@ -113,6 +174,8 @@ export function createPluginWorkspaceSeed(
   notebookMode: "preview" | "source" = "source",
   notebookPath: string = NOTEBOOK_FIXTURE_PATHS.gettingStarted,
   layoutOverride?: Record<string, unknown>,
+  pluginSettingsOverride?: Record<string, unknown>,
+  panelGroupLayout = false,
 ): Record<string, string> {
   return {
     ".lapis/app.json": JSON.stringify(
@@ -130,16 +193,21 @@ export function createPluginWorkspaceSeed(
         execution: {
           autoRunStaleOnCellChange: true,
         },
+        ...(pluginSettingsOverride ?? {}),
         panels: {
           autoOpenSourcesOnNotebookOpen: false,
           autoOpenDependenciesOnNotebookOpen: false,
+          openPanelGroupOnNotebookOpen: false,
+          ...((pluginSettingsOverride?.panels as Record<string, unknown>) ??
+            {}),
         },
       },
       null,
       2,
     ),
     ".lapis/workspace.json": JSON.stringify(
-      layoutOverride ?? workspaceLayout(notebookMode, notebookPath),
+      layoutOverride ??
+      workspaceLayout(notebookMode, notebookPath, panelGroupLayout),
       null,
       2,
     ),
@@ -156,6 +224,8 @@ export async function bootPluginWorkspaceDemo(
   notebookMode: "preview" | "source" = "source",
   notebookPath: string = NOTEBOOK_FIXTURE_PATHS.gettingStarted,
   layoutOverride?: Record<string, unknown>,
+  pluginSettingsOverride?: Record<string, unknown>,
+  panelGroupLayout = false,
 ): Promise<{
   app: App;
   dispose: () => Promise<void>;
@@ -164,7 +234,13 @@ export async function bootPluginWorkspaceDemo(
     version: "0.0.1-story",
     configPath: ".lapis/app.json",
     adapter: new MemoryVaultAdapter(
-      createPluginWorkspaceSeed(notebookMode, notebookPath, layoutOverride),
+      createPluginWorkspaceSeed(
+        notebookMode,
+        notebookPath,
+        layoutOverride,
+        pluginSettingsOverride,
+        panelGroupLayout,
+      ),
       {
         name: "Notebook Plugin Workspace",
         vaultId: "notebook-plugin-workspace",

@@ -115,6 +115,21 @@ export class NotebookSettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
+      .setName("Open panel group on notebook open")
+      .setDesc(
+        "Show Variables, Dependencies, and Packages together in a right-sidebar group when a notebook opens.",
+      )
+      .addToggle((toggle) => {
+        toggle
+          .setValue(settings.panels.openPanelGroupOnNotebookOpen)
+          .onChange(async (value) => {
+            await this.notebookPlugin.updateSettings({
+              panels: { openPanelGroupOnNotebookOpen: value },
+            });
+          });
+      });
+
+    new Setting(containerEl)
       .setName("Runtime packages")
       .setDesc(
         "Open the Packages side view to install, uninstall, and inspect notebook runtime packages.",
