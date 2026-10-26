@@ -37,14 +37,21 @@ Core primitives with Tailwind utilities converted to notebook-owned native
 CSS at copy time. The dataframe family and the output renderers are ported;
 markdown outputs render through the public `MarkdownEmbed` with explicitly
 threaded `App` and `sourcePath`. The cell source editor wraps the public
-`markupEditor` factory from `@lapis-notes/api/editor/core` (the same
-app-editor surface the CSV and source plugins compose) so Mira base theme,
+`markupEditor` factory from `@lapis-notes/api/editor/core` as a compact
+inline surface (the same app-editor composition the CSV and source plugins
+use, with Mira file-margin and background tokens rebound at the editor
+element so it stays left-aligned, low-padded, and color-matched to the cell
+surface) so Mira base theme,
 live configuration compartments, and `cm-editor-source` styling are inherited;
 the notebook layer adds the cell language, the absolute-document gutter, and
 the TypeScript virtual-document projection. View header actions resolve the
 legacy run-all glyph through Design Core's `registerWorkspaceIcon`, and the
 dataframe filter badge reflects real filter state instead of summary
-presence. Dead legacy component variants that nothing
+presence. The dataframe toolbar actions are icon-only with Design Core
+shadcn tooltips (the tooltip trigger composes the popover trigger through
+the bits-ui `child` snippet), the toolbar row wraps on narrow viewports,
+and row density uses a Design Core button-group split control over a radio
+menu. Dead legacy component variants that nothing
 imports are excluded and recorded in `PROVENANCE.md`. The panel layer is ported end to end:
 inspector, dependencies (minimap plus SVG DAG), and packages surfaces with
 their ItemViews, snapshot builders, graph layout engine, and npm registry
@@ -64,9 +71,9 @@ plugin (render-service registration, cell directive post-processor, run and
 clear commands, status-bar context keys, safe-mode gating, input-rerun and
 stale-autorun scheduling, notebook-state persistence) with panels, packages,
 and the TypeScript language provider deferred to their stages. The
-`Plugins/Notebook/Shell` family carries nine App-backed stories over seven
-seeded notebook fixtures — including the legacy System Guide and Notebook
-Gallery showcases (async cells, vault FileAttachments, relative ESM imports,
+`Plugins/Notebook/Shell` family carries ten App-backed stories over eight
+seeded notebook fixtures — including the legacy System Guide, Notebook
+Gallery, and Input Types showcases (every UI-backed input factory) (async cells, vault FileAttachments, relative ESM imports,
 viewof text/table/range inputs, md/html interpolation, stdlib helpers,
 lapis.table, registerVaultFile SQL) — and the three panel families each carry
 the six named placement stories, with the Dependencies canonical placement

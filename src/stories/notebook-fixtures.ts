@@ -400,6 +400,134 @@ Grace,West,9
 Katherine,South,8`,
 };
 
+export const NOTEBOOK_FIXTURE_INPUT_TYPES = `---
+notebook:
+  version: 1
+  autorun: false
+  mode: lazy
+---
+
+# Input Types
+
+Every UI-backed notebook input factory, one view per cell, mounted through
+the lazy Design Core input runtime.
+
+:::cell{#text-input lang="ts"}
+
+\`\`\`ts
+const textValue = view(Inputs.text({ label: "Text", value: "ada" }));
+\`\`\`
+
+:::
+
+:::cell{#textarea-input lang="ts"}
+
+\`\`\`ts
+const textareaValue = view(Inputs.textarea({ label: "Textarea", value: "line one" }));
+\`\`\`
+
+:::
+
+:::cell{#number-input lang="ts"}
+
+\`\`\`ts
+const numberValue = view(Inputs.number([0, 100], { label: "Number", value: 12, step: 1 }));
+\`\`\`
+
+:::
+
+:::cell{#range-input lang="ts"}
+
+\`\`\`ts
+const rangeValue = view(Inputs.range([0, 10], { label: "Range", value: 4, step: 1 }));
+\`\`\`
+
+:::
+
+:::cell{#toggle-input lang="ts"}
+
+\`\`\`ts
+const toggleValue = view(Inputs.toggle({ label: "Toggle", value: true }));
+\`\`\`
+
+:::
+
+:::cell{#email-input lang="ts"}
+
+\`\`\`ts
+const emailValue = view(Inputs.email({ label: "Email", value: "ada@lapis.notes" }));
+\`\`\`
+
+:::
+
+:::cell{#tel-input lang="ts"}
+
+\`\`\`ts
+const telValue = view(Inputs.tel({ label: "Telephone", value: "+1 555 0100" }));
+\`\`\`
+
+:::
+
+:::cell{#url-input lang="ts"}
+
+\`\`\`ts
+const urlValue = view(Inputs.url({ label: "URL", value: "https://lapis.notes" }));
+\`\`\`
+
+:::
+
+:::cell{#password-input lang="ts"}
+
+\`\`\`ts
+const passwordValue = view(Inputs.password({ label: "Password", value: "secret" }));
+\`\`\`
+
+:::
+
+:::cell{#date-input lang="ts"}
+
+\`\`\`ts
+const dateValue = view(Inputs.date({ label: "Date", value: "2026-01-15" }));
+\`\`\`
+
+:::
+
+:::cell{#datetime-input lang="ts"}
+
+\`\`\`ts
+const datetimeValue = view(Inputs.datetime({ label: "Datetime", value: "2026-01-15T09:30" }));
+\`\`\`
+
+:::
+
+:::cell{#color-input lang="ts"}
+
+\`\`\`ts
+const colorValue = view(Inputs.color({ label: "Color", value: "#8a5cf5" }));
+\`\`\`
+
+:::
+
+:::cell{#table-input lang="ts"}
+
+\`\`\`ts
+const tableValue = view(Inputs.table([
+  { name: "Ada", role: "Math" },
+  { name: "Grace", role: "Compilers" }
+], { label: "Rows", multiple: false, rows: 3 }));
+\`\`\`
+
+:::
+
+:::cell{#echo lang="md"}
+
+\`\`\`md
+Text: {{textValue}} · Number: {{numberValue}} · Range: {{rangeValue}}
+\`\`\`
+
+:::
+`;
+
 export const NOTEBOOK_FIXTURE_PATHS = {
   welcome: "welcome.md",
   gettingStarted: "Getting Started.notebook.md",
@@ -409,6 +537,7 @@ export const NOTEBOOK_FIXTURE_PATHS = {
   autorun: "Autorun Notebook.notebook.md",
   systemGuide: "System Guide.notebook.md",
   gallery: "Notebook Gallery.notebook.md",
+  inputTypes: "Input Types.notebook.md",
 } as const;
 
 export function notebookWorkspaceMarkdownFixtures(): Array<{
@@ -444,6 +573,10 @@ export function notebookWorkspaceMarkdownFixtures(): Array<{
     {
       path: NOTEBOOK_FIXTURE_PATHS.gallery,
       raw: NOTEBOOK_FIXTURE_GALLERY,
+    },
+    {
+      path: NOTEBOOK_FIXTURE_PATHS.inputTypes,
+      raw: NOTEBOOK_FIXTURE_INPUT_TYPES,
     },
     ...Object.entries(NOTEBOOK_SHOWCASE_ASSETS).map(([path, raw]) => ({
       path,

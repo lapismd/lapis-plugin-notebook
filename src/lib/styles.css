@@ -1046,11 +1046,10 @@
 .notebook-dataframe__toolbar-row {
   display: flex;
   min-width: 0;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  overflow-x: auto;
+  gap: 0.5rem 0.75rem;
 }
 
 .notebook-dataframe__toolbar-primary {
@@ -1079,8 +1078,8 @@
 
 .notebook-dataframe__search {
   display: flex;
-  min-width: 14rem;
-  flex: 1 1 0;
+  min-width: 10rem;
+  flex: 1 1 12rem;
   align-items: center;
   gap: 0.5rem;
   border: 1px solid var(--border);
@@ -1603,13 +1602,37 @@
    only frames it inside the cell surface. */
 
 .notebook-cell__editor {
+  /* Inline editor surface: capture the cell-surface colors before Mira's
+     `.markdown-editor-surface` scope remaps the theme variables. */
+  --notebook-editor-bg: var(--background);
+  --notebook-editor-pad-y: 0.375rem;
+  --notebook-editor-pad-x: 0.75rem;
   overflow: hidden;
   border-color: var(--border);
   background: var(--background);
 }
 
+/* Rebind the Mira editor theme's file-margin and background tokens at the
+   editor element (higher specificity than the Mira surface scope) so the
+   cell editor stays compact, left-aligned, and color-matched to the cell
+   surface instead of inheriting the centered readable-column layout. */
+.notebook-cell__editor .cm-editor.cm-editor-source {
+  --mira-editor-background: var(--notebook-editor-bg);
+  --file-margins-y: var(--notebook-editor-pad-y);
+  --file-margins-x: var(--notebook-editor-pad-x);
+  --file-line-width: 100%;
+  /* Design Core paints .cm-editor with var(--background), which Mira's
+     surface scope remaps to its own paper white inside editors; keep the
+     inline cell editor flush with the cell surface instead. */
+  background-color: var(--notebook-editor-bg);
+}
+
+.notebook-cell__editor .cm-scroller {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+}
+
 .notebook-cell__editor-cm {
-  padding-block: 0.5rem;
+  padding-block: 0;
 }
 
 .notebook-cell__action {

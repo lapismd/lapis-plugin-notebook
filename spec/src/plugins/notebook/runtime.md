@@ -43,7 +43,9 @@ cell-id output values only when names do not collide), MarkdownEmbed output
 rendering, and notebook-state persistence. Safe-mode, startup-thin,
 cancellation, and autorun acceptance have since landed as governed stories
 and audits; the packaged worker asset path remains open, landing with the
-publication bundle. DOM-backed notebooks execute through the in-process
+publication bundle. The input package's table surface rebinds Mira's
+`--table-preview-spacing` so document-table typography does not gap input
+tables inside their rounded containers. DOM-backed notebooks execute through the in-process
 runtime: the `Run inputs` story proves the viewof input mount on Design Core
 primitives with `aria-label` wired from the input's `label` option, and the
 debounced targeted rerun of downstream cells on input change.

@@ -669,3 +669,75 @@
     );
   }}
 />
+
+<Story
+  name="Input types"
+  args={{
+    displayMode: "desktop",
+    notebookMode: "preview",
+    notebookPath: NOTEBOOK_FIXTURE_PATHS.inputTypes,
+  }}
+  play={async ({ canvasElement }) => {
+    await waitForReady(canvasElement);
+    const app = storyApp(canvasElement);
+
+    await waitFor(
+      () => {
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="table-input"]'),
+        ).toBeTruthy();
+      },
+      { timeout: 15_000 },
+    );
+
+    // Every UI-backed input factory mounts through the lazy Design Core
+    // input runtime after the run resolves.
+    await app.commands.executeCommand(
+      `${NOTEBOOK_PLUGIN_ID}:run-active-notebook`,
+    );
+
+    const expectInput = async (
+      cellId: string,
+      selector: string,
+    ): Promise<void> => {
+      await waitFor(
+        () => {
+          const cell = canvasElement.querySelector(
+            `[data-notebook-cell="${cellId}"]`,
+          );
+          expect(cell?.querySelector(selector)).toBeTruthy();
+        },
+        { timeout: 30_000 },
+      );
+    };
+
+    await expectInput("text-input", 'input[type="text"]');
+    await expectInput("textarea-input", "textarea");
+    await expectInput("number-input", 'input[type="number"]');
+    await expectInput("range-input", 'input[type="range"]');
+    await expectInput("toggle-input", '[role="switch"]');
+    await expectInput("email-input", 'input[type="email"]');
+    await expectInput("tel-input", 'input[type="tel"]');
+    await expectInput("url-input", 'input[type="url"]');
+    await expectInput("password-input", 'input[type="password"]');
+    await expectInput("date-input", 'input[type="date"]');
+    await expectInput("datetime-input", 'input[type="datetime-local"]');
+    await expectInput("color-input", 'input[type="color"]');
+    await expectInput("table-input", 'input[type="radio"]');
+
+    await waitFor(
+      () => {
+        const rows = canvasElement.querySelector(
+          '[data-notebook-cell="table-input"]',
+        );
+        expect(rows?.textContent ?? "").toContain("Grace");
+        const echo = canvasElement.querySelector(
+          '[data-notebook-cell="echo"]',
+        );
+        expect(echo?.textContent ?? "").toContain("Text: ada");
+        expect(echo?.textContent ?? "").toContain("Range: 4");
+      },
+      { timeout: 30_000 },
+    );
+  }}
+/>
