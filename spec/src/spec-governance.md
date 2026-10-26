@@ -45,7 +45,14 @@ sub-package contract, and Storybook sources stay on
 Private sub-package specifiers resolve from TypeScript source through
 `scripts/vite-notebook-packages.ts` (shared by the Vitest projects and the
 Storybook Vite pipeline) plus matching tsconfig paths, keeping the published
-root manifest free of `workspace:` dependencies per LN-NB-006.
+root manifest free of `workspace:` dependencies per LN-NB-006. The
+`build:bundle` lane compiles `src/bundle-entry.ts` into `dist/main.mjs` and
+`dist/app.css` with the sub-packages inlined, copies the pinned DuckDB-WASM
+engine assets into `dist/duckdb/`, mirrors `manifest.json` into `dist/`, and
+runs `scripts/check-bundle-exclusions.mjs`, which fails on forbidden private
+surfaces, missing inlining, missing externalization of host-shared modules,
+missing engine assets, or a missing workspace runtime entry and
+`network.connect` permission.
 
 The six private support packages ported from the legacy notebook
 (`notebook-core`, `notebook-stdlib`, `notebook-input`, `notebook-duckdb`,

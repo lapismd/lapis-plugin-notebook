@@ -7,5 +7,61 @@
   "author": "Lapis Notes",
   "distribution": "first-party-external",
   "provenance": "official",
-  "enabledByDefault": false
+  "enabledByDefault": false,
+  "lapis": {
+    "manifestVersion": 1,
+    "runtime": {
+      "entries": {
+        "workspace": {
+          "path": "main.mjs",
+          "format": "esm",
+          "sharedDependencies": [
+            "@codemirror/autocomplete",
+            "@codemirror/commands",
+            "@codemirror/lang-markdown",
+            "@codemirror/language",
+            "@codemirror/search",
+            "@codemirror/state",
+            "@codemirror/view",
+            "@lapis-notes/api",
+            "@lapis-notes/api/editor/language-service",
+            "@lapis-notes/markdown",
+            "@lapis-notes/ui",
+            "@lapis-notes/ui/search",
+            "@lapismd/design-core/shadcn/alert",
+            "@lapismd/design-core/shadcn/badge",
+            "@lapismd/design-core/shadcn/button",
+            "@lapismd/design-core/shadcn/card",
+            "@lapismd/design-core/shadcn/dropdown-menu",
+            "@lapismd/design-core/shadcn/input",
+            "@lapismd/design-core/shadcn/popover",
+            "@lapismd/design-core/shadcn/scroll-area",
+            "@lapismd/design-core/shadcn/separator",
+            "@lapismd/design-core/shadcn/sheet",
+            "@lapismd/design-core/shadcn/slider",
+            "@lapismd/design-core/shadcn/switch",
+            "@lapismd/design-core/shadcn/textarea",
+            "@lezer/highlight",
+            "svelte",
+            "svelte/transition"
+          ],
+          "requiresReloadOnUpdate": false
+        }
+      }
+    },
+    "permissions": [
+      "vault.read",
+      "vault.write",
+      "vault.stream",
+      "plugin.data",
+      "plugin.generated-state",
+      "commands",
+      "notices",
+      "settings.read",
+      "metadata.query",
+      "metadata.changes",
+      "network.connect",
+      "events"
+    ]
+  }
 }

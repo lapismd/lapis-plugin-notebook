@@ -24,11 +24,11 @@
 | LN-NB-001 | Implemented | `manifest.json` and `package.json` match the `packageManifest` validator (`pnpm spec:validate`). |
 | LN-NB-002 | Implemented | Stage 2 `onload` registers the file-keyed `notebook` view, editor-view contribution, `.notebook.md` extension, cell editor suggest, settings tab, and six authoring commands; the Shell story play asserts each through layout restore. |
 | LN-NB-003 | Implemented | `src/lib/application-ownership.test.ts` audits plugin, story, and support-package sources; wired into `check` and `spec:check`. |
-| LN-NB-004 | Planned | The published-bundle exclusion audit lands with the bundling lane (LN-NB-006); Stage 2 imports stay on published api/markdown/design-core surfaces. |
+| LN-NB-004 | Implemented | `scripts/check-bundle-exclusions.mjs` audits every built bundle file for forbidden private surfaces and proves api/svelte externalization; all runtime imports stay on published first-party surfaces. |
 | LN-NB-005 | Implemented | Stage 0–2 records under `spec/records/2026-10-25-*` carry lane evidence and status flips followed executed acceptance. |
-| LN-NB-006 | Planned | Source resolution ships via `scripts/vite-notebook-packages.mjs` + tsconfig paths; the inlining bundle lane lands before the publication gate. |
+| LN-NB-006 | Implemented | The `build:bundle` lane emits `dist/main.mjs` + `dist/app.css` with sub-packages inlined (audit-verified), lazy TypeScript and DuckDB chunks split, engine assets copied, and the svelte-package `dist` kept for the npm export surface. |
 | LN-NB-007 | Planned | All three panels and ItemViews are ported, registered with `ViewAccess.command` openers, and exercised by the shell stories' boot; the six-placement story suite is the remaining acceptance. |
-| LN-NB-008 | Planned | Registry client wired into the packages panel, install/uninstall/update plugin methods, and the restored settings rows; both legacy suites green. Manifest network permission lands at the bundle/distribution gate. |
+| LN-NB-008 | Implemented | Registry wired through the packages panel, install/uninstall/update methods, and the restored settings rows with both legacy suites green; the runtime manifest declares `network.connect` and the bundle audit enforces it. |
 | LN-NB-009 | Planned | Layout engine, panel surface (minimap + DAG), orientation/zoom settings wiring, and the legacy suite are ported; the dedicated panel story acceptance remains. |
 | LN-NB-010 | Implemented | `notebook-path.ts`/`notebook-file.ts` ported with legacy tests; `registerExtensions(["notebook.md"])` + editor-view `filenamePatterns` proven by the Shell story opening the fixture in `NotebookView`. |
 | LN-NB-011 | Implemented | `parse/parse-notebook-document.ts` ported verbatim; `parse-notebook-document.test.ts` green in the unit lane. |
@@ -43,4 +43,5 @@
 | LN-NB-025 | Implemented | `Query data` story runs SQL cells on DuckDB-WASM (pinned 1.33.1-dev45.0) resolved through the plugin asset paths and queries `lapis.notes` from vault snapshots; register-app-tables and vault-file suites green; the native provider seam remains open (Electron sidecar excluded). |
 | LN-NB-026 | Implemented | `startup-thin.test.ts` audits the static-import boundary for DuckDB/TypeScript/htl/d3/Plot (dynamic-only outside the allowlisted lazy service); the `Run notebook` story shows the compiler loading only at first execution. |
 | LN-NB-027 | Implemented | `subpackage-boundaries.test.ts` audits the static/dynamic import boundaries of all six packages (core/duckdb/worker/stdlib/duckdb-assets host-neutrality; input loads Svelte and Design Core only inside its lazy UI runtime). |
+| LN-NB-029 | Implemented | `manifest.json` declares the workspace ESM entry, the shared-dependency list mirroring the bundle externals, and twelve permissions; the bundle audit fails on a missing entry or `network.connect`. |
 | LN-NB-028 | Implemented | `Run notebook` story runs a TypeScript cell through the lazily loaded compiler with `display()` capture; worker-engine suites cover module rewriting and dependency-descriptor validation. |

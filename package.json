@@ -42,7 +42,8 @@
     "validation": "node scripts/validation.mjs",
     "validation:doctor": "node scripts/validation.mjs doctor",
     "validation:images": "node scripts/validation.mjs images",
-    "validation:clean": "node scripts/validation.mjs clean"
+    "validation:clean": "node scripts/validation.mjs clean",
+    "build:bundle": "node scripts/validation.mjs run build:bundle"
   },
   "files": [
     "dist",

@@ -77,3 +77,26 @@ memory-adapter stories; the frontmatter-precedence rule itself is covered by
 the ported frontmatter unit suite. The earlier Stage 7 Docker run failed
 spec-first only because the snapshot caught this slice mid-edit; Docker
 reruns against the committed state.
+
+## Publication bundle lane (LN-NB-004/006/008/029)
+
+`pnpm build:bundle` compiles `src/bundle-entry.ts` into `dist/main.mjs` and
+`dist/app.css`: private sub-packages inline through the shared resolver;
+`svelte`, `@lapis-notes/api` (+`/editor/language-service`),
+`@lapis-notes/markdown`, `@lapis-notes/ui` (+`/search`), the thirteen Design
+Core shadcn subpaths, the host-shared CodeMirror packages, and
+`@lezer/highlight` stay external, mirrored one-for-one in the manifest
+`lapis.runtime.entries.workspace.sharedDependencies` list. TypeScript (6.1MB)
+and the DuckDB service split into lazy chunks; the worker bundle externalizes
+Svelte/Design Core. The lane copies the four pinned DuckDB-WASM assets into
+`dist/duckdb/`, mirrors `manifest.json` into `dist/`, and runs
+`scripts/check-bundle-exclusions.mjs` (forbidden surfaces, inlining proof,
+externalization proof, asset presence, runtime entry, `network.connect`).
+The manifest declares twelve permissions matching the wired surface. The
+svelte-package `dist` export surface is unchanged; npm publication and host
+adoption remain separate gates (the host import-map alignment for the shared
+list is a Stage 9 consumer-acceptance step).
+
+Entry-chunk weight (16.6MB, datasets + vega/d3/Plot) matches the legacy
+bundle scale; dataset trimming and chunk splitting remain recorded
+follow-ups, not gates.
