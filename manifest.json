@@ -30,6 +30,7 @@
             "@lapismd/design-core/shadcn/switch",
             "@lapismd/design-core/shadcn/textarea",
             "@lapismd/design-core/workspace/icon",
+            "@lapismd/mira/codemirror",
             "@codemirror/autocomplete",
             "@codemirror/commands",
             "@codemirror/lang-markdown",

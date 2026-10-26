@@ -90,7 +90,8 @@
     "@lapis-notes/api": "^0.1.4",
     "@lapis-notes/markdown": "^0.1.6",
     "@lapismd/design-core": "^0.6.0",
-    "svelte": "^5.0.0"
+    "svelte": "^5.0.0",
+    "@lapismd/mira": "^0.1.1"
   },
   "devDependencies": {
     "@codemirror/autocomplete": "6.20.3",

@@ -75,3 +75,23 @@ Authoritative Docker `validation:all` passed for `7e9f7bdb` — run
 `lapis-notebook-run-f78517cb-ebfd-43bc-a413-7ae2d14d94bd` (28 stories, 290
 unit tests, bundle lane with exclusion audit, all spec gates on the
 registry-pure worker with the cohort archives).
+
+## Section anatomy follow-up (user review round three)
+
+The first white-body pass painted only the body wrapper, leaving inset gaps
+and a white header. Revised anatomy: `details` paints the white body surface
+full-bleed to the section border separator, `summary` paints the panel family
+grey (`--background-primary-alt`), verified live at rgb(250,250,250) over
+rgb(255,255,255) in the variables panel and across all packages sections.
+
+Dependencies panel follow-ups from browser review: the floating graph
+controls lost their `right-4 bottom-4` offsets in the utility conversion
+(dead strings removed, insets restored at 1rem via `[data-graph-controls]`);
+the graph meta row's converted rule mis-assigned `font-size:
+var(--text-muted)` (now 12px with the muted color); and the read-only code
+snippets showed no syntax colors because the standard lezer
+`classHighlighter` emits `tok-*` classes while Mira's token colors target
+`cm-*` — the snippets now use the public `miraClassHighlighter` from
+`@lapismd/mira/codemirror` plus the `mira-code-editor` scope class
+(keywords rgb(124,58,237), numbers rgb(180,83,9) verified live). `@lapismd/mira`
+joins the root peers and the manifest shared-dependency mirror.

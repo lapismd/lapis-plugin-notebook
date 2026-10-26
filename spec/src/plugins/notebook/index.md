@@ -62,11 +62,16 @@ component with a thin wrapper over the public `getSvg` registry, and convert
 every Tailwind utility — static and conditional — into notebook-owned native
 CSS, including generated classes for mechanical conversions. Dataframe row
 regions carry query-derived accessible names so multiple dataframes satisfy
-the landmark-uniqueness rule. Expandable section bodies in the variables,
-packages, and dependencies panels read on the white body/document surface
-(`--background-primary`) while their collapsible headers keep the panel
-tint; the dependencies selection snippets carry a semantic
-`notebook-dependencies__snippet-body` class for the same treatment.
+the landmark-uniqueness rule. Expandable sections in the variables, packages,
+and dependencies panels read as full-bleed units: grey family headers
+(`--background-primary-alt`) over white bodies (`--background-primary`)
+running to the section border separator, with the dependencies selection
+snippets carrying a semantic `notebook-dependencies__snippet-body` class.
+The snippet editors opt into Mira's `.mira-code-editor` token-color scope
+through the public `miraClassHighlighter` (the standard lezer highlighter
+emits unstyled `tok-*` classes), which adds `@lapismd/mira` to the peer and
+dev surfaces; the graph's floating controls regained their edge insets and
+the graph meta row its 12px muted typography after conversion gaps.
 
 Cell chrome and plugin wiring complete the render stage: the CodeMirror cell
 source editor, the cell chrome with rails/collapse/run action/status footer,

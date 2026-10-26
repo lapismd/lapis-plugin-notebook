@@ -15,6 +15,7 @@ const external = [
   /^@lapis-notes\/markdown(?:$|\/)/,
   /^@lapis-notes\/ui(?:$|\/)/,
   /^@lapismd\/design-core(?:$|\/)/,
+  /^@lapismd\/mira(?:$|\/)/,
   /^@codemirror\/(?:autocomplete|commands|language|lang-markdown|search|state|view)$/,
   /^@lezer\/highlight$/,
 ];

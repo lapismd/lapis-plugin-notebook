@@ -5,9 +5,9 @@
   import { syntaxHighlighting } from "@codemirror/language";
   import { EditorState, type Extension } from "@codemirror/state";
   import { EditorView } from "@codemirror/view";
-  // Standard lezer classHighlighter replaces the API-internal copy (same cm-*
-  // tag classes), matching the cell source editor adaptation.
-  import { classHighlighter } from "@lezer/highlight";
+  // Mira scopes its CodeMirror token colors to cm-* classes; its public
+  // class highlighter produces them (the standard lezer one emits tok-*).
+  import { miraClassHighlighter as classHighlighter } from "@lapismd/mira/codemirror";
   import type { NotebookCellLanguage } from "../model/notebook-cell";
 
   let {
@@ -44,6 +44,9 @@
       resolveLanguageExtension(lang),
       EditorState.readOnly.of(true),
       EditorView.editable.of(false),
+      // Mira scopes its CodeMirror token colors under .mira-code-editor;
+      // opt the read-only snippet into the same scope.
+      EditorView.editorAttributes.of({ class: "mira-code-editor" }),
       EditorView.lineWrapping,
       EditorView.contentAttributes.of({
         tabindex: "-1",

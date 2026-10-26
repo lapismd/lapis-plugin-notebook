@@ -1134,7 +1134,7 @@
 
             <div
               data-graph-controls
-              class="right-4 bottom-4 notebook-dependencies__g3b69acb6"
+              class="notebook-dependencies__g3b69acb6"
             >
               <button
                 type="button"

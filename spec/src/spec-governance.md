@@ -59,7 +59,9 @@ The six private support packages ported from the legacy notebook
 `notebook-duckdb-assets`, `notebook-worker`) remain unpublished workspace
 members. Their host-neutrality boundaries are specified in
 [Runtime](plugins/notebook/runtime.md); a future native services crate needs
-its own specification and lane intake before it lands. `notebook-input`
+its own specification and lane intake before it lands. The root manifest peers `@lapismd/mira`
+for the dependencies snippet's public `miraClassHighlighter` (token colors
+scope to Mira's code-editor surface). `notebook-input`
 peers onto `@lapismd/design-core` (its lazy UI runtime mounts Design Core
 input/slider/switch/textarea primitives); support packages MUST NOT peer
 onto retired legacy UI surfaces.

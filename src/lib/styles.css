@@ -2642,7 +2642,9 @@
   font-weight: 500;
   gap: 0.5rem;
   align-items: center;
-  font-size: var(--text-muted);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1rem;
 }
 
 .notebook-dependencies__ga6d78c1e {
@@ -4096,4 +4098,26 @@
 .notebook-packages details > summary + *,
 .notebook-dependencies__snippet-body {
   background: var(--background-primary, var(--card));
+}
+
+/* Full-bleed section bodies: the collapsible header keeps the panel tint
+   while everything below it up to the border separator reads on the white
+   body/document surface. */
+.notebook-inspector__section > details,
+.notebook-packages details.notebook-packages__section {
+  background: var(--background-primary, var(--card));
+}
+
+.notebook-inspector__section > details > summary,
+.notebook-packages details.notebook-packages__section > summary {
+  /* Header keeps the panel family grey; the expanded body below reads on
+     the white body surface up to the section border separator. */
+  background: var(--background-primary-alt, var(--muted));
+}
+
+/* Graph floating controls: legacy offsets lived in utility strings the
+   conversion dropped; restore the inset from the graph edge. */
+.notebook-dependencies [data-graph-controls] {
+  right: 1rem;
+  bottom: 1rem;
 }
