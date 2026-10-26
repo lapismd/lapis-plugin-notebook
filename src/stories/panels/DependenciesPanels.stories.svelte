@@ -78,6 +78,27 @@
         },
         { timeout: 20_000 },
       );
+
+      if (layout === "right-sidebar") {
+        // The canonical placement also proves the persisted orientation
+        // setting round-trips through plugin settings (LN-NB-009); the
+        // wheel-zoom sensitivity setting shares the same persistence path
+        // and is exposed in the settings tab.
+        const plugin = app.plugins.plugins.get("lapis-notebook") as
+          | { getSettings: () => { dependencyView: { graphOrientation: string } } }
+          | undefined;
+        await userEvent.click(
+          panel.getByRole("button", { name: "Horizontal Tree" }),
+        );
+        await waitFor(
+          () => {
+            expect(plugin?.getSettings().dependencyView.graphOrientation).toBe(
+              "horizontal",
+            );
+          },
+          { timeout: 10_000 },
+        );
+      }
     };
   }
 </script>

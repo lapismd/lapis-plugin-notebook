@@ -58,7 +58,8 @@ stale-autorun scheduling, notebook-state persistence) with panels, packages,
 and the TypeScript language provider deferred to their stages. The
 `Plugins/Notebook/Shell` family carries seven App-backed stories over five
 seeded notebook fixtures, and the three panel families each carry the six
-named placement stories: the boot registration acceptance, `Run notebook`,
+named placement stories, with the Dependencies canonical placement also
+proving persisted graph-orientation round-tripping: the boot registration acceptance, `Run notebook`,
 which executes through the worker transport and asserts rendered outputs,
 interpolation, and persisted notebook state, `Safe mode`, which proves the
 host execution-disable gate, `Run inputs`, which proves the in-process DOM

@@ -136,3 +136,14 @@ Full native suite after the slice: check chain green (routing 21 lanes /
 story composition 4 families, 0 findings; svelte-check 0/0; no-tailwind
 clean), unit 290/290, test:storybook 25/25 with axe clean, build + bundle
 audit green, spec:validate 43 requirements.
+
+## LN-NB-009 acceptance
+
+The Dependencies Right Sidebar placement story now switches to the graph
+surface and asserts the orientation change persists through
+`plugin.getSettings().dependencyView.graphOrientation` — the same
+`updateSettings`/`saveData` round-trip the wheel-zoom sensitivity setting
+uses (exposed in the settings tab alongside the default-tab and orientation
+dropdowns). Cycle and duplicate-definition errors render through the panel's
+snapshot error branches; their detection is covered by the ported graph and
+data suites. LN-NB-009 flips to Implemented; no Planned rows remain.
