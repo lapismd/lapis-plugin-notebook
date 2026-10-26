@@ -48,6 +48,15 @@ runtime: the `Run inputs` story proves the viewof input mount on Design Core
 primitives with `aria-label` wired from the input's `label` option, and the
 debounced targeted rerun of downstream cells on input change.
 
+The panel surfaces are registered with `ViewAccess.command` openers
+(`open-notebook-session-view`, `open-notebook-dependencies-view`,
+`open-notebook-packages-view`), refresh on controller, layout, and leaf
+events, honor the panel auto-open settings, and degrade with a warning
+instead of unhandled rejection when catalog or registry probing fails on
+hosts without resolvable assets or network. The plugin asset URL fallback
+anchors root-relative plugin paths at the document origin for browser hosts
+without an asset server.
+
 ## Requirements
 
 | ID | Requirement |

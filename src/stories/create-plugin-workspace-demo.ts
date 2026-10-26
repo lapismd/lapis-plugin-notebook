@@ -124,6 +124,16 @@ export function createPluginWorkspaceSeed(
       null,
       2,
     ),
+    ".lapis/lapis-notebook.json": JSON.stringify(
+      {
+        panels: {
+          autoOpenSourcesOnNotebookOpen: false,
+          autoOpenDependenciesOnNotebookOpen: false,
+        },
+      },
+      null,
+      2,
+    ),
     ".lapis/workspace.json": JSON.stringify(
       workspaceLayout(notebookMode, notebookPath),
       null,

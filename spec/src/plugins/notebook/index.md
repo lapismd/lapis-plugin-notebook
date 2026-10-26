@@ -37,11 +37,17 @@ Core primitives with Tailwind utilities converted to notebook-owned native
 CSS at copy time. The dataframe family and the output renderers are ported;
 markdown outputs render through the public `MarkdownEmbed` with explicitly
 threaded `App` and `sourcePath`. Dead legacy component variants that nothing
-imports are excluded and recorded in `PROVENANCE.md`. The panel logic layer
-(inspector data and DuckDB catalog snapshots, dependencies data and graph
-layout engine, packages data and npm registry client) is ported with its five
-legacy suites; the panel Svelte surfaces and view registrations follow with
-their Design Core conversions.
+imports are excluded and recorded in `PROVENANCE.md`. The panel layer is ported end to end:
+inspector, dependencies (minimap plus SVG DAG), and packages surfaces with
+their ItemViews, snapshot builders, graph layout engine, and npm registry
+client, all with their legacy suites. Panel conversions remap legacy UI
+primitives onto Design Core (the `Item` family becomes semantic
+`notebook-packages__item-*` structure), replace the non-exported API `Icon`
+component with a thin wrapper over the public `getSvg` registry, and convert
+every Tailwind utility — static and conditional — into notebook-owned native
+CSS, including generated classes for mechanical conversions. Dataframe row
+regions carry query-derived accessible names so multiple dataframes satisfy
+the landmark-uniqueness rule.
 
 Cell chrome and plugin wiring complete the render stage: the CodeMirror cell
 source editor, the cell chrome with rails/collapse/run action/status footer,

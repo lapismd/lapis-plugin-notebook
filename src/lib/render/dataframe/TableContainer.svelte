@@ -89,12 +89,24 @@
 
   let virtualRows = $derived(virtualizer.getVirtualItems());
   let totalSize = $derived(virtualizer.getTotalSize());
+
+  // Landmark uniqueness: multiple dataframes can share one document, so the
+  // rows region is named after its source query (or the per-instance search
+  // input id) instead of a constant label.
+  let regionLabel = $derived.by(() => {
+    const sourceSql = (schema as { sourceSql?: string }).sourceSql?.trim();
+    if (sourceSql) {
+      return `Dataframe rows for query: ${sourceSql.slice(0, 80)}`;
+    }
+    const suffix = searchInputId.split("-").pop();
+    return suffix ? `Dataframe rows ${suffix}` : "Dataframe rows";
+  });
 </script>
 
 <div
   bind:this={containerEl}
   role="region"
-  aria-label="Dataframe rows"
+  aria-label={regionLabel}
   class="notebook-dataframe__table-container"
   style:max-height="var(--df-max-height)"
   use:keyNav={{

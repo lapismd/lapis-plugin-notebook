@@ -1,4 +1,5 @@
 import { PluginSettingTab, Setting, type App } from "@lapis-notes/api";
+import { validateNotebookDependencyRegistry } from "@lapis-notes/notebook-stdlib";
 import type { NotebookPlugin } from "./notebook-plugin";
 import type { NotebookPluginSettingsPatch } from "./notebook-settings";
 
@@ -113,10 +114,25 @@ export class NotebookSettingsTab extends PluginSettingTab {
           });
       });
 
-    // Stage 3 re-adds the legacy "Runtime packages" and "Runtime dependency
-    // status" rows with their Open-packages buttons once the Packages side
-    // view (openNotebookPackages) and the dependency-registry validation UI
-    // port with the render/runtime stages.
+    new Setting(containerEl)
+      .setName("Runtime packages")
+      .setDesc(
+        "Open the Packages side view to install, uninstall, and inspect notebook runtime packages.",
+      )
+      .addButton((button) => {
+        button.setButtonText("Open packages").onClick(() => {
+          void this.notebookPlugin.openNotebookPackages(true);
+        });
+      });
+
+    new Setting(containerEl)
+      .setName("Runtime dependency status")
+      .setDesc(formatRuntimeDependencyStatus(settings.runtimeDependencies))
+      .addButton((button) => {
+        button.setButtonText("Open packages").onClick(() => {
+          void this.notebookPlugin.openNotebookPackages(true);
+        });
+      });
   }
 
   private async updateSettings(
@@ -125,4 +141,24 @@ export class NotebookSettingsTab extends PluginSettingTab {
     await this.notebookPlugin.updateSettings(patch);
     this.display();
   }
+}
+
+function formatRuntimeDependencyStatus(
+  dependencies: NotebookPluginSettingsPatch["runtimeDependencies"],
+): string {
+  const validation = validateNotebookDependencyRegistry(dependencies ?? []);
+  if (!validation.ok) {
+    return formatRuntimeDependencyIssues(validation.issues);
+  }
+  return validation.dependencies.length === 1
+    ? "1 runtime dependency configured."
+    : `${validation.dependencies.length} runtime dependencies configured.`;
+}
+
+function formatRuntimeDependencyIssues(
+  issues: ReturnType<typeof validateNotebookDependencyRegistry>["issues"],
+): string {
+  return issues
+    .map((issue) => `Entry ${issue.index + 1}: ${issue.message}`)
+    .join(" ");
 }

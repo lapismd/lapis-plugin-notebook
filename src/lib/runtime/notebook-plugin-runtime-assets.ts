@@ -62,9 +62,18 @@ export function createNotebookPluginAssetUrlResolver(
       });
     }
 
+    const base = normalizePluginBaseUrl(request.pluginPath);
+    // Browser fallback: a root-relative plugin path is not a valid URL base,
+    // so anchor it at the document origin when one exists (workers included).
+    const absoluteBase =
+      /^[a-z]+:\/\//i.test(base) ||
+      typeof globalThis.location === "undefined" ||
+      !globalThis.location?.origin
+        ? base
+        : `${globalThis.location.origin}${base}`;
     return new URL(
       relativePath,
-      `${normalizePluginBaseUrl(request.pluginPath)}/`,
+      absoluteBase.endsWith("/") ? absoluteBase : `${absoluteBase}/`,
     ).href;
   };
 }

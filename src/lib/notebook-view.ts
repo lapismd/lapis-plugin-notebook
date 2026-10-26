@@ -22,8 +22,9 @@ type NotebookViewCallbacks = {
   runNotebook: () => Promise<void>;
   runStaleNotebookCells: () => Promise<void>;
   clearNotebookOutputs: () => Promise<void>;
-  // Stage 7 re-adds the legacy openPackages/openDependencies/openSources
-  // callbacks with the inspector, dependencies, and packages panel views.
+  openPackages: () => Promise<void>;
+  openDependencies: () => Promise<void>;
+  openSources: () => Promise<void>;
 };
 
 export class NotebookView extends MarkdownView {
@@ -87,6 +88,33 @@ export class NotebookView extends MarkdownView {
           });
       });
     }
+    menu.addItem((item) => {
+      item
+        .setSection(NOTEBOOK_VIEW_MENU_SECTION)
+        .setTitle("Notebook packages")
+        .setIcon("package")
+        .onClick(() => {
+          void this.callbacks.openPackages();
+        });
+    });
+    menu.addItem((item) => {
+      item
+        .setSection(NOTEBOOK_VIEW_MENU_SECTION)
+        .setTitle("Notebook dependencies")
+        .setIcon("workflow")
+        .onClick(() => {
+          void this.callbacks.openDependencies();
+        });
+    });
+    menu.addItem((item) => {
+      item
+        .setSection(NOTEBOOK_VIEW_MENU_SECTION)
+        .setTitle("Notebook sources")
+        .setIcon("database")
+        .onClick(() => {
+          void this.callbacks.openSources();
+        });
+    });
   }
 
   setExecutionState(state: NotebookExecutionRunState): void {

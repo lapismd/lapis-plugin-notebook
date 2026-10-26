@@ -48,6 +48,40 @@ const MANIFEST: PluginManifest = {
 };
 import type { NotebookCellLanguage } from "./commands/append-cell-template";
 import { NotebookCellSuggest } from "./commands/notebook-cell-suggest";
+import {
+  buildNotebookDependencySnapshot,
+  type NotebookDependencySnapshot,
+} from "./dependencies/notebook-dependencies-data";
+import {
+  NotebookDependenciesView,
+  NotebookDependenciesViewType,
+  type NotebookDependenciesRefreshableView,
+} from "./dependencies/notebook-dependencies-view";
+import {
+  buildNotebookInspectorSnapshot,
+  type NotebookInspectorSnapshot,
+  type NotebookInspectorTablePreview,
+} from "./inspector/notebook-inspector-data";
+import {
+  NotebookInspectorView,
+  NotebookInspectorViewType,
+  type NotebookInspectorRefreshableView,
+} from "./inspector/notebook-inspector-view";
+import {
+  buildNotebookPackagesSnapshot,
+  type NotebookPackagesSnapshot,
+} from "./packages/notebook-packages-data";
+import {
+  fetchNotebookPackageManifest,
+  resolveNotebookIndirectImports,
+  searchNotebookPackages,
+  type NotebookPackageSearchResult,
+} from "./packages/notebook-package-registry";
+import {
+  NotebookPackagesView,
+  NotebookPackagesViewType,
+  type NotebookPackagesRefreshableView,
+} from "./packages/notebook-packages-view";
 import { isMarkdownFile, isNotebookFile } from "./notebook-file";
 import { toNotebookFilePath } from "./notebook-path";
 import type { NotebookDocument } from "./model/notebook-document";
@@ -147,6 +181,10 @@ const RUN_ALL_NOTEBOOK_ICON = `
 
 export class NotebookPlugin extends Plugin {
   private readonly runtimeController = new NotebookRuntimeController();
+  private readonly inspectorViews = new Set<NotebookInspectorRefreshableView>();
+  private readonly dependenciesViews =
+    new Set<NotebookDependenciesRefreshableView>();
+  private readonly packagesViews = new Set<NotebookPackagesRefreshableView>();
   private readonly executionPromises = new Map<string, Promise<void>>();
   private readonly inputRerunTimers = new Map<
     string,
@@ -237,6 +275,8 @@ export class NotebookPlugin extends Plugin {
         }
         this.updateNotebookExecutionForPath(sourcePath);
         void this.syncNotebookStatusBar();
+        void this.refreshNotebookInspectorViews();
+        void this.refreshNotebookDependenciesViews();
       }),
     );
     this.register(
@@ -262,8 +302,50 @@ export class NotebookPlugin extends Plugin {
           runNotebook: () => this.runActiveNotebookCommand(),
           runStaleNotebookCells: () => this.runStaleNotebookCellsCommand(),
           clearNotebookOutputs: () => this.clearActiveNotebookOutputsCommand(),
+          openPackages: () => this.openNotebookPackages(true),
+          openDependencies: () => this.openNotebookDependencies(true),
+          openSources: () => this.openNotebookInspector(true),
         }) as unknown as View,
       { kind: "file" },
+    );
+    this.registerView(
+      NotebookInspectorViewType,
+      (leaf) => new NotebookInspectorView(leaf, this) as unknown as View,
+      {
+        kind: "command",
+        command: {
+          id: "open-notebook-session-view",
+          name: "Open notebook variables and data sources",
+          callback: () =>
+            this.runCommand(() => this.openNotebookInspector(true)),
+        },
+      },
+    );
+    this.registerView(
+      NotebookDependenciesViewType,
+      (leaf) => new NotebookDependenciesView(leaf, this) as unknown as View,
+      {
+        kind: "command",
+        command: {
+          id: "open-notebook-dependencies-view",
+          name: "Open notebook dependencies",
+          callback: () =>
+            this.runCommand(() => this.openNotebookDependencies(true)),
+        },
+      },
+    );
+    this.registerView(
+      NotebookPackagesViewType,
+      (leaf) => new NotebookPackagesView(leaf, this) as unknown as View,
+      {
+        kind: "command",
+        command: {
+          id: "open-notebook-packages-view",
+          name: "Open notebook packages",
+          callback: () =>
+            this.runCommand(() => this.openNotebookPackages(true)),
+        },
+      },
     );
     this.registerEditorView({
       id: NotebookViewType,
@@ -278,6 +360,9 @@ export class NotebookPlugin extends Plugin {
     this.app.workspace.onLayoutReady(() => {
       void this.refreshOpenNotebookViews();
       void this.syncNotebookStatusBar();
+      void this.refreshNotebookInspectorViews();
+      void this.refreshNotebookDependenciesViews();
+      void this.refreshNotebookPackagesViews();
     });
 
     this.registerEvent(
@@ -289,6 +374,9 @@ export class NotebookPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("active-leaf-change", () => {
         void this.syncNotebookStatusBar();
+        void this.refreshNotebookInspectorViews();
+        void this.refreshNotebookDependenciesViews();
+        void this.refreshNotebookPackagesViews();
       }),
     );
 
@@ -485,6 +573,8 @@ export class NotebookPlugin extends Plugin {
     this.settings = patchNotebookSettings(this.settings, patch);
     const snapshot = this.getSettings();
     await this.saveData(snapshot);
+    await this.refreshNotebookDependenciesViews();
+    await this.refreshNotebookPackagesViews();
     if (autoRunEnabledBefore && !snapshot.execution.autoRunStaleOnCellChange) {
       for (const [sourcePath, timer] of this.staleAutoRunTimers.entries()) {
         if (this.isAutoRunStaleOnCellChangeEnabledForPath(sourcePath)) {
@@ -844,12 +934,21 @@ export class NotebookPlugin extends Plugin {
     file: TFile | null | undefined,
   ): Promise<void> {
     if (!file || !isNotebookFile(file)) {
+      await this.refreshNotebookInspectorViews();
+      await this.refreshNotebookDependenciesViews();
+      await this.refreshNotebookPackagesViews();
       return;
     }
 
-    // Stage 7 restores the legacy panel auto-open behavior
-    // (autoOpenSourcesOnNotebookOpen / autoOpenDependenciesOnNotebookOpen)
-    // with the inspector, dependencies, and packages views.
+    if (this.settings.panels.autoOpenSourcesOnNotebookOpen) {
+      await this.openNotebookInspector(false);
+    }
+    if (this.settings.panels.autoOpenDependenciesOnNotebookOpen) {
+      await this.openNotebookDependencies(false);
+    }
+    await this.refreshNotebookInspectorViews();
+    await this.refreshNotebookDependenciesViews();
+    await this.refreshNotebookPackagesViews();
   }
 
   private async initializeSettings(): Promise<void> {
@@ -1210,6 +1309,414 @@ export class NotebookPlugin extends Plugin {
     }
 
     return null;
+  }
+
+  registerNotebookInspectorView(
+    view: NotebookInspectorRefreshableView,
+  ): () => void {
+    this.inspectorViews.add(view);
+    return () => {
+      this.inspectorViews.delete(view);
+    };
+  }
+
+  registerNotebookDependenciesView(
+    view: NotebookDependenciesRefreshableView,
+  ): () => void {
+    this.dependenciesViews.add(view);
+    return () => {
+      this.dependenciesViews.delete(view);
+    };
+  }
+
+  registerNotebookPackagesView(
+    view: NotebookPackagesRefreshableView,
+  ): () => void {
+    this.packagesViews.add(view);
+    return () => {
+      this.packagesViews.delete(view);
+    };
+  }
+
+  async installNotebookPackage(
+    dependency: {
+      packageName: string;
+      version: string;
+      globalName?: string;
+    },
+    onProgress?: (message: string) => void,
+  ): Promise<void> {
+    await this.saveNotebookRuntimeDependencies(
+      [...this.settings.runtimeDependencies, dependency],
+      dependency,
+      onProgress,
+    );
+  }
+
+  async searchNotebookPackages(
+    query: string,
+  ): Promise<NotebookPackageSearchResult[]> {
+    return searchNotebookPackages(query);
+  }
+
+  async uninstallNotebookPackage(entryIndex: number): Promise<void> {
+    if (
+      entryIndex < 0 ||
+      entryIndex >= this.settings.runtimeDependencies.length
+    ) {
+      return;
+    }
+
+    await this.updateSettings({
+      runtimeDependencies: this.settings.runtimeDependencies.filter(
+        (_, index) => index !== entryIndex,
+      ),
+    });
+  }
+
+  async updateNotebookPackage(
+    entryIndex: number,
+    dependency: {
+      packageName: string;
+      version: string;
+      globalName?: string;
+    },
+    onProgress?: (message: string) => void,
+  ): Promise<void> {
+    if (
+      entryIndex < 0 ||
+      entryIndex >= this.settings.runtimeDependencies.length
+    ) {
+      return;
+    }
+
+    const runtimeDependencies = [...this.settings.runtimeDependencies];
+    runtimeDependencies[entryIndex] = dependency;
+
+    await this.saveNotebookRuntimeDependencies(
+      runtimeDependencies,
+      dependency,
+      onProgress,
+    );
+  }
+
+  private async saveNotebookRuntimeDependencies(
+    runtimeDependencies: NotebookUserDependencyDescriptor[],
+    dependency: {
+      packageName: string;
+      version: string;
+      globalName?: string;
+    },
+    onProgress?: (message: string) => void,
+  ): Promise<void> {
+    onProgress?.("Validating package descriptor...");
+    const validation = validateNotebookDependencyRegistry(runtimeDependencies);
+    if (!validation.ok) {
+      throw new Error(
+        validation.issues
+          .map((issue) => `Entry ${issue.index + 1}: ${issue.message}`)
+          .join(" "),
+      );
+    }
+
+    onProgress?.("Checking package metadata...");
+    await fetchNotebookPackageManifest(
+      dependency.packageName,
+      dependency.version,
+    );
+
+    onProgress?.("Saving package...");
+    await this.updateSettings({ runtimeDependencies });
+  }
+
+  async getNotebookInspectorSnapshot(): Promise<NotebookInspectorSnapshot | null> {
+    const context = await this.loadActiveNotebookInspectorContext();
+    if (!context) {
+      return null;
+    }
+
+    const runtimeSnapshot = this.runtimeController.getOrCreateGraphSnapshot(
+      context.document,
+    );
+    const duckDbCatalog = await this.inspectDuckDbCatalog(context.document);
+
+    return buildNotebookInspectorSnapshot({
+      file: context.file,
+      document: context.document,
+      graph: runtimeSnapshot.graph,
+      duckDbCatalog,
+    });
+  }
+
+  async getNotebookDependencySnapshot(): Promise<NotebookDependencySnapshot | null> {
+    const context = await this.loadActiveNotebookInspectorContext();
+    if (!context) {
+      return null;
+    }
+
+    const runtimeSnapshot = this.runtimeController.getOrCreateGraphSnapshot(
+      context.document,
+    );
+
+    return buildNotebookDependencySnapshot({
+      file: context.file,
+      document: context.document,
+      graph: runtimeSnapshot.graph,
+      getCellState: (cellId) => runtimeSnapshot.getCellState(cellId),
+    });
+  }
+
+  async getNotebookPackagesSnapshot(): Promise<NotebookPackagesSnapshot | null> {
+    const context = await this.loadActiveNotebookInspectorContext();
+    if (!context) {
+      return buildNotebookPackagesSnapshot({
+        file: {
+          path: "GlobalPackages.notebook.md",
+          basename: "Global Packages",
+        },
+        document: parseNotebookDocument("", {
+          sourcePath: "GlobalPackages.notebook.md",
+        }),
+        runtimeDependencies: this.settings.runtimeDependencies,
+        hasActiveNotebook: false,
+      });
+    }
+
+    const baseSnapshot = buildNotebookPackagesSnapshot({
+      file: context.file,
+      document: context.document,
+      runtimeDependencies: this.settings.runtimeDependencies,
+    });
+
+    const directImports = baseSnapshot.directImports
+      .filter((entry) => entry.status === "configured")
+      .map((entry) => this.settings.runtimeDependencies[entry.entryIndex ?? -1])
+      .filter(
+        (entry): entry is (typeof this.settings.runtimeDependencies)[number] =>
+          Boolean(entry),
+      );
+
+    if (directImports.length === 0) {
+      return {
+        ...baseSnapshot,
+        indirectImportsStatus: {
+          kind: "unavailable",
+          message:
+            "Direct imports from this notebook will populate transitive packages here.",
+        },
+      };
+    }
+
+    const resolved = await resolveNotebookIndirectImports(directImports);
+
+    return buildNotebookPackagesSnapshot({
+      file: context.file,
+      document: context.document,
+      runtimeDependencies: this.settings.runtimeDependencies,
+      indirectImports: resolved.imports,
+      indirectImportsStatus:
+        resolved.errors.length > 0
+          ? {
+              kind: "error",
+              message: resolved.errors.join(" "),
+            }
+          : {
+              kind: "ready",
+              message:
+                resolved.imports.length === 0
+                  ? "No transitive package dependencies were declared by the current direct imports."
+                  : `Loaded transitive dependencies for ${directImports.length} direct import${directImports.length === 1 ? "" : "s"}.`,
+            },
+    });
+  }
+
+  async openNotebookPackages(reveal = true): Promise<void> {
+    const leaves = this.app.workspace.getLeavesOfType(NotebookPackagesViewType);
+    if (leaves.length > 0) {
+      if (reveal) {
+        for (const leaf of leaves) {
+          await this.app.workspace.revealLeaf(leaf);
+        }
+      }
+      return;
+    }
+
+    const leaf = this.app.workspace.ensureSideLeaf(
+      NotebookPackagesViewType,
+      "right",
+    );
+    await leaf.setViewState(
+      { type: NotebookPackagesViewType },
+      { history: true },
+    );
+    if (reveal) {
+      await this.app.workspace.revealLeaf(leaf);
+    }
+  }
+
+  async loadNotebookInspectorTablePreview(
+    sourcePath: string,
+    schemaName: string,
+    tableName: string,
+    rowCount: number | null,
+  ): Promise<NotebookInspectorTablePreview | null> {
+    const context = await this.loadNotebookInspectorContextByPath(sourcePath);
+    const runtimePromise = this.getExistingRuntime(sourcePath);
+    if (!context || !runtimePromise) {
+      return null;
+    }
+
+    const runtime = await runtimePromise.catch(() => null);
+    const preview = await runtime?.inspectDuckDbTablePreview?.(
+      context.document,
+      schemaName,
+      tableName,
+      5,
+    );
+    if (!preview) {
+      return null;
+    }
+
+    return {
+      columns: preview.columns,
+      rows: preview.rows.map((row) =>
+        preview.columns.map((column) => row[column]),
+      ),
+      truncated:
+        rowCount !== null &&
+        rowCount !== undefined &&
+        rowCount > preview.rows.length,
+    };
+  }
+
+  private async refreshNotebookInspectorViews(): Promise<void> {
+    await Promise.all(
+      Array.from(this.inspectorViews, (view) => view.refreshView()),
+    );
+  }
+
+  private async refreshNotebookDependenciesViews(): Promise<void> {
+    await Promise.all(
+      Array.from(this.dependenciesViews, (view) => view.refreshView()),
+    );
+  }
+
+  private async refreshNotebookPackagesViews(): Promise<void> {
+    await Promise.all(
+      Array.from(this.packagesViews, (view) => view.refreshView()),
+    );
+  }
+
+  private async openNotebookInspector(reveal: boolean): Promise<void> {
+    const leaves = this.app.workspace.getLeavesOfType(
+      NotebookInspectorViewType,
+    );
+    if (leaves.length > 0) {
+      if (reveal) {
+        for (const leaf of leaves) {
+          await this.app.workspace.revealLeaf(leaf);
+        }
+      }
+      return;
+    }
+
+    const leaf = this.app.workspace.ensureSideLeaf(
+      NotebookInspectorViewType,
+      "right",
+    );
+    await leaf.setViewState(
+      { type: NotebookInspectorViewType },
+      { history: true },
+    );
+    if (reveal) {
+      await this.app.workspace.revealLeaf(leaf);
+    }
+  }
+
+  private async openNotebookDependencies(reveal: boolean): Promise<void> {
+    const leaves = this.app.workspace.getLeavesOfType(
+      NotebookDependenciesViewType,
+    );
+    if (leaves.length > 0) {
+      if (reveal) {
+        for (const leaf of leaves) {
+          await this.app.workspace.revealLeaf(leaf);
+        }
+      }
+      return;
+    }
+
+    const leaf = this.app.workspace.ensureSideLeaf(
+      NotebookDependenciesViewType,
+      "left",
+    );
+    await leaf.setViewState(
+      { type: NotebookDependenciesViewType },
+      { history: true },
+    );
+    if (reveal) {
+      await this.app.workspace.revealLeaf(leaf);
+    }
+  }
+
+  private async loadNotebookInspectorContextByPath(
+    sourcePath: string,
+  ): Promise<{
+    file: TFile;
+    document: NotebookDocument;
+  } | null> {
+    const file = this.app.vault.getFileByPath(sourcePath);
+    if (!(file instanceof TFile)) {
+      return null;
+    }
+
+    const cachedSource = await this.app.vault.cachedRead(file);
+    const openLeaf = this.findNotebookLeafForPath(sourcePath);
+    const openView = openLeaf?.view as
+      | {
+          file?: TFile;
+          editor?: { getValue: () => string };
+        }
+      | undefined;
+    const source =
+      openView?.file?.path === sourcePath
+        ? (openView.editor?.getValue() ?? cachedSource)
+        : cachedSource;
+    const document = parseNotebookDocument(source, {
+      sourcePath,
+      frontmatter:
+        this.app.metadataCache.getFileCache(file)?.frontmatter?.notebook,
+    });
+
+    return document.enabled ? { file, document } : null;
+  }
+
+  private async loadActiveNotebookInspectorContext(): Promise<{
+    file: TFile;
+    document: NotebookDocument;
+  } | null> {
+    const file = this.getNotebookFile(this.app.workspace.activeLeaf);
+    if (!file) {
+      return null;
+    }
+
+    return this.loadNotebookInspectorContextByPath(file.path);
+  }
+
+  private async inspectDuckDbCatalog(
+    document: NotebookDocument,
+  ): Promise<NotebookDuckDbCatalog | null> {
+    const runtimePromise = this.getExistingRuntime(document.sourcePath);
+    if (!runtimePromise) {
+      return null;
+    }
+
+    const runtime = await runtimePromise.catch(() => null);
+    if (!runtime?.inspectDuckDbCatalog) {
+      return null;
+    }
+
+    return runtime.inspectDuckDbCatalog(document);
   }
 }
 
