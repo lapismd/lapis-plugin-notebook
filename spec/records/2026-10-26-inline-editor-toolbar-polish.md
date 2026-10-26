@@ -68,3 +68,10 @@ structural selectors (`.notebook-inspector details > summary + *`,
 selection-snippet wrappers, all painting
 `var(--background-primary, var(--card))`. Verified live in all three panel
 stories: bodies rgb(255,255,255), summaries/sections unchanged.
+
+## Docker acceptance for the section-body paint
+
+Authoritative Docker `validation:all` passed for `7e9f7bdb` — run
+`lapis-notebook-run-f78517cb-ebfd-43bc-a413-7ae2d14d94bd` (28 stories, 290
+unit tests, bundle lane with exclusion audit, all spec gates on the
+registry-pure worker with the cohort archives).
