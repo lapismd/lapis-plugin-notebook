@@ -135,6 +135,7 @@ const config: StorybookConfig = {
         include: [
           "aria-query",
           "typescript",
+          "htl",
           "@duckdb/duckdb-wasm",
           "bits-ui",
           "@lapismd/design-core > bits-ui",

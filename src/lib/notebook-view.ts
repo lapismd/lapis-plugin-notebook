@@ -159,7 +159,7 @@ export class NotebookView extends MarkdownView {
       { disabled: running },
     );
     this.addAction(
-      "trash-2",
+      "trash",
       "Clear all notebook outputs",
       () => {
         void this.callbacks.clearNotebookOutputs();

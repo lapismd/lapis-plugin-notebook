@@ -615,6 +615,12 @@ function createTableInput(
             selectCell.className = "lapis-notebook-input__table-select-cell";
             const control = document.createElement("input");
             control.type = multiple ? "checkbox" : "radio";
+            // Row selection controls have no visible label cell text; name
+            // them for axe (form elements must have labels).
+            control.setAttribute(
+              "aria-label",
+              `${multiple ? "Toggle" : "Select"} table row ${rowIndex + 1}`,
+            );
             if (!multiple) {
               control.name = radioGroupName;
             }

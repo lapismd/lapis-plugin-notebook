@@ -11,7 +11,8 @@
     DataFrameRow,
     DataFrameSchema,
     SortState,
-  } from "./dataframe-types";
+    FilterState,
+} from "./dataframe-types";
 
   const ROW_HEIGHT_MAP = {
     compact: 28,
@@ -35,6 +36,7 @@
     rows: DataFrameRow[];
     state: {
       sortColumns: SortState[];
+      filters: FilterState[];
       filterBarOpen: boolean;
       searchQuery: string;
       rowHeight: "compact" | "default" | "relaxed";
@@ -136,6 +138,7 @@
     <TableHead
       {columns}
       {summaryByKey}
+      activeFilterColumns={viewerState.filters.map((filter) => filter.column)}
       sorts={viewerState.sortColumns}
       {gridTemplate}
       {onToggleSort}

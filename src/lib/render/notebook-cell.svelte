@@ -9,7 +9,7 @@
   import Square from "@lucide/svelte/icons/square";
   import { Notice, type App } from "@lapis-notes/api";
   import { MarkdownEmbed } from "@lapis-notes/markdown";
-  import { Button, buttonVariants } from "@lapismd/design-core/shadcn/button";
+  import { Button } from "@lapismd/design-core/shadcn/button";
   import * as DropdownMenu from "@lapismd/design-core/shadcn/dropdown-menu";
   import type { NotebookCell } from "../model/notebook-cell";
   import type { NotebookOutput } from "../output";
@@ -120,8 +120,6 @@
 
     return "Not run";
   });
-  const menuTriggerClass = `${buttonVariants({ variant: "ghost" })} notebook-cell__menu-trigger`;
-
   const statusLabelClass = $derived.by(() => {
     if (executionState === "running" || durationMs !== undefined) {
       return "notebook-cell__status-label";
@@ -540,6 +538,7 @@
         aria-label={collapsedCode
           ? "Expand code section"
           : "Collapse code section"}
+        title={collapsedCode ? "Expand code section" : "Collapse code section"}
         aria-expanded={!collapsedCode}
         onclick={() => toggleCodeSection()}
       ></button>
@@ -552,6 +551,7 @@
             : "notebook-cell__action--run"
         }`.trim()}
         aria-label={codeActionState.ariaLabel}
+        title={codeActionState.ariaLabel}
         disabled={codeActionState.disabled}
         onclick={(event) => {
           event.stopPropagation();
@@ -574,6 +574,7 @@
         aria-label={collapsedCode
           ? "Expand code section"
           : "Collapse code section"}
+        title={collapsedCode ? "Expand code section" : "Collapse code section"}
         aria-expanded={!collapsedCode}
         onclick={() => toggleCodeSection()}
       ></button>
@@ -603,6 +604,7 @@
           <div class:notebook-cell__body--busy={isBusy}>
             {#if editingSource}
               <NotebookCellSourceEditor
+                {app}
                 value={localSource}
                 lang={cell.lang}
                 startLine={localSourceRange.startLine}
@@ -616,6 +618,7 @@
                 role="button"
                 tabindex="0"
                 aria-label="Edit notebook cell source"
+                title="Edit notebook cell source"
                 onkeydown={(event) => {
                   if (event.key !== "Enter" && event.key !== " ") {
                     return;
@@ -714,14 +717,22 @@
         aria-label={collapsedOutput
           ? "Expand output section"
           : "Collapse output section"}
+        title={collapsedOutput
+          ? "Expand output section"
+          : "Collapse output section"}
         aria-expanded={!collapsedOutput}
         onclick={() => toggleOutputSection()}
       ></button>
       <!-- Output actions menu -->
       <DropdownMenu.Root>
         <DropdownMenu.Trigger
-          class={menuTriggerClass}
+          data-ui-component="button"
+          data-slot="button"
+          data-variant="ghost"
+          data-size="sm"
+          class="notebook-cell__menu-trigger"
           aria-label="Notebook output options"
+          title="Notebook output options"
           onclick={(event) => event.stopPropagation()}
         >
           <Ellipsis class="notebook-cell__icon" aria-hidden="true" />
@@ -740,6 +751,9 @@
         type="button"
         class="notebook-cell__rail-spacer-target notebook-cell__rail-spacer-target--output"
         aria-label={collapsedOutput
+          ? "Expand output section"
+          : "Collapse output section"}
+        title={collapsedOutput
           ? "Expand output section"
           : "Collapse output section"}
         aria-expanded={!collapsedOutput}

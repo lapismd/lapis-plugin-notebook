@@ -36,7 +36,15 @@ suites; Svelte presentation follows per family, remapped onto public Design
 Core primitives with Tailwind utilities converted to notebook-owned native
 CSS at copy time. The dataframe family and the output renderers are ported;
 markdown outputs render through the public `MarkdownEmbed` with explicitly
-threaded `App` and `sourcePath`. Dead legacy component variants that nothing
+threaded `App` and `sourcePath`. The cell source editor wraps the public
+`markupEditor` factory from `@lapis-notes/api/editor/core` (the same
+app-editor surface the CSV and source plugins compose) so Mira base theme,
+live configuration compartments, and `cm-editor-source` styling are inherited;
+the notebook layer adds the cell language, the absolute-document gutter, and
+the TypeScript virtual-document projection. View header actions resolve the
+legacy run-all glyph through Design Core's `registerWorkspaceIcon`, and the
+dataframe filter badge reflects real filter state instead of summary
+presence. Dead legacy component variants that nothing
 imports are excluded and recorded in `PROVENANCE.md`. The panel layer is ported end to end:
 inspector, dependencies (minimap plus SVG DAG), and packages surfaces with
 their ItemViews, snapshot builders, graph layout engine, and npm registry
@@ -56,10 +64,13 @@ plugin (render-service registration, cell directive post-processor, run and
 clear commands, status-bar context keys, safe-mode gating, input-rerun and
 stale-autorun scheduling, notebook-state persistence) with panels, packages,
 and the TypeScript language provider deferred to their stages. The
-`Plugins/Notebook/Shell` family carries seven App-backed stories over five
-seeded notebook fixtures, and the three panel families each carry the six
-named placement stories, with the Dependencies canonical placement also
-proving persisted graph-orientation round-tripping: the boot registration acceptance, `Run notebook`,
+`Plugins/Notebook/Shell` family carries nine App-backed stories over seven
+seeded notebook fixtures — including the legacy System Guide and Notebook
+Gallery showcases (async cells, vault FileAttachments, relative ESM imports,
+viewof text/table/range inputs, md/html interpolation, stdlib helpers,
+lapis.table, registerVaultFile SQL) — and the three panel families each carry
+the six named placement stories, with the Dependencies canonical placement
+also proving persisted graph-orientation round-tripping: the boot registration acceptance, `Run notebook`,
 which executes through the worker transport and asserts rendered outputs,
 interpolation, and persisted notebook state, `Safe mode`, which proves the
 host execution-disable gate, `Run inputs`, which proves the in-process DOM

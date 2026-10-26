@@ -72,6 +72,7 @@
       class="notebook-dataframe__column-profile"
       onclick={onOpenProfile}
       aria-label={`Open profile for ${column.label ?? column.name}`}
+      title={`Open profile for ${column.label ?? column.name}`}
     >
       <Ellipsis class="notebook-dataframe__column-profile-icon" />
     </Button>

@@ -5,7 +5,7 @@
   import SearchIcon from "@lucide/svelte/icons/search";
   import Settings2 from "@lucide/svelte/icons/settings-2";
   import { Badge } from "@lapismd/design-core/shadcn/badge";
-  import { Button, buttonVariants } from "@lapismd/design-core/shadcn/button";
+  import { Button } from "@lapismd/design-core/shadcn/button";
   import { Input } from "@lapismd/design-core/shadcn/input";
   import * as Popover from "@lapismd/design-core/shadcn/popover";
   import { Separator } from "@lapismd/design-core/shadcn/separator";
@@ -52,7 +52,6 @@
     options.downloadable !== false && onExport != null,
   );
 
-  const toolbarTriggerClass = `${buttonVariants({ variant: "ghost", size: "sm" })} notebook-dataframe__toolbar-button`;
 </script>
 
 <div class="notebook-dataframe__toolbar">
@@ -96,7 +95,13 @@
       </Button>
 
       <Popover.Root>
-        <Popover.Trigger class={toolbarTriggerClass}>
+        <Popover.Trigger
+          data-ui-component="button"
+          data-slot="button"
+          data-variant="ghost"
+          data-size="sm"
+          class="notebook-dataframe__toolbar-button"
+        >
           <Columns3 class="notebook-dataframe__toolbar-icon" />
           Columns
         </Popover.Trigger>
@@ -126,7 +131,13 @@
 
       {#if downloadable}
         <Popover.Root>
-          <Popover.Trigger class={toolbarTriggerClass}>
+          <Popover.Trigger
+          data-ui-component="button"
+          data-slot="button"
+          data-variant="ghost"
+          data-size="sm"
+          class="notebook-dataframe__toolbar-button"
+        >
             <Download class="notebook-dataframe__toolbar-icon" />
             Export
           </Popover.Trigger>
@@ -156,7 +167,13 @@
       {/if}
 
       <Popover.Root>
-        <Popover.Trigger class={toolbarTriggerClass}>
+        <Popover.Trigger
+          data-ui-component="button"
+          data-slot="button"
+          data-variant="ghost"
+          data-size="sm"
+          class="notebook-dataframe__toolbar-button"
+        >
           <Settings2 class="notebook-dataframe__toolbar-icon" />
           Settings
         </Popover.Trigger>

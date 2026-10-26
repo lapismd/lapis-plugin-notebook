@@ -5,6 +5,7 @@
   let {
     columns,
     summaryByKey,
+    activeFilterColumns = [],
     sorts,
     gridTemplate,
     onToggleSort,
@@ -13,6 +14,9 @@
   }: {
     columns: Column[];
     summaryByKey: Record<string, ColumnSummary>;
+    // The legacy port derived this from summary presence, which mislabelled
+    // every summarized column as filtered; real filter state is threaded now.
+    activeFilterColumns?: string[];
     sorts: SortState[];
     gridTemplate: string;
     onToggleSort: (column: string, multi: boolean) => void;
@@ -45,7 +49,7 @@
           {column}
           summary={summaryByKey[column.name]}
           sortState={sortFor(column.name)}
-          filterActive={Boolean(summaryByKey[column.name])}
+          filterActive={activeFilterColumns.includes(column.name)}
           onToggleSort={(multi) => onToggleSort(column.name, multi)}
           onOpenProfile={() => onOpenProfile(column.name)}
           showSummary={showSummaries}

@@ -493,3 +493,179 @@
     );
   }}
 />
+
+<Story
+  name="System guide"
+  args={{
+    displayMode: "desktop",
+    notebookMode: "preview",
+    notebookPath: NOTEBOOK_FIXTURE_PATHS.systemGuide,
+  }}
+  play={async ({ canvasElement }) => {
+    await waitForReady(canvasElement);
+    const app = storyApp(canvasElement);
+
+    await waitFor(
+      () => {
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="summary"]'),
+        ).toBeTruthy();
+      },
+      { timeout: 15_000 },
+    );
+
+    // The legacy Observable-stance acceptance notebook: async cells, vault
+    // FileAttachments, relative ESM imports, viewof inputs, md/html
+    // interpolation, stdlib helpers, and lapis.table.
+    await app.commands.executeCommand(
+      `${NOTEBOOK_PLUGIN_ID}:run-active-notebook`,
+    );
+
+    await waitFor(
+      () => {
+        const summary = canvasElement.querySelector(
+          '[data-notebook-cell="summary"]',
+        );
+        const text = summary?.textContent ?? "";
+        expect(text).toContain("Hello from Lapis Notebook Kit");
+        expect(text).toContain("Lapis Notebook Kit (beta)");
+      },
+      { timeout: 60_000 },
+    );
+
+    // DOM-backed outputs (viewof inputs, html claims, tables) mount
+    // asynchronously after the run resolves, so each is polled.
+    await waitFor(
+      () => {
+        const controls = canvasElement.querySelector(
+          '[data-notebook-cell="controls"]',
+        );
+        expect(controls?.querySelector('input[type="text"]')).toBeTruthy();
+      },
+      { timeout: 20_000 },
+    );
+
+    await waitFor(
+      () => {
+        const tableControls = canvasElement.querySelector(
+          '[data-notebook-cell="table-controls"]',
+        );
+        expect(tableControls?.textContent ?? "").toContain("Ada");
+      },
+      { timeout: 20_000 },
+    );
+
+    await waitFor(
+      () => {
+        const htmlSource = canvasElement.querySelector(
+          "[data-system-guide-html-source]",
+        );
+        expect(htmlSource).toBeTruthy();
+        const escaped = htmlSource?.querySelector("[data-escaped]");
+        expect(escaped?.textContent).toBe("<not escaped by markdown>");
+        expect(
+          canvasElement.querySelector("[data-system-guide-card]"),
+        ).toBeTruthy();
+      },
+      { timeout: 20_000 },
+    );
+
+    await waitFor(
+      () => {
+        const tableCell = canvasElement.querySelector(
+          '[data-notebook-cell="table"]',
+        );
+        expect(tableCell?.textContent ?? "").toContain("Katherine");
+      },
+      { timeout: 20_000 },
+    );
+  }}
+/>
+
+<Story
+  name="Gallery"
+  args={{
+    displayMode: "desktop",
+    notebookMode: "preview",
+    notebookPath: NOTEBOOK_FIXTURE_PATHS.gallery,
+  }}
+  play={async ({ canvasElement }) => {
+    await waitForReady(canvasElement);
+    const app = storyApp(canvasElement);
+
+    await waitFor(
+      () => {
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="csv-query"]'),
+        ).toBeTruthy();
+      },
+      { timeout: 15_000 },
+    );
+
+    // The legacy gallery: markdown outputs, app-table SQL, vault CSV
+    // registration into DuckDB, interpolated SQL, range inputs, and md
+    // interpolation.
+    await app.commands.executeCommand(
+      `${NOTEBOOK_PLUGIN_ID}:run-active-notebook`,
+    );
+
+    await waitFor(
+      () => {
+        const setup = canvasElement.querySelector(
+          '[data-notebook-cell="setup"]',
+        );
+        expect(setup?.textContent ?? "").toContain(
+          "Running E2E Vault samples for North.",
+        );
+      },
+      { timeout: 60_000 },
+    );
+
+    await waitFor(
+      () => {
+        const appNotes = canvasElement.querySelector(
+          '[data-notebook-cell="app-notes"]',
+        );
+        expect(appNotes?.textContent ?? "").toContain("Getting Started");
+      },
+      { timeout: 30_000 },
+    );
+
+    // Registered vault CSV queried through read_csv_auto with an
+    // interpolated region filter (South rows excluded).
+    await waitFor(
+      () => {
+        const csvQuery = canvasElement.querySelector(
+          '[data-notebook-cell="csv-query"]',
+        );
+        const csvText = csvQuery?.textContent ?? "";
+        expect(csvText).toContain("2026-03");
+        expect(csvText).toContain("150");
+        expect(csvText).not.toContain("86");
+      },
+      { timeout: 30_000 },
+    );
+
+    await waitFor(
+      () => {
+        const input = canvasElement.querySelector(
+          '[data-notebook-cell="input"]',
+        );
+        expect(input?.querySelector('input[type="range"]')).toBeTruthy();
+      },
+      { timeout: 20_000 },
+    );
+
+    await waitFor(
+      () => {
+        const markdownOutput = canvasElement.querySelector(
+          '[data-notebook-cell="markdown-output"]',
+        );
+        const mdText = markdownOutput?.textContent ?? "";
+        expect(mdText).toContain("Selected region: North");
+        expect(mdText).toContain("Input value placeholder: 4");
+      },
+      { timeout: 20_000 },
+    );
+  }}
+/>

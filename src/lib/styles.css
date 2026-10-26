@@ -6,6 +6,12 @@
  * Design Core semantic tokens; Tailwind utility strings are forbidden in
  * production sources (pnpm check:no-tailwind).
  */
+.notebook-view,
+.notebook-cell,
+.notebook-output,
+.notebook-dataframe,
+.notebook-inspector,
+.notebook-dependencies,
 .notebook-packages {
   --notebook-surface-background: var(--background-primary-alt, var(--card));
   --notebook-surface-background-active: var(
@@ -1591,7 +1597,10 @@
   padding-bottom: 1rem;
 }
 
-/* Cell source editor (CodeMirror) surface. */
+/* Cell source editor (CodeMirror) surface. The editor itself is a Lapis
+   markup-editor surface (api editor/core markupEditor): Mira base theme,
+   gutter, and cm-editor-source styling come from the host, so the notebook
+   only frames it inside the cell surface. */
 
 .notebook-cell__editor {
   overflow: hidden;
@@ -1600,36 +1609,7 @@
 }
 
 .notebook-cell__editor-cm {
-  padding-block: 1rem;
-}
-
-.notebook-cell__editor-cm :global(.cm-editor) {
-  background: transparent;
-  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: 0.875rem;
-}
-
-.notebook-cell__editor-cm :global(.cm-gutters) {
-  margin-inline-end: 0;
-  border-right: 1px solid var(--border);
-  border-color: var(--border);
-  background: var(--background);
-}
-
-.notebook-cell__editor-cm :global(.cm-lineNumbers .cm-gutterElement) {
-  color: var(--muted-foreground);
-}
-
-.notebook-cell__editor-cm :global(.cm-content) {
   padding-block: 0.5rem;
-}
-
-.notebook-cell__editor-cm :global(.cm-line) {
-  padding-inline: 0.75rem;
-}
-
-.notebook-cell__editor-cm :global(.cm-scroller) {
-  line-height: 1.5rem;
 }
 
 .notebook-cell__action {

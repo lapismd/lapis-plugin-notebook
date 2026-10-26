@@ -1,33 +1,19 @@
 <script lang="ts">
-  import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
-  import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
   import { javascript } from "@codemirror/lang-javascript";
   import { markdown } from "@codemirror/lang-markdown";
   import { sql } from "@codemirror/lang-sql";
-  import {
-    bracketMatching,
-    indentOnInput,
-    syntaxHighlighting,
-  } from "@codemirror/language";
   import { EditorState, type Extension } from "@codemirror/state";
-  import { highlightSelectionMatches } from "@codemirror/search";
-  import {
-    drawSelection,
-    EditorView,
-    highlightActiveLine,
-    highlightActiveLineGutter,
-    highlightSpecialChars,
-    keymap,
-    lineNumbers,
-  } from "@codemirror/view";
+  import { EditorView, lineNumbers } from "@codemirror/view";
+  import type { App } from "@lapis-notes/api";
+  import { editorConfig, markupEditor } from "@lapis-notes/api/editor/core";
+  // Side-effect import: the api editor module owns editor.css, which styles
+  // the `cm-editor-source` host surface this cell editor renders into. It is
+  // otherwise only loaded by source-mode markdown views.
+  import "@lapis-notes/api/editor";
   import {
     languageServiceDocumentContext,
     languageServiceExtensions,
   } from "@lapis-notes/api/editor/language-service";
-  // The legacy api/editor/extensions/class-highlighter copy is internal in the
-  // current API; the standard lezer classHighlighter produces the same cm-*
-  // tag classes the notebook editor theme styles.
-  import { classHighlighter } from "@lezer/highlight";
   import {
     buildNotebookTypeScriptVirtualDocument,
     mapNotebookCellPositionToVirtual,
@@ -38,6 +24,7 @@
   import { replaceNotebookCellSource } from "./notebook-cell-source";
 
   type Props = {
+    app: App;
     value: string;
     lang: NotebookCellLanguage;
     startLine: number;
@@ -48,6 +35,7 @@
   };
 
   let {
+    app,
     value,
     lang,
     startLine,
@@ -119,27 +107,28 @@
             languageServiceExtensions({ languageId: "typescript" }),
           ]
         : [];
+
+    // The cell editor is a Lapis markup-editor surface: the host factory
+    // supplies the Mira base extensions, theme, keymaps, live configuration
+    // compartments, and `cm-editor-source` styling (the same wrapping the
+    // CSV/source-editor plugins use). Notebook-owned layers add the cell
+    // language, the absolute-document line-number gutter, the TypeScript
+    // virtual-document projection, and the inline-editor identity classes.
     return [
+      markupEditor(
+        {
+          language: lang === "html" ? "markdown" : lang,
+          app,
+        },
+        resolveLanguageExtension(lang),
+        EditorView.editorAttributes.of({
+          class: "mod-inline mod-notebook-cell-inline-editor",
+        }),
+        ...languageService,
+      ),
       lineNumbers({
         formatNumber: (lineNumber) => `${startLine + lineNumber - 1}`,
       }),
-      highlightActiveLineGutter(),
-      highlightSpecialChars(),
-      history(),
-      drawSelection(),
-      indentOnInput(),
-      syntaxHighlighting(classHighlighter),
-      bracketMatching(),
-      closeBrackets(),
-      highlightActiveLine(),
-      highlightSelectionMatches(),
-      resolveLanguageExtension(lang),
-      EditorView.lineWrapping,
-      EditorView.editorAttributes.of({
-        class: "mod-cm6 mod-inline mod-notebook-cell-inline-editor",
-      }),
-      ...languageService,
-      keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap]),
     ];
   }
 
@@ -171,6 +160,7 @@
       editorView?.state.doc.length ?? value.length,
     );
   }
+
   function mountEditor(node: HTMLDivElement) {
     editorView = new EditorView({
       parent: node,
@@ -179,6 +169,15 @@
         extensions: createExtensions(),
       }),
     });
+
+    // The notebook gutter shows absolute document lines; suppress the
+    // configuration-driven relative gutter for this view only.
+    editorConfig.update(
+      editorView,
+      "editor.display.showLineNumbers",
+      false,
+      app,
+    );
 
     queueMicrotask(() => {
       editorView?.focus();

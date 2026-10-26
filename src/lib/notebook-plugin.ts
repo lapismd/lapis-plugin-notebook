@@ -13,7 +13,10 @@ import {
   TFile,
   MarkdownRenderChild,
 } from "@lapis-notes/api";
+import { registerWorkspaceIcon } from "@lapismd/design-core/workspace/icon";
 import { mount, unmount } from "svelte";
+
+import NotebookRunAllIcon from "./notebook-run-all-icon.svelte";
 
 const logger = {
   debug: (...a: any[]) => console.debug("[notebook.plugin]", ...a),
@@ -263,6 +266,11 @@ export class NotebookPlugin extends Plugin {
     await this.initializeSettings();
 
     addIcon(RUN_ALL_NOTEBOOK_ICON_ID, RUN_ALL_NOTEBOOK_ICON);
+    // The workspace header renders icons through Design Core's registry;
+    // register the same glyph there and dispose with the plugin lifecycle.
+    this.register(
+      registerWorkspaceIcon(RUN_ALL_NOTEBOOK_ICON_ID, NotebookRunAllIcon),
+    );
     this.app.metadataTypeManager.setType("notebook.autorun", "checkbox");
     registerNotebookRenderService(this.renderService);
     this.registerNotebookStatusBarItems();

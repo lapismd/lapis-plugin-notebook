@@ -55,7 +55,11 @@ events, honor the panel auto-open settings, and degrade with a warning
 instead of unhandled rejection when catalog or registry probing fails on
 hosts without resolvable assets or network. The plugin asset URL fallback
 anchors root-relative plugin paths at the document origin for browser hosts
-without an asset server. Panel context resolution falls back from the active
+without an asset server. The plugin registers its run-all icon with both the
+api icon registry and the Design Core workspace icon registry (the header
+renders through the latter), and plugin-side controls carry `title`
+tooltips beside their aria-labels. The input runtime names its table row
+selection controls for the strict a11y gate. Panel context resolution falls back from the active
 leaf to any open notebook leaf, because panel views are main-area tabs in the
 current workspace and can hold the active leaf themselves (the legacy
 sidebar assumption no longer holds); views additionally seed a refresh at
