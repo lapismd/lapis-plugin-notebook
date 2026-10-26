@@ -86,7 +86,10 @@ data`, which proves SQL cells on DuckDB-WASM resolved through the plugin
 asset paths plus the `lapis.notes` snapshot table, `Cancel execution`, which
 proves mid-run cancellation with checkpoint rollback, and `Autorun stale
 cells`, which proves edit-triggered stale marking and the debounced
-settings-gated autorun. A static-import audit
+settings-gated autorun. The `Workspace` story additionally regression-tests
+generic file-open routing: `determineViewTypeForPath` resolves notebook
+files to the notebook view type, and opening one through a plain leaf yields
+`NotebookView` with its run-all header action. A static-import audit
 keeps the heavy runtime modules behind lazy boundaries.
 
 ## Requirements

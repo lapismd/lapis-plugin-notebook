@@ -355,11 +355,16 @@ export class NotebookPlugin extends Plugin {
         },
       },
     );
+    // Exclusive priority with the more specific pattern mirrors the
+    // transcript plugin's contract: markdown claims `*.md` exclusively, so
+    // notebook files only route to NotebookView when this contribution
+    // outranks it on specificity within the exclusive tier.
     this.registerEditorView({
-      id: NotebookViewType,
+      id: `${NotebookViewType}-file`,
+      viewType: NotebookViewType,
       label: "Notebook",
       filenamePatterns: ["*.notebook.md"],
-      priority: "default",
+      priority: "exclusive",
     });
     this.registerExtensions(["notebook.md"], NotebookViewType);
     this.registerEditorSuggest(new NotebookCellSuggest(this.app), "markdown");

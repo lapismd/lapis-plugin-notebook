@@ -50,7 +50,13 @@ runtime: the `Run inputs` story proves the viewof input mount on Design Core
 primitives with `aria-label` wired from the input's `label` option, and the
 debounced targeted rerun of downstream cells on input change.
 
-The panel surfaces are registered with `ViewAccess.command` openers
+The notebook editor-view contribution registers with
+`priority: "exclusive"` and the specific `*.notebook.md` pattern (the
+transcript plugin contract): markdown claims `*.md` exclusively, and the
+registry ranks exclusive tiers by pattern specificity, so generic file-open
+paths deterministically route notebook files to `NotebookView` — with the
+previous `default` priority they lost to markdown and header actions only
+appeared for leaves opened through explicit layout state. The panel surfaces are registered with `ViewAccess.command` openers
 (`open-notebook-session-view`, `open-notebook-dependencies-view`,
 `open-notebook-packages-view`), refresh on controller, layout, and leaf
 events, honor the panel auto-open settings, and degrade with a warning

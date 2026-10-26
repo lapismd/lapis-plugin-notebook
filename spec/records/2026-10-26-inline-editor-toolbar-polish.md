@@ -51,3 +51,8 @@ test:storybook 28/28 strict-axe; build + bundle exclusion audit green;
 browser-verified editor metrics (6px/12px scroller padding, unified
 rgb(251,251,252) surface), 2px table gap, tooltip content, and split-button
 round-trip.
+
+## Docker acceptance for the polish commit
+
+Authoritative Docker `validation:all` passed for `a613cd27` — run
+`lapis-notebook-run-172e9375-bd68-41d5-b3d9-8c8eb32fb256`.

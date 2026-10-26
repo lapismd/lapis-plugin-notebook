@@ -7,6 +7,7 @@
   import {
     NotebookPlugin,
     NotebookView,
+    NotebookViewType,
     NOTEBOOK_PLUGIN_ID,
   } from "../lib";
   import { fireEvent } from "storybook/test";
@@ -152,6 +153,29 @@
     await waitFor(() => {
       expect(root).toHaveAttribute("data-ui-theme", "lapis");
       expect(root).not.toHaveClass("dark");
+    });
+
+    // Generic file-open routing: the exclusive editor-view contribution must
+    // outrank markdown's `*.md` claim so notebook files open as NotebookView
+    // (header actions included) through the normal open path, not only via
+    // explicit layout state.
+    expect(
+      app.workspace.determineViewTypeForPath(
+        NOTEBOOK_FIXTURE_PATHS.interactiveInputs,
+      ),
+    ).toBe(NotebookViewType);
+    const routedFile = app.vault.getFileByPath(
+      NOTEBOOK_FIXTURE_PATHS.interactiveInputs,
+    );
+    expect(routedFile).toBeTruthy();
+    await app.workspace.getUnpinnedLeaf().openFile(routedFile!);
+    await waitFor(() => {
+      expect(app.workspace.activeLeaf?.view).toBeInstanceOf(NotebookView);
+    });
+    await waitFor(() => {
+      expect(
+        canvasElement.querySelector('[aria-label="Run notebook now"]'),
+      ).toBeTruthy();
     });
   }}
 />
