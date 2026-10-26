@@ -42,5 +42,5 @@
 | LN-NB-024 | Implemented | `Safe mode` story toggles `app.safeMode.disableNotebookExecution`, runs the command, and asserts no interpolated output and no persisted notebook state; the gate reads the host contract live. |
 | LN-NB-025 | Implemented | `Query data` story runs SQL cells on DuckDB-WASM (pinned 1.33.1-dev45.0) resolved through the plugin asset paths and queries `lapis.notes` from vault snapshots; register-app-tables and vault-file suites green; the native provider seam remains open (Electron sidecar excluded). |
 | LN-NB-026 | Implemented | `startup-thin.test.ts` audits the static-import boundary for DuckDB/TypeScript/htl/d3/Plot (dynamic-only outside the allowlisted lazy service); the `Run notebook` story shows the compiler loading only at first execution. |
-| LN-NB-027 | Planned | Support-package boundary audits land in Stage 1. |
+| LN-NB-027 | Implemented | `subpackage-boundaries.test.ts` audits the static/dynamic import boundaries of all six packages (core/duckdb/worker/stdlib/duckdb-assets host-neutrality; input loads Svelte and Design Core only inside its lazy UI runtime). |
 | LN-NB-028 | Implemented | `Run notebook` story runs a TypeScript cell through the lazily loaded compiler with `display()` capture; worker-engine suites cover module rewriting and dependency-descriptor validation. |
