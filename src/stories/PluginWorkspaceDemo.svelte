@@ -7,13 +7,16 @@
   import type { App } from "@lapis-notes/api";
 
   import { bootPluginWorkspaceDemo } from "./create-plugin-workspace-demo";
+  import { NOTEBOOK_FIXTURE_PATHS } from "./notebook-fixtures";
 
   let {
     displayMode = "desktop",
     notebookMode = "source",
+    notebookPath = NOTEBOOK_FIXTURE_PATHS.gettingStarted,
   }: {
     displayMode?: WorkspaceShellProps["displayMode"];
     notebookMode?: "preview" | "source";
+    notebookPath?: string;
   } = $props();
 
   let app = $state<App | null>(null);
@@ -32,7 +35,7 @@
 
   onMount(() => {
     let cancelled = false;
-    const runtimePromise = bootPluginWorkspaceDemo(notebookMode);
+    const runtimePromise = bootPluginWorkspaceDemo(notebookMode, notebookPath);
     void runtimePromise
       .then((runtime) => {
         if (cancelled) return;

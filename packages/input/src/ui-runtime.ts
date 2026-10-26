@@ -224,6 +224,14 @@ async function loadNotebookUiRuntimeModules(): Promise<NotebookUiRuntimeModules>
   return notebookUiRuntimeModulesPromise as Promise<NotebookUiRuntimeModules>;
 }
 
+function notebookInputAriaLabel(
+  options: Record<string, unknown>,
+): string | undefined {
+  return typeof options.label === "string" && options.label.length > 0
+    ? options.label
+    : undefined;
+}
+
 function createRangeInput(
   runtime: NotebookUiRuntimeModules,
   extent: unknown,
@@ -276,6 +284,7 @@ function createRangeInput(
         mounted = runtime.mount(runtime.Slider, {
           target: mountTarget,
           props: {
+            "aria-label": notebookInputAriaLabel(options),
             min,
             max,
             step,
@@ -329,6 +338,7 @@ function createNumberInput(
       const mounted = runtime.mount(runtime.Input, {
         target: mountTarget,
         props: {
+          "aria-label": notebookInputAriaLabel(options),
           type: "number",
           value: stringifyOptionalValue(currentValue),
           min,
@@ -376,6 +386,7 @@ function createTextInput(
       const mounted = runtime.mount(runtime.Input, {
         target: mountTarget,
         props: {
+          "aria-label": notebookInputAriaLabel(options),
           type,
           value: currentValue,
           disabled: options.disabled === true,
@@ -411,6 +422,7 @@ function createTextareaInput(
       const mounted = runtime.mount(runtime.Textarea, {
         target: mountTarget,
         props: {
+          "aria-label": notebookInputAriaLabel(options),
           value: currentValue,
           disabled: options.disabled === true,
           placeholder:
@@ -452,6 +464,7 @@ function createToggleInput(
       const mounted = runtime.mount(runtime.Switch, {
         target: mountTarget,
         props: {
+          "aria-label": notebookInputAriaLabel(options),
           checked: currentValue,
           disabled: options.disabled === true,
           onCheckedChange(checked: unknown) {

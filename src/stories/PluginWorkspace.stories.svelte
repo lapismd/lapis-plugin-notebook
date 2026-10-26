@@ -9,6 +9,7 @@
     NotebookView,
     NOTEBOOK_PLUGIN_ID,
   } from "../lib";
+  import { fireEvent } from "storybook/test";
   import { NOTEBOOK_FIXTURE_PATHS } from "./notebook-fixtures";
   import { PluginWorkspaceExample } from "./PluginWorkspace.example-sources";
 
@@ -224,5 +225,67 @@
         NOTEBOOK_FIXTURE_PATHS.gettingStarted,
       ),
     ).toBeUndefined();
+  }}
+/>
+
+<Story
+  name="Run inputs"
+  args={{
+    displayMode: "desktop",
+    notebookMode: "preview",
+    notebookPath: NOTEBOOK_FIXTURE_PATHS.interactiveInputs,
+  }}
+  play={async ({ canvasElement }) => {
+    await waitForReady(canvasElement);
+    const app = storyApp(canvasElement);
+
+    await waitFor(
+      () => {
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="controls"]'),
+        ).toBeTruthy();
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="echo"]'),
+        ).toBeTruthy();
+      },
+      { timeout: 15_000 },
+    );
+
+    // Running mounts the viewof input through the in-process DOM runtime
+    // and interpolates the downstream markdown cell.
+    await app.commands.executeCommand(
+      `${NOTEBOOK_PLUGIN_ID}:run-active-notebook`,
+    );
+    await waitFor(
+      () => {
+        const controls = canvasElement.querySelector(
+          '[data-notebook-cell="controls"]',
+        );
+        expect(
+          controls?.querySelector('input[type="range"]'),
+        ).toBeTruthy();
+        const echo = canvasElement.querySelector(
+          '[data-notebook-cell="echo"]',
+        );
+        expect(echo?.textContent ?? "").toContain("Count is 2.");
+      },
+      { timeout: 30_000 },
+    );
+
+    // Moving the input schedules a targeted rerun of the downstream cell.
+    const rangeInput = canvasElement.querySelector<HTMLInputElement>(
+      '[data-notebook-cell="controls"] input[type="range"]',
+    );
+    expect(rangeInput).toBeTruthy();
+    await fireEvent.input(rangeInput!, { target: { value: "5" } });
+    await waitFor(
+      () => {
+        const echo = canvasElement.querySelector(
+          '[data-notebook-cell="echo"]',
+        );
+        expect(echo?.textContent ?? "").toContain("Count is 5.");
+      },
+      { timeout: 30_000 },
+    );
   }}
 />

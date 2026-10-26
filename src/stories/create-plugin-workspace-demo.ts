@@ -15,6 +15,9 @@ import {
   notebookWorkspaceMarkdownFixtures,
 } from "./notebook-fixtures";
 
+export type NotebookFixturePath =
+  (typeof NOTEBOOK_FIXTURE_PATHS)[keyof typeof NOTEBOOK_FIXTURE_PATHS];
+
 function leaf(
   id: string,
   title: string,
@@ -29,7 +32,10 @@ function leaf(
   };
 }
 
-function workspaceLayout(notebookMode: "preview" | "source") {
+function workspaceLayout(
+  notebookMode: "preview" | "source",
+  notebookPath: string,
+) {
   return {
     main: {
       id: "main",
@@ -49,7 +55,7 @@ function workspaceLayout(notebookMode: "preview" | "source") {
               "square-terminal",
               "notebook",
               {
-                file: NOTEBOOK_FIXTURE_PATHS.gettingStarted,
+                file: notebookPath,
                 mode: notebookMode,
               },
             ),
@@ -105,6 +111,7 @@ function workspaceLayout(notebookMode: "preview" | "source") {
 
 export function createPluginWorkspaceSeed(
   notebookMode: "preview" | "source" = "source",
+  notebookPath: string = NOTEBOOK_FIXTURE_PATHS.gettingStarted,
 ): Record<string, string> {
   return {
     ".lapis/app.json": JSON.stringify(
@@ -118,7 +125,7 @@ export function createPluginWorkspaceSeed(
       2,
     ),
     ".lapis/workspace.json": JSON.stringify(
-      workspaceLayout(notebookMode),
+      workspaceLayout(notebookMode, notebookPath),
       null,
       2,
     ),
@@ -133,6 +140,7 @@ export function createPluginWorkspaceSeed(
 
 export async function bootPluginWorkspaceDemo(
   notebookMode: "preview" | "source" = "source",
+  notebookPath: string = NOTEBOOK_FIXTURE_PATHS.gettingStarted,
 ): Promise<{
   app: App;
   dispose: () => Promise<void>;
@@ -140,11 +148,14 @@ export async function bootPluginWorkspaceDemo(
   const app = new App({
     version: "0.0.1-story",
     configPath: ".lapis/app.json",
-    adapter: new MemoryVaultAdapter(createPluginWorkspaceSeed(notebookMode), {
-      name: "Notebook Plugin Workspace",
-      vaultId: "notebook-plugin-workspace",
-      clock: 1_700_000_000_000,
-    }),
+    adapter: new MemoryVaultAdapter(
+      createPluginWorkspaceSeed(notebookMode, notebookPath),
+      {
+        name: "Notebook Plugin Workspace",
+        vaultId: "notebook-plugin-workspace",
+        clock: 1_700_000_000_000,
+      },
+    ),
     appDatabase: new MemoryAppDatabase("notebook-plugin-workspace"),
     workspaceShell: { application: { name: "Lapis Notes" } },
     markdownRenderer: async () => {},

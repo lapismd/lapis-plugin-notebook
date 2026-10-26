@@ -33,7 +33,7 @@
 | LN-NB-013 | Implemented | `append-cell-template`, `ensure-notebook-frontmatter`, `create-demo-notebooks`, and `notebook-cell-suggest` ported with their four legacy test suites green. |
 | LN-NB-014 | Implemented | `runtime/analysis/*` and `runtime/notebook-graph.ts` ported verbatim over `notebook-core/graph`; legacy graph, worker-engine, and viewof suites green in the unit lane (52 files / 227 tests). |
 | LN-NB-020 | Implemented | `Run notebook` story executes through the dedicated worker transport end-to-end (engine logs + rendered outputs); eligibility policy and broker suites green in the unit lane. |
-| LN-NB-021 | Planned | Graph reactivity and autorun land in Stage 4. |
+| LN-NB-021 | Planned | Execution order proven by `Run notebook`; input-change targeted rerun proven by `Run inputs`; edit-triggered stale marking and autorun debounce await their own acceptance. |
 | LN-NB-022 | Planned | Cancellation and progress land in Stage 4. |
 | LN-NB-023 | Implemented | `Run notebook` story asserts `appDatabase.getNotebookState` holds per-cell typed state after execution; output-store fingerprint suite green. |
 | LN-NB-024 | Implemented | `Safe mode` story toggles `app.safeMode.disableNotebookExecution`, runs the command, and asserts no interpolated output and no persisted notebook state; the gate reads the host contract live. |
