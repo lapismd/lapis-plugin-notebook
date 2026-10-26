@@ -31,10 +31,18 @@ store, interpolation, the shared worker engine, worker client with
 transport-eligibility policy, runtime protocol and worker entry, the
 DuckDB-WASM service with app-table and vault-file registration, and the
 plugin runtime-asset resolver. The legacy Electron native-DuckDB sidecar
-provider is excluded; the provider seam remains per LN-NB-025. Plugin
-wiring (run commands, cancellation surfaces, persistence and safe-mode
-activation, packaged worker assets) and the cell UI land in the following
-slices.
+provider is excluded; the provider seam remains per LN-NB-025. Plugin wiring has landed: the render service registers globally, the cell
+post-processor mounts `:::cell` directives through the bridged API registry
+(moving the directive `lang` attribute to data before mount so the host
+element keeps valid HTML `lang` semantics), and run/clear commands, status-bar
+items with context-key when-expressions, safe-mode gating, input rerun and
+autorun scheduling are registered. The `Plugins/Notebook/Shell` `Run
+notebook` story proves the worker transport, TypeScript evaluation with
+`display()` capture, `{{name}}` interpolation (variable definitions win over
+cell-id output values only when names do not collide), MarkdownEmbed output
+rendering, and notebook-state persistence. Cancellation, safe-mode, and
+startup-thin acceptance remain open verification items, as does the packaged
+worker asset path which lands with the publication bundle.
 
 ## Requirements
 

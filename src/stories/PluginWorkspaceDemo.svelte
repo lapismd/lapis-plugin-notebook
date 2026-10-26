@@ -10,8 +10,10 @@
 
   let {
     displayMode = "desktop",
+    notebookMode = "source",
   }: {
     displayMode?: WorkspaceShellProps["displayMode"];
+    notebookMode?: "preview" | "source";
   } = $props();
 
   let app = $state<App | null>(null);
@@ -30,7 +32,7 @@
 
   onMount(() => {
     let cancelled = false;
-    const runtimePromise = bootPluginWorkspaceDemo();
+    const runtimePromise = bootPluginWorkspaceDemo(notebookMode);
     void runtimePromise
       .then((runtime) => {
         if (cancelled) return;

@@ -78,10 +78,7 @@
 
 <Story
   name="Workspace"
-  render={() => ({
-    Component: PluginWorkspaceDemo,
-    props: { displayMode: "desktop" },
-  })}
+  args={{ displayMode: "desktop", notebookMode: "source" }}
   play={async ({ canvasElement }) => {
     const canvas = await waitForReady(canvasElement);
     const app = storyApp(canvasElement);
@@ -139,5 +136,59 @@
       expect(root).toHaveAttribute("data-ui-theme", "lapis");
       expect(root).not.toHaveClass("dark");
     });
+  }}
+/>
+
+<Story
+  name="Run notebook"
+  args={{ displayMode: "desktop", notebookMode: "preview" }}
+  play={async ({ canvasElement }) => {
+    await waitForReady(canvasElement);
+    const app = storyApp(canvasElement);
+
+    // Reading mode composes the `:::cell` directives through the bridged
+    // global post-processor registry into mounted notebook cells.
+    await waitFor(
+      () => {
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="calc"]'),
+        ).toBeTruthy();
+        expect(
+          canvasElement.querySelector('[data-notebook-cell="summary"]'),
+        ).toBeTruthy();
+      },
+      { timeout: 15_000 },
+    );
+
+    // Running the active notebook executes the TypeScript cell through the
+    // lazily loaded compiler and interpolates the markdown cell.
+    await app.commands.executeCommand(
+      `${NOTEBOOK_PLUGIN_ID}:run-active-notebook`,
+    );
+    await waitFor(
+      () => {
+        const calc = canvasElement.querySelector(
+          '[data-notebook-cell="calc"]',
+        );
+        expect(calc?.textContent ?? "").toContain("42");
+        const summary = canvasElement.querySelector(
+          '[data-notebook-cell="summary"]',
+        );
+        expect(summary?.textContent ?? "").toContain("The answer is 42");
+      },
+      { timeout: 45_000 },
+    );
+
+    // Generated outputs persist through the host notebook-state contract.
+    await waitFor(
+      async () => {
+        const state = await app.appDatabase.getNotebookState(
+          NOTEBOOK_FIXTURE_PATHS.gettingStarted,
+        );
+        expect(state).toBeTruthy();
+        expect(Object.keys(state?.cells ?? {}).length).toBeGreaterThan(0);
+      },
+      { timeout: 15_000 },
+    );
   }}
 />

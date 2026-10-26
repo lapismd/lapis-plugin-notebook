@@ -29,7 +29,7 @@ function leaf(
   };
 }
 
-function workspaceLayout() {
+function workspaceLayout(notebookMode: "preview" | "source") {
   return {
     main: {
       id: "main",
@@ -48,7 +48,10 @@ function workspaceLayout() {
               "Getting Started",
               "square-terminal",
               "notebook",
-              { file: NOTEBOOK_FIXTURE_PATHS.gettingStarted },
+              {
+                file: NOTEBOOK_FIXTURE_PATHS.gettingStarted,
+                mode: notebookMode,
+              },
             ),
           ],
         },
@@ -100,7 +103,9 @@ function workspaceLayout() {
   };
 }
 
-export function createPluginWorkspaceSeed(): Record<string, string> {
+export function createPluginWorkspaceSeed(
+  notebookMode: "preview" | "source" = "source",
+): Record<string, string> {
   return {
     ".lapis/app.json": JSON.stringify(
       {
@@ -112,7 +117,11 @@ export function createPluginWorkspaceSeed(): Record<string, string> {
       null,
       2,
     ),
-    ".lapis/workspace.json": JSON.stringify(workspaceLayout(), null, 2),
+    ".lapis/workspace.json": JSON.stringify(
+      workspaceLayout(notebookMode),
+      null,
+      2,
+    ),
     ...Object.fromEntries(
       notebookWorkspaceMarkdownFixtures().map((fixture) => [
         fixture.path,
@@ -122,14 +131,16 @@ export function createPluginWorkspaceSeed(): Record<string, string> {
   };
 }
 
-export async function bootPluginWorkspaceDemo(): Promise<{
+export async function bootPluginWorkspaceDemo(
+  notebookMode: "preview" | "source" = "source",
+): Promise<{
   app: App;
   dispose: () => Promise<void>;
 }> {
   const app = new App({
     version: "0.0.1-story",
     configPath: ".lapis/app.json",
-    adapter: new MemoryVaultAdapter(createPluginWorkspaceSeed(), {
+    adapter: new MemoryVaultAdapter(createPluginWorkspaceSeed(notebookMode), {
       name: "Notebook Plugin Workspace",
       vaultId: "notebook-plugin-workspace",
       clock: 1_700_000_000_000,

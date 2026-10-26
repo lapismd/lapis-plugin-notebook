@@ -28,9 +28,18 @@ importers:
 
   .:
     dependencies:
+      '@codemirror/lang-javascript':
+        specifier: ^6.2.4
+        version: 6.2.5
+      '@codemirror/lang-sql':
+        specifier: ^6.9.1
+        version: 6.10.0
       '@duckdb/duckdb-wasm':
         specifier: 1.33.1-dev45.0
         version: 1.33.1-dev45.0
+      '@lezer/highlight':
+        specifier: 1.2.3
+        version: 1.2.3
       '@lucide/svelte':
         specifier: ^0.523.0
         version: 0.523.0(svelte@5.56.10)
@@ -116,9 +125,6 @@ importers:
       '@lezer/common':
         specifier: 1.5.2
         version: 1.5.2
-      '@lezer/highlight':
-        specifier: 1.2.3
-        version: 1.2.3
       '@lezer/lr':
         specifier: 1.4.10
         version: 1.4.10
@@ -223,9 +229,9 @@ importers:
       '@lapis-notes/notebook-stdlib':
         specifier: workspace:*
         version: link:../stdlib
-      '@lapis-notes/ui':
-        specifier: 0.1.3
-        version: 0.1.3(@internationalized/date@3.12.2)(@lapismd/design-core@0.6.0(svelte@5.56.10)(tailwindcss@4.1.12))(svelte@5.56.10)
+      '@lapismd/design-core':
+        specifier: 0.6.0
+        version: 0.6.0(svelte@5.56.10)(tailwindcss@4.1.12)
       svelte:
         specifier: 5.56.10
         version: 5.56.10

@@ -32,12 +32,12 @@
 | LN-NB-012 | Implemented | `model/notebook-frontmatter.ts` ported verbatim; `notebook-frontmatter.test.ts` green in the unit lane. |
 | LN-NB-013 | Implemented | `append-cell-template`, `ensure-notebook-frontmatter`, `create-demo-notebooks`, and `notebook-cell-suggest` ported with their four legacy test suites green. |
 | LN-NB-014 | Implemented | `runtime/analysis/*` and `runtime/notebook-graph.ts` ported verbatim over `notebook-core/graph`; legacy graph, worker-engine, and viewof suites green in the unit lane (52 files / 227 tests). |
-| LN-NB-020 | Planned | Worker/in-process transport port lands in Stage 4. |
+| LN-NB-020 | Implemented | `Run notebook` story executes through the dedicated worker transport end-to-end (engine logs + rendered outputs); eligibility policy and broker suites green in the unit lane. |
 | LN-NB-021 | Planned | Graph reactivity and autorun land in Stage 4. |
 | LN-NB-022 | Planned | Cancellation and progress land in Stage 4. |
-| LN-NB-023 | Planned | Notebook-state persistence lands in Stage 4 against the existing host contract. |
+| LN-NB-023 | Implemented | `Run notebook` story asserts `appDatabase.getNotebookState` holds per-cell typed state after execution; output-store fingerprint suite green. |
 | LN-NB-024 | Planned | Safe-mode gating lands in Stage 4. |
 | LN-NB-025 | Planned | DuckDB-WASM slice lands in Stage 6; the provider seam ports with it. |
 | LN-NB-026 | Planned | Startup-thin audit lands with the Stage 4 runtime wiring. |
 | LN-NB-027 | Planned | Support-package boundary audits land in Stage 1. |
-| LN-NB-028 | Planned | TypeScript cell execution lands in Stage 4. |
+| LN-NB-028 | Implemented | `Run notebook` story runs a TypeScript cell through the lazily loaded compiler with `display()` capture; worker-engine suites cover module rewriting and dependency-descriptor validation. |

@@ -39,6 +39,18 @@ markdown outputs render through the public `MarkdownEmbed` with explicitly
 threaded `App` and `sourcePath`. Dead legacy component variants that nothing
 imports are excluded and recorded in `PROVENANCE.md`.
 
+Cell chrome and plugin wiring complete the render stage: the CodeMirror cell
+source editor, the cell chrome with rails/collapse/run action/status footer,
+the full `NotebookView` over the published `MarkdownView`, and the assembled
+plugin (render-service registration, cell directive post-processor, run and
+clear commands, status-bar context keys, safe-mode gating, input-rerun and
+stale-autorun scheduling, notebook-state persistence) with panels, packages,
+and the TypeScript language provider deferred to their stages. The
+`Plugins/Notebook/Shell` family now carries two App-backed stories: the boot
+registration acceptance and `Run notebook`, which executes the seeded fixture
+through the worker transport and asserts rendered outputs, interpolation, and
+persisted notebook state.
+
 ## Requirements
 
 | ID | Requirement |

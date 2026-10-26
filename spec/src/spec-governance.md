@@ -52,7 +52,10 @@ The six private support packages ported from the legacy notebook
 `notebook-duckdb-assets`, `notebook-worker`) remain unpublished workspace
 members. Their host-neutrality boundaries are specified in
 [Runtime](plugins/notebook/runtime.md); a future native services crate needs
-its own specification and lane intake before it lands.
+its own specification and lane intake before it lands. `notebook-input`
+peers onto `@lapismd/design-core` (its lazy UI runtime mounts Design Core
+input/slider/switch/textarea primitives); support packages MUST NOT peer
+onto retired legacy UI surfaces.
 
 The tracked lockfile MUST be regenerated without local pnpm hooks
 (`pnpm install --lockfile-only --ignore-pnpmfile`) so it stays registry-pure

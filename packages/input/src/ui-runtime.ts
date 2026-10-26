@@ -204,10 +204,10 @@ async function loadNotebookUiRuntimeModules(): Promise<NotebookUiRuntimeModules>
   if (!notebookUiRuntimeModulesPromise) {
     notebookUiRuntimeModulesPromise = Promise.all([
       import("svelte"),
-      import("@lapis-notes/ui/input"),
-      import("@lapis-notes/ui/slider"),
-      import("@lapis-notes/ui/switch"),
-      import("@lapis-notes/ui/textarea"),
+      import("@lapismd/design-core/shadcn/input"),
+      import("@lapismd/design-core/shadcn/slider"),
+      import("@lapismd/design-core/shadcn/switch"),
+      import("@lapismd/design-core/shadcn/textarea"),
     ]).then(
       ([svelte, input, slider, toggleSwitch, textarea]) =>
         ({

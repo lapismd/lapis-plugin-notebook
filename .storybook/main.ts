@@ -110,12 +110,23 @@ const config: StorybookConfig = {
         ],
       },
       esbuild: { target: "esnext" },
+      worker: {
+        format: "es",
+        plugins: () => [notebookPackagesPlugin()],
+        rollupOptions: {
+          // Design Core ships precompiled .svelte components and the lazy
+          // notebook-input UI runtime never executes inside a DOM-less
+          // worker; keep both out of the worker bundle graph.
+          external: [/^@lapismd\/design-core/, /^svelte(?:$|\/)/],
+        },
+      },
       optimizeDeps: {
         noDiscovery: true,
         exclude: ["@storybook/svelte", ...linkedSiblingPackages],
         esbuildOptions: { target: "esnext" },
         include: [
           "aria-query",
+          "typescript",
           "bits-ui",
           "@lapismd/design-core > bits-ui",
           "@internationalized/date",

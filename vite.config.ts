@@ -46,6 +46,13 @@ export default defineConfig({
   esbuild: {
     target: "esnext",
   },
+  worker: {
+    format: "es",
+    plugins: () => [notebookPackagesPlugin()],
+    rollupOptions: {
+      external: [/^@lapismd\/design-core/, /^svelte(?:$|\/)/],
+    },
+  },
   ssr: {
     noExternal: ["aria-query"],
   },

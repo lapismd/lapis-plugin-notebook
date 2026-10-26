@@ -22,11 +22,11 @@ notebook:
 
 # Getting Started
 
-:::cell{#answer lang="ts"}
+:::cell{#calc lang="ts"}
 
 \`\`\`ts
 const answer = 42;
-answer;
+display(answer);
 \`\`\`
 
 :::
