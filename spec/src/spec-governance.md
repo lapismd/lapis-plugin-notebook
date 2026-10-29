@@ -57,7 +57,10 @@ same fail-closed Docker runner as local portable validation, and
 frozen registry install whose pnpm hooks stay disabled
 (`--frozen-lockfile --ignore-pnpmfile`, matching the registry-pure lockfile
 and keeping registry resolution per LPN-SPEC-005) and deploys it to GitHub
-Pages as a publication pipeline outside the validation lanes.
+Pages as a publication pipeline outside the validation lanes. Both
+workflows track the current runner action majors (checkout, setup-node, and
+the pnpm setup action at v6; the pnpm action reads the `packageManager`
+pin) so runner Node deprecation notices do not accumulate.
 
 `spec-first` maps notebook document model, parser, and file-identity sources to
 [Documents](plugins/notebook/documents.md); execution, commands, settings, and

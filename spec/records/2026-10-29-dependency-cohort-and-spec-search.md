@@ -136,3 +136,8 @@ first Pages deployment succeeded and the catalog is live at
 <https://lapismd.github.io/lapis-plugin-notebook/>. The superseded CI run
 for the pre-fix commit was cancelled by the ref-scoped concurrency group as
 designed.
+
+The first GitHub runs surfaced the actions Node 20 deprecation notice; both
+workflows moved to the current action majors (checkout/setup-node/pnpm
+setup at v6, with the pnpm action reading the `packageManager` pin),
+matching the design-core workflow envelope.
