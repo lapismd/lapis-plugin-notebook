@@ -55,6 +55,13 @@ This repository owns the first-party external Lapis plugin whose runtime ID is
 - Keep the fatal Svelte console guard installed through browser teardown.
   Capture original stacks without throwing through framework cleanup, then fail
   post-test and post-file assertions. Do not suppress or allowlist diagnostics.
+- Prefer `pnpm spec:search -- "<topic>"` (QMD-backed; add `--semantic` for
+  conceptual queries) over raw `rg` scans when locating requirements or
+  guidance in `spec/src`, and refresh the local index with `pnpm spec:index`
+  after chapter edits. After any spec-tooling update, run
+  `pnpm exec spec-validator doctor` and fix the reported issues. Keep
+  `spec:index`/`spec:search` native-only; they MUST NOT enter Docker lanes
+  or CI.
 - Canonical requirements live in `spec/src`; protected implementation changes
   require corresponding canonical specification changes in the same Jujutsu
   change. Advance verification statuses only with executed lane evidence.

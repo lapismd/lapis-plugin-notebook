@@ -5,31 +5,57 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: notebook-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
+    name: Validation lanes
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v5
+      - name: Check out the repository
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 10.32.1
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
-      - run: node scripts/validation/install-tools.mjs --ci
+      - name: Install validation bootstrap tools
+        run: node scripts/validation/install-tools.mjs --ci
       - name: Select the exact CI source revision
         run: |
           jj git init --colocate .
           jj --ignore-immutable edit "$GITHUB_SHA"
-      - run: pnpm validation:check
-      - run: pnpm validation:smoke
-      - run: pnpm spec:check
-      - run: pnpm check
-      - run: pnpm test
-      - run: pnpm build
-      - run: pnpm publint
-      - run: pnpm test:storybook
-      - run: pnpm build-storybook
+      - name: Audit the validation runner and routing
+        run: pnpm validation:check
+      - name: Run the validation smoke lane
+        run: pnpm validation:smoke
+      - name: Run the canonical specification gates
+        run: pnpm spec:check
+      - name: Run quality checks
+        run: pnpm check
+      - name: Run unit tests
+        run: pnpm test
+      - name: Build the package and audit the bundle
+        run: pnpm build
+      - name: Lint the package archive surface
+        run: pnpm publint
+      - name: Run Storybook interaction and accessibility tests
+        run: pnpm test:storybook
+      - name: Build the static Storybook catalog
+        run: pnpm build-storybook
