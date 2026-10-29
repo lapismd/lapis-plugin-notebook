@@ -20,7 +20,7 @@ own routing, vault state, persistence, and application policy.
   dependencies).
 - Runtime plugin id: `lapis-notebook` (preserved from the legacy plugin so
   persisted plugin-data keys stay compatible).
-- Runtime peers: `@lapis-notes/api@^0.2.0`, `@lapis-notes/markdown@^0.1.7`,
+- Runtime peers: `@lapis-notes/api@^0.2.0`, `@lapis-notes/markdown@^0.2.0`,
   `@lapismd/design-core@^0.7.0`, `svelte@^5`.
 - Canonical repository: `lapismd/lapis-plugin-notebook`.
 - Live catalog: <https://lapismd.github.io/lapis-plugin-notebook/>.

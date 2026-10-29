@@ -3,8 +3,8 @@
 Tracked dependencies use registry Design Core `0.7.0` and Mira `0.1.2`, with
 the published Lapis host cohort at `@lapis-notes/api@0.2.0`,
 `@lapis-notes/ui@0.1.4`, `@lapis-notes/workspace@0.3.0`,
-`@lapis-notes/file-explorer@0.2.0`, `@lapis-notes/markdown@0.1.7`, and
-`@lapis-notes/search@0.1.3`. Explicit temporary source acceptance follows
+`@lapis-notes/file-explorer@0.2.0`, `@lapis-notes/markdown@0.2.0`, and
+`@lapis-notes/search@0.1.4`. Explicit temporary source acceptance follows
 LPN-SPEC-014 with verified sibling archives in isolated worker installations;
 publication and consumer adoption remain separate gates. Source ownership and
 public contracts remain unchanged. Shared specification tooling resolves the
@@ -61,6 +61,10 @@ Pages as a publication pipeline outside the validation lanes. Both
 workflows track the current runner action majors (checkout, setup-node, and
 the pnpm setup action at v6; the pnpm action reads the `packageManager`
 pin) so runner Node deprecation notices do not accumulate.
+Dependabot maintains registry currency with weekly grouped pull requests
+for the npm and GitHub Actions ecosystems; the exact `@duckdb/duckdb-wasm`
+engine pin is excluded from automated updates because LPN-SPEC-004 keeps
+engine bumps owned by the ported compatibility tests.
 
 `spec-first` maps notebook document model, parser, and file-identity sources to
 [Documents](plugins/notebook/documents.md); execution, commands, settings, and

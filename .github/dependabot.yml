@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # The Lapis cohort moves together (peer-graph convergence per
+      # LPN-SPEC-005); review it as one update.
+      lapis-cohort:
+        patterns:
+          - "@lapis-notes/*"
+          - "@lapismd/*"
+      storybook:
+        patterns:
+          - "@storybook/*"
+          - storybook
+      # CodeMirror and Lezer pins are converged by the workspace overrides;
+      # bump them as one unit so the kernel stays single-instanced.
+      codemirror-lezer:
+        patterns:
+          - "@codemirror/*"
+          - "@lezer/*"
+    ignore:
+      # DuckDB-WASM is pinned exactly by design (LPN-SPEC-004); engine bumps
+      # are owned by the ported compatibility tests, not Dependabot.
+      - dependency-name: "@duckdb/duckdb-wasm"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
