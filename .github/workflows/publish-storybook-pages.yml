@@ -38,10 +38,13 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      # Sibling repositories are absent on CI, so the pnpmfile keeps registry
-      # resolution for every published LapisMD dependency (LPN-SPEC-005).
+      # Sibling repositories are absent on CI, and the tracked lockfile is
+      # registry-pure (generated with pnpm hooks ignored), so the frozen
+      # install must ignore .pnpmfile.cjs as well — this also guarantees
+      # registry resolution for every published LapisMD dependency
+      # (LPN-SPEC-005).
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-pnpmfile
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6

@@ -112,3 +112,18 @@ Storybook interaction/accessibility stories (12 + 6 + 11, including the
 `Panel group` acceptance), routing audit (21 lanes, 0 findings), story
 parity (4 families), spec validate/mdbook/spec-first on spec-validator
 0.2.0, and the App-ownership audit.
+
+## GitHub publication
+
+The repository was created public at `lapismd/lapis-plugin-notebook`
+(matching the manifest URL and the family convention) and `main` was
+pushed from the Jujutsu bookmark at the record commit. The first Pages
+workflow run failed at the install step with
+`ERR_PNPM_LOCKFILE_CONFIG_MISMATCH (pnpmfileChecksum)`: the tracked
+lockfile is registry-pure (generated with `--ignore-pnpmfile`), while a
+plain `pnpm install --frozen-lockfile` computes the hook checksum and
+mismatches. The workflow now installs with
+`--frozen-lockfile --ignore-pnpmfile`, which also guarantees the
+LPN-SPEC-005 registry resolution on CI; the governance chapter records the
+flag combination. CI (`ci.yml`) is unaffected — its lanes install inside
+the Docker workers.

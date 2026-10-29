@@ -54,9 +54,10 @@ Jujutsu revision and runs the validation, specification, quality, unit,
 build, publint, and Storybook interaction and static-build lanes through the
 same fail-closed Docker runner as local portable validation, and
 `publish-storybook-pages.yml` builds the static catalog from `main` with a
-frozen registry install (absent sibling paths keep registry resolution per
-LPN-SPEC-005) and deploys it to GitHub Pages as a publication pipeline
-outside the validation lanes.
+frozen registry install whose pnpm hooks stay disabled
+(`--frozen-lockfile --ignore-pnpmfile`, matching the registry-pure lockfile
+and keeping registry resolution per LPN-SPEC-005) and deploys it to GitHub
+Pages as a publication pipeline outside the validation lanes.
 
 `spec-first` maps notebook document model, parser, and file-identity sources to
 [Documents](plugins/notebook/documents.md); execution, commands, settings, and
