@@ -127,3 +127,12 @@ mismatches. The workflow now installs with
 LPN-SPEC-005 registry resolution on CI; the governance chapter records the
 flag combination. CI (`ci.yml`) is unaffected — its lanes install inside
 the Docker workers.
+
+Pages site creation itself needed a one-time admin call
+(`gh api repos/lapismd/lapis-plugin-notebook/pages -X POST -f
+build_type=workflow`) because the workflow token may not create the site
+("Resource not accessible by integration"); subsequent runs only read it. The
+first Pages deployment succeeded and the catalog is live at
+<https://lapismd.github.io/lapis-plugin-notebook/>. The superseded CI run
+for the pre-fix commit was cancelled by the ref-scoped concurrency group as
+designed.
