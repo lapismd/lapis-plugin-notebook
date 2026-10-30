@@ -57,7 +57,16 @@ export async function install(directory = "/opt/tools", onlyJj = false) {
       .filter((member) => member.replace(/^\.\//, "") === name);
     if (members.length !== 1)
       throw Error(`Tool archive must contain exactly one root ${name}`);
-    execFileSync("tar", ["-xzf", archive, "-C", directory, members[0]]);
+    // Tool archives carry their builder's uid/gid. Extraction must also work
+    // in CI containers that deliberately drop the CHOWN capability.
+    execFileSync("tar", [
+      "--no-same-owner",
+      "-xzf",
+      archive,
+      "-C",
+      directory,
+      members[0],
+    ]);
     const actual = execFileSync(join(directory, name), ["--version"], {
       encoding: "utf8",
     });

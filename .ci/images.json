@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "base": {
+    "image": "ghcr.io/lapismd/lapis-ci",
+    "digest": "sha256:91341a81cc9306eed818c4c433cd29ed11d2ea64c703f32685391befe0eca503"
+  }
+}

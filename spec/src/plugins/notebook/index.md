@@ -25,6 +25,9 @@ pinned exactly at `1.33.1-dev45.0` in root dependencies per LPN-SPEC-004 so
 query behavior cannot drift independently from the ported compatibility
 tests.
 
+Development tooling includes registry Turbo for the container CI build, quality
+and unit task cache; it adds no runtime dependency or published export.
+
 This chapter is the package contract and the only normative MUST table for
 package identity, host registration, and ownership. The following chapters
 describe the ported model:

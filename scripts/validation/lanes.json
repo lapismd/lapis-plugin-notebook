@@ -17,7 +17,7 @@
   "spec:validate": "spec-validator validate",
   "check:validation-routing": "node scripts/validation/check-routing.mjs",
   "check:storybook-parity": "node scripts/spec-validation/check-storybook-parity.mjs",
-  "validation:check": "vitest run --project unit scripts/validation.test.mjs scripts/spec-validation/storybook-parity.test.mjs --maxWorkers=1 --no-file-parallelism",
+  "validation:check": "vitest run --project unit scripts/validation.test.mjs scripts/ci.test.mjs scripts/spec-validation/storybook-parity.test.mjs --maxWorkers=1 --no-file-parallelism",
   "validation:smoke": "node scripts/validation/smoke.mjs",
   "build:bundle": "node scripts/build-plugin-bundle.mjs && node scripts/check-bundle-exclusions.mjs"
 }

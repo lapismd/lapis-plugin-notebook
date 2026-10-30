@@ -1,0 +1,40 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "remoteCache": {
+    "signature": true,
+    "timeout": 10,
+    "uploadTimeout": 30
+  },
+  "futureFlags": {
+    "longerSignatureKey": true
+  },
+  "globalDependencies": [
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    ".ci/images.json"
+  ],
+  "globalEnv": [
+    "LAPIS_NOTEBOOK_VALIDATION_WORKER",
+    "LAPIS_NOTEBOOK_CACHE_PLATFORM"
+  ],
+  "globalPassThroughEnv": [
+    "LAPIS_NOTEBOOK_VALIDATION_RUNTIME",
+    "PLAYWRIGHT_BROWSERS_PATH",
+    "NODE_OPTIONS",
+    "COREPACK_HOME"
+  ],
+  "tasks": {
+    "//#build": {
+      "inputs": ["$TURBO_DEFAULT$", "packages/**"],
+      "outputs": ["dist/**"]
+    },
+    "//#check": {
+      "inputs": ["$TURBO_DEFAULT$", "packages/**"],
+      "outputs": []
+    },
+    "//#test": {
+      "inputs": ["$TURBO_DEFAULT$", "packages/**"],
+      "outputs": []
+    }
+  }
+}

@@ -27,13 +27,14 @@ search uses the spec-validator-pinned system `qmd` binary (LPN-SPEC-020).
 | LPN-SPEC-011 | Tracked agent guidance MUST require preserving unrelated work, committing every independently verified change with Jujutsu without waiting for another request, and using a PR-quality message that explains what changed, why it changed, and which validation passed.                                                                                                                                                                                                                       |
 | LPN-SPEC-012 | Every executable Storybook family MUST declare application, component, integration or prototype coverage. The guard MUST follow its selected CSF-Svelte render path through actual imports. Application coverage MUST reach exactly one public WorkspaceShell; focused component coverage MUST identify the real rendered subject. Missing or stale declarations, unused imports, replacement roots and private production presentation overrides MUST fail checks.                           |
 | LPN-SPEC-013 | Portable root validation commands MUST default to the fail-closed Docker runner and be registered in the lane inventory. Every other root script MUST match an explicitly reviewed native development or bootstrap exception. Docker errors MUST NOT trigger a host fallback. Intentional native diagnosis MUST require an explicit runtime override.                                                                                                                                         |
-| LPN-SPEC-014 | Docker validation MUST transfer the exact tracked Jujutsu revision and ancestry without ignored local state, host dependency/source mounts or a Docker socket. Registry installs MUST be frozen. Explicit temporary archive acceptance MUST verify package identity and checksum, restore tracked manifests and lockfiles before checks, and record archive provenance.                                                                                                                               |
+| LPN-SPEC-014 | Local Docker validation MUST transfer the exact tracked Jujutsu revision and ancestry without ignored local state, host dependency/source mounts or a Docker socket. Registry installs MUST be frozen. Explicit temporary archive acceptance MUST verify package identity and checksum, restore tracked manifests and lockfiles before checks, and record archive provenance.                                                                                                                               |
 | LPN-SPEC-015 | The Docker image MUST pin base and toolchain identities and install Chromium matching the locked Playwright version. Default browser acceptance MUST use sequential bounded shards and one worker, clamping the shard count to the discovered story-file count so a catalog smaller than the shard bound runs one unsharded batch. Explicit file, test-name and shard arguments MUST remain literal and MUST NOT be silently expanded into unrelated cases.                                                                                                                                   |
 | LPN-SPEC-016 | Synthetic story controls MUST use the visible padded dotted FixtureControls boundary. Application fixtures MUST use overlay placement outside production geometry; focused component stories MAY use inline placement. The boundary MUST NOT conceal production roots or dynamic component replacement. Functional acceptance MUST verify the visible boundary in an affected story.                                                                                                          |
-| LPN-SPEC-017 | Every Docker worker MUST have finite CPU, memory and shared-memory limits and a per-checkout lease. Reports MUST retain source, image, tool, argument and outcome identities with available outputs and combined logs. Cleanup MUST collect reports before deleting stopped owned runs and MUST NOT prune global data or delete another checkout's containers.                                                                                                                                |
+| LPN-SPEC-017 | Every local Docker worker MUST have finite CPU, memory and shared-memory limits and a per-checkout lease. Reports MUST retain source, image, tool, argument and outcome identities with available outputs and combined logs. Cleanup MUST collect reports before deleting stopped owned runs and MUST NOT prune global data or delete another checkout's containers.                                                                                                                                |
 | LPN-SPEC-018 | Browser acceptance MUST fail on Svelte runtime diagnostics from console warnings or errors, including mount, interaction and teardown. The guard MUST install before story hooks, retain original diagnostic stacks until post-test and post-file assertions without interrupting framework cleanup, and preserve console output without suppression or allowlisting.                                                                                                                          |
 | LPN-SPEC-019 | The classified validation:all command MUST execute the existing check, unit test, build, publint, static Storybook, complete catalog and specification lanes sequentially within one Docker snapshot and dependency installation. It MUST preserve first-failure propagation, refuse aggregate selectors and retain every individual command and exact target.                                                                                                                                   |
 | LPN-SPEC-020 | Specification discovery MUST be QMD-backed: a tracked `.qmd/index.yml` collection over `spec/src`, root `spec:index` and `spec:search` tasks kept as reviewed native development exceptions out of Docker lanes and CI, and `spec-validator doctor` verifying collection config, system binary, and native index health. Search MAY degrade to the printed `rg` fallback only when QMD is unavailable. |
+| LPN-SPEC-021 | Hosted CI MUST use a digest-pinned job container, frozen registry installation, parallel quality, unit, package, static-catalog and complete browser-shard jobs, and an always-running aggregate that fails on any failed, cancelled or skipped prerequisite. Turbo MUST cache root build/check/test tasks including private support-package sources, restore `dist` for consumers, sign remote artifacts when credentials are available, and execute normally with the GitHub Actions task-cache fallback when they are absent. Specification checks and browser interaction/accessibility MUST execute independently of task-cache hits. |
 
 Aggregate validation shares the outer worker's single lease, exact snapshot and
 installation. Inner gates use the native execution port inside that worker;
@@ -49,18 +50,36 @@ MUST NOT enter Docker lanes or CI. `spec-validator doctor` reports the
 collection config, binary, and native-index health; agents prefer `spec:search`
 over raw `rg` scans of `spec/src` and run `doctor` after tooling updates.
 
-GitHub Actions mirrors the local gates: `ci.yml` selects the exact pushed
-Jujutsu revision and runs the validation, specification, quality, unit,
-build, publint, and Storybook interaction and static-build lanes through the
-same fail-closed Docker runner as local portable validation, and
+GitHub Actions mirrors the local gates in separate jobs. `image-pin` resolves
+`.ci/images.json` to the same immutable Lapis CI base used by the local Docker
+recipe. `build-cache` builds the package and audits its bundle, then quality,
+unit tests, package lint, static Storybook and three interaction/accessibility
+shards run in parallel. Jobs run as the checkout uid (1001), with writable temporary tool/browser
+caches, init, dropped capabilities, finite resource limits and the explicit
+native execution port inside that container, avoiding
+nested Docker builds and repeated worker installations. Quality selects the
+exact CI Jujutsu revision with full ancestry for uncached specification gates.
+The stable `Validation lanes` aggregate runs even after prerequisite failure
+and requires every job to succeed; skipped or cancelled jobs cannot pass it.
+
+The composite setup caches the actual container pnpm store and `.turbo/cache`
+with OS, architecture, image and lockfile identities. The build job primes
+Turbo results for downstream jobs; job-specific save keys preserve quality and
+unit results too. Root tasks hash private `packages/**` sources and restore
+`dist/**` outputs. Remote cache uses the same `TURBO_API`, `TURBO_TEAM`,
+`TURBO_TOKEN` and `TURBO_REMOTE_CACHE_SIGNATURE_KEY` settings as Lapis Plugins,
+with signature verification enabled. Missing remote configuration retains
+normal execution and the GitHub task cache. Run summaries report actual local
+and remote hits. Specification checks, smoke tests and browser acceptance are
+never skipped by Turbo. Chromium resolves through the locked browser provider,
+with a separate image/lock-keyed browser installation cache.
+
 `publish-storybook-pages.yml` builds the static catalog from `main` with a
 frozen registry install whose pnpm hooks stay disabled
-(`--frozen-lockfile --ignore-pnpmfile`, matching the registry-pure lockfile
-and keeping registry resolution per LPN-SPEC-005) and deploys it to GitHub
-Pages as a publication pipeline outside the validation lanes. Both
-workflows track the current runner action majors (checkout, setup-node, and
-the pnpm setup action at v6; the pnpm action reads the `packageManager`
-pin) so runner Node deprecation notices do not accumulate.
+(`--frozen-lockfile --ignore-pnpmfile`, matching registry resolution per
+LPN-SPEC-005), and deploys it to GitHub Pages as a publication pipeline outside
+the validation lanes. Its Node/pnpm bootstrap and cache remain appropriate
+because this publication job installs on the runner itself.
 Dependabot maintains registry currency with weekly grouped pull requests
 for the npm and GitHub Actions ecosystems; the exact `@duckdb/duckdb-wasm`
 engine pin is excluded from automated updates because LPN-SPEC-004 keeps
