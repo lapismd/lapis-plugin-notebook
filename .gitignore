@@ -11,3 +11,4 @@ AGENTS.override.md
 *.tsbuildinfo
 .local/
 .qmd/index.sqlite*
+.turbo/

@@ -5,13 +5,12 @@ packages:
 linkWorkspacePackages: true
 
 overrides:
-  # Converge the published peer graph onto one kernel instance. api@0.2.0
-  # and ui@0.1.4 declare the current design-core ^0.7.0 / mira ~0.1.2 /
-  # ui ^0.1.4 peers, but markdown@0.1.7 and search@0.1.3 still declare
-  # api ^0.1.2 and legacy ranges; without these overrides pnpm materializes
-  # nested duplicate instances and host typechecks split across kernel
-  # types. Remove the markdown/search entries when republished releases
-  # declare the current peer ranges.
+  # Converge the published peer graph onto one kernel instance. The whole
+  # cohort now declares the current ranges (api@0.2.0, ui@0.1.4,
+  # markdown@0.2.0, search@0.1.4 -> design-core ^0.7.0 / mira ~0.1.2 /
+  # ui ^0.1.4 / api ^0.2.0); the exact pins are kept so pnpm can never
+  # materialize nested duplicate kernel instances and host typechecks stay
+  # on a single instance.
   "@lapismd/design-core": "0.7.0"
   "@lapismd/mira": "0.1.2"
   "@lapis-notes/ui": "0.1.4"

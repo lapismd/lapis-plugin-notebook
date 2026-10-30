@@ -1,0 +1,48 @@
+name: Prepare Notebook CI workspace
+description: Install the frozen registry graph and restore pnpm and Turbo caches inside the job container.
+inputs:
+  browsers:
+    description: Install Chromium for the locked Playwright version.
+    default: "false"
+  turbo-cache:
+    description: Restore and persist Turbo task results for jobs that consume them.
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - name: Trust the container checkout
+      shell: bash
+      run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+    - name: Select the pinned pnpm version
+      shell: bash
+      run: corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+    - name: Restore the container pnpm store
+      uses: actions/cache@v5
+      with:
+        path: /tmp/lapis-notebook-pnpm
+        key: notebook-pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml', '.ci/images.json') }}
+        restore-keys: |
+          notebook-pnpm-${{ runner.os }}-${{ runner.arch }}-
+    - name: Install frozen registry dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile --ignore-pnpmfile --prefer-offline --store-dir=/tmp/lapis-notebook-pnpm
+    - name: Restore Turbo task cache
+      if: inputs.turbo-cache == 'true'
+      uses: actions/cache@v5
+      with:
+        path: .turbo/cache
+        key: notebook-turbo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml', '.ci/images.json') }}-${{ github.sha }}-${{ github.job }}
+        restore-keys: |
+          notebook-turbo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml', '.ci/images.json') }}-${{ github.sha }}-build-cache
+          notebook-turbo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml', '.ci/images.json') }}-
+    - name: Install matching headless Chromium
+      if: inputs.browsers == 'true'
+      uses: actions/cache@v5
+      id: browsers
+      with:
+        path: /tmp/lapis-notebook-browsers
+        key: notebook-chromium-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml', '.ci/images.json') }}
+    - name: Prepare the locked browser
+      if: inputs.browsers == 'true'
+      shell: bash
+      run: node scripts/ci-browser.mjs

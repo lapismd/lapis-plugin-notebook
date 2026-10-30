@@ -105,12 +105,12 @@ export default defineConfig(tableRequirements(), {
         },
         {
           pattern:
-            "^(?:pnpm-|scripts/|\\.github/|AGENTS\\.md$|spec-validator\\.config\\.mjs$)",
+            "^(?:turbo\\.json$|\\.ci/|pnpm-|scripts/|\\.github/|AGENTS\\.md$|spec-validator\\.config\\.mjs$)",
           chapters: ["spec/src/spec-governance.md"],
         },
       ],
       protected: [
-        "^(?:package\\.json$|manifest\\.json$|src/|packages/|stories/catalog/|\\.storybook/|pnpm-|scripts/|\\.github/|AGENTS\\.md$|spec-validator\\.config\\.mjs$)",
+        "^(?:package\\.json$|manifest\\.json$|src/|packages/|stories/catalog/|\\.storybook/|turbo\\.json$|\\.ci/|pnpm-|scripts/|\\.github/|AGENTS\\.md$|spec-validator\\.config\\.mjs$)",
       ],
     },
   },

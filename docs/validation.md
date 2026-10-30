@@ -75,8 +75,26 @@ LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native pnpm validation:check
 
 Interactive `pnpm storybook`, stop/restart and validation bootstrap commands
 remain native. Native execution is never a Docker error-recovery mechanism.
-Hosted CI also uses Docker; its only host bootstrap installs the pinned Jujutsu
-tool and selects the exact CI commit.
+Hosted CI uses the digest-pinned Lapis CI job container directly, with the
+explicit native execution port inside that container as the checkout uid (1001),
+with a writable temporary Corepack/browser cache. Local commands keep their
+Docker default. The image/build stage is followed by parallel quality, unit,
+package lint, static Storybook and three browser-shard jobs, then the stable
+`Validation lanes` aggregate. All jobs must succeed, including every shard.
+
+The shared CI setup installs once per job with frozen registry resolution and
+caches the container pnpm store. Turbo caches root build/check/test tasks and
+includes all private support-package sources in their inputs. Build cache hits
+restore the complete `dist` tree. GitHub Actions persists task results between
+jobs and runs; signed remote cache uses the same organization/repository
+`TURBO_API`, `TURBO_TEAM`, `TURBO_TOKEN` and
+`TURBO_REMOTE_CACHE_SIGNATURE_KEY` settings as Lapis Plugins. If those settings
+are unavailable (including fork PRs), normal execution and the GitHub task cache
+remain enabled. Per-job summaries distinguish local hits, remote hits and
+executed tasks. Specification checks, smoke tests and browser interaction/axe
+always execute. Browser jobs install Chromium through the locked Playwright
+provider and cache its files separately. CI no longer asks setup-node to cache
+a host pnpm directory that never receives dependencies.
 
 ## Outputs, archives and cleanup
 
