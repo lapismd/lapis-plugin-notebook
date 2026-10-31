@@ -295,7 +295,7 @@
       rowHeight={{ compact: 28, default: 36, relaxed: 48 }[
         viewerState.rowHeight
       ]}
-      headerHeight={options.showColumnSummaries === false ? 64 : 112}
+      headerHeight={options.showColumnSummaries === false ? 64 : 144}
       widths={visibleColumns.map(
         (c) => viewerState.colWidths.get(c.name) ?? 192,
       )}

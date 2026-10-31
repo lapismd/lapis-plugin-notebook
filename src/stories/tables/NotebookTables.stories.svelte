@@ -3,6 +3,7 @@
   import { expect, userEvent, within } from "storybook/test";
   import DataFrameViewer from "../../lib/render/dataframe/DataFrameViewer.svelte";
   import Demo from "./NotebookTables.fixture.svelte";
+  import { assertTableHeaders } from "./table-header.story-play";
   const { Story } = defineMeta({
     title: "Plugins/Notebook/Tables",
     component: DataFrameViewer,
@@ -44,6 +45,7 @@
 <Story
   name="Rich cells and expanded rows"
   play={async ({ canvasElement }) => {
+    await assertTableHeaders(canvasElement);
     const c = within(canvasElement);
     const expand = (
       await c.findAllByRole("button", { name: /^Expand row / })

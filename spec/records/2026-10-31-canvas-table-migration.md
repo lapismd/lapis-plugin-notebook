@@ -104,3 +104,49 @@ Exact commands and results (Node 24 PATH for local tools):
 Resume broader focused migration qualification and the outstanding filter-trigger
 type correction separately. Do not begin full suites, push, merge or publish from
 this review feedback. The running Docker review remains available for user review.
+
+## UI feedback: clipped column summaries (31 October)
+
+Implemented and focused-tested; UI approval and full qualification remain pending.
+The Notebook adapter reserved 112px for a title/type row plus a histogram and
+range, clipping the summary below the shared header. Notebook's chart component
+also referenced unavailable legacy colour tokens. This fix belongs to Notebook:
+use the existing public header-height contract at 144px (64 without summaries),
+prevent flex shrinking, contain summary padding with border-box sizing, restore
+sans header typography, and use Design Core chart/muted tokens. No shared-package
+CSS override, package patch, screenshot comparison or baseline update was added.
+
+The new `table-header.story-play.ts` regression checks summary geometry and
+resolved nontransparent histogram/boolean bar paint through the actual viewer.
+Cold source snapshot `486f73a4` is available in the owned review worker
+`lapis-notebook-run-e08a3745-2d0a-4186-908f-eef5a68caf26` on loopback port 10529.
+The Design Core archive checksum is unchanged from the preceding feedback slice.
+
+Commands and failure counts:
+
+- `pnpm view @lapismd/spec-validator version`: latest 0.2.0, already installed.
+  `pnpm exec spec-validator doctor`: 10 passed, 1 script-alias warning, 0 failures.
+  `pnpm spec:search "column summaries"`: QMD returned LN-NB-050.
+- `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte -t RichCellsAndExpandedRows`:
+  baseline 1 failed, 4 skipped. The summary bottom was 280px against a maximum
+  header bottom of 269px (including the assertion's 1px rounding tolerance).
+  Receipt: `.local/validation/runs/lapis-notebook-run-2afe3f3a-d91d-4034-bc6c-05b09977a033`.
+- `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm storybook:review`:
+  restarted only the owned Notebook review after the fix, from a fresh snapshot.
+- Post-fix Docker prefix for the following commands:
+  `docker --context omarchy exec -e LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native -e LAPIS_NOTEBOOK_VALIDATION_WORKER=1 -w /work/lapis-plugin-notebook lapis-notebook-run-e08a3745-2d0a-4186-908f-eef5a68caf26`.
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte -t RichCellsAndExpandedRows`:
+  exact regression 1 passed, 0 failed, 4 skipped.
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte src/stories/PluginWorkspace.stories.svelte -t 'ResultsAndStructuredFilters|RichCellsAndExpandedRows|LargeTypedResults|InspectorSample|IndependentTables|TableFilters'`:
+  7 passed, 0 failed, 27 unrelated shell stories skipped. Includes both real
+  desktop/mobile TableFilters stories and all five table scenarios, with the
+  fatal runtime guard and existing accessibility checks retained.
+- Prefix + `pnpm test -- src/lib/render/table/table-files.test.ts`: 24 passed,
+  0 failed; the new helper is 34 physical lines.
+- Prefix + `pnpm spec:check`: 3 specification lanes passed, routing 25 lanes/0
+  findings, parity 6 families/0 findings, ownership 1 passed.
+- `/Users/stevejuma/code/lapismd/design-core-notebook-tables/node_modules/.bin/prettier --plugin /Users/stevejuma/code/lapismd/design-core-notebook-tables/node_modules/prettier-plugin-svelte/plugin.js --check src/stories/tables/table-header.story-play.ts src/stories/tables/NotebookTables.stories.svelte src/lib/render/dataframe/DataFrameViewer.svelte src/lib/render/dataframe/DataFrameColumnSummary.svelte`:
+  all four files passed.
+
+Full qualification remains deferred. The previously recorded filter-trigger type
+error and the broader migration's remaining focused gates are still outstanding.
