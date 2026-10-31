@@ -8,15 +8,20 @@
     preview = false,
     large = false,
     simple = false,
+    longText = false,
   }: {
     setup?: boolean;
     preview?: boolean;
     large?: boolean;
     simple?: boolean;
+    longText?: boolean;
   } = $props();
   const rows = $derived(
     Array.from({ length: large ? 10000 : 45 }, (_, i) => ({
-      name: ["Ada", "Grace", "Katherine"][i % 3] + " " + i,
+      name:
+        longText && i === 0
+          ? "Ada completed the analysis and is reviewing the detailed findings with the research team before the next planning meeting."
+          : ["Ada", "Grace", "Katherine"][i % 3] + " " + i,
       score: i,
       enabled: i % 2 === 0,
       created: "2026-03-01",

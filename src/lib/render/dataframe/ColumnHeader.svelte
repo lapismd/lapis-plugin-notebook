@@ -1,7 +1,5 @@
 <script lang="ts">
-  import ArrowDownWideNarrow from "@lucide/svelte/icons/arrow-down-wide-narrow";
-  import ArrowUpNarrowWide from "@lucide/svelte/icons/arrow-up-narrow-wide";
-  import ChevronsUpDown from "@lucide/svelte/icons/chevrons-up-down";
+  import SortIcon from "./SortIcon.svelte";
   import Ellipsis from "@lucide/svelte/icons/ellipsis";
   import { Badge } from "@lapismd/design-core/shadcn/badge";
   import { Button } from "@lapismd/design-core/shadcn/button";
@@ -38,15 +36,7 @@
         <span class="notebook-dataframe__column-label"
           >{column.label ?? column.name}</span
         >
-        {#if sortState?.direction === "asc"}
-          <ArrowUpNarrowWide class="notebook-dataframe__column-sort-icon" />
-        {:else if sortState?.direction === "desc"}
-          <ArrowDownWideNarrow class="notebook-dataframe__column-sort-icon" />
-        {:else}
-          <ChevronsUpDown
-            class="notebook-dataframe__column-sort-icon notebook-dataframe__column-sort-icon--idle"
-          />
-        {/if}
+        <SortIcon direction={sortState?.direction} />
       </span>
       <span class="notebook-dataframe__column-meta">
         <span>{column.displayType ?? column.type}</span>

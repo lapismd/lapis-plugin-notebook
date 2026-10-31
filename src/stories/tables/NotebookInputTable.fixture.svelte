@@ -8,7 +8,12 @@
     disabled = false,
   }: { single?: boolean; required?: boolean; disabled?: boolean } = $props();
   const rows = [
-    { name: "Ada", score: 7 },
+    {
+      name: "Ada",
+      score: 7,
+      notes:
+        "Completed the analysis and reviewing the detailed findings with the research team before the next planning meeting.",
+    },
     { name: "Grace", score: 9 },
     { name: "Katherine", score: 8 },
   ];

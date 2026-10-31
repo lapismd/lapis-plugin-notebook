@@ -6,7 +6,7 @@
 - Implemented: result/input/preview UI candidate and subsequent feedback slices;
   host compatibility and final migration cleanup remain in progress.
 - Focused-tested: review stories and feedback regressions as recorded below;
-  remaining migration gates and the filter-trigger type issue stay open.
+  remaining migration gates stay open; the filter-trigger type issue is now fixed.
 - UI-approved: pending.
 - Fully-qualified: deferred until UI approval.
 
@@ -225,3 +225,59 @@ This is focused archive acceptance for UI review. UI-approved and fully-qualifie
 states remain pending; the recorded filter-trigger type gate and original
 migration's remaining checks are not waived. No full suites, screenshot comparison,
 baseline updates, publication, push, merge or workspace cleanup were performed.
+
+## UI feedback: table surfaces, controls and header consistency
+
+Specified, implemented and focused-tested. UI-approved: pending. Fully-qualified:
+deferred. Tables/Input Tables use the document background (white in light mode),
+rounded bordered adapter surfaces and a toolbar divider. Wrap text/Column colours
+controls sit beside Filters and use shared controlled presentation/geometry.
+Basic headers reuse dataframe icons and its sort-state implementation, including
+Shift multi-sort and priority. Header hover is visible on the summary surface.
+Density uses a required three-segment ToggleGroup. The column picker adapts Bases'
+search/checkbox/type-icon presentation without plugin imports. Filter popovers
+retain 12px viewport clearance, an accessible dialog role and focus return.
+The prior unsupported aria-description type issue is fixed with aria-describedby.
+
+Shared owner commits: `121fab10` (nested Command checkbox foreground and controlled
+display), `24d11233` (custom header text colour/tint). Final Design Core 0.8.0
+review archive SHA256: `302c454246d97b355b8f2556eab7af9d797de4b18f78fa1f85437d5b160f207b`.
+Host follow-up `513970d0` adds the public ToggleGroup module and keeps earlier
+cohort work in its existing parent. Tracked manifests/locks remain registry-portable.
+
+Fresh final review worker: `lapis-notebook-run-a1c34e01-a83a-4483-b091-31035e3efbf7`;
+review on loopback 10529. The original 10329 and shared 10429 processes remain.
+Review supervisor log: `.local/table-feedback-review.log`. Exact installed graph
+and checksum provenance are retained in the owned worker's validation receipt.
+
+All commands use Node 24.10.0 on PATH. `pnpm view @lapismd/spec-validator version`
+returned 0.2.0 (already installed). Doctor passed 10 checks/1 alias warning;
+`pnpm spec:search "table review"` succeeded with QMD; no ABI fallback was needed.
+
+Before/after and exact targets:
+
+- Baseline `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte -t ColumnControls`: 1 failed/5 skipped (old dropdown has no density group), receipt `lapis-notebook-run-ab4acf7f-9bbe-4e6e-af0c-00d887c6d33c`.
+- Exact target against first new review: 1 failed/5 skipped (new test expected button/aria-pressed, actual single-choice segments correctly expose radio/aria-checked); corrected test semantics.
+- New-target selector `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte src/stories/tables/NotebookInputTables.stories.svelte -t 'ColumnControls|IndependentTables|DisplayControls|SortState'`: first 4 failed/1 passed (required density could deselect, filter needed explicit dialog semantics, two new input tests awaited async mount for only one second). Next 3 failed/2 passed (test measured unpositioned row wrappers and did not retain Shift across separate user-event instances); corrected to actual cell geometry and a shared interaction instance. Next 3 failed/2 passed, with functional assertions passing and accessibility finding two duplicate priority-label failures plus an unnamed sparkbar switch. Added complete sort names/descriptions and switch label. Final exact selector: 5 passed/0 failed/8 unrelated skipped. No assertions or accessibility/runtime guards were removed.
+
+Final command prefix for all focused Docker acceptance:
+`docker --context omarchy exec -e LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native -e LAPIS_NOTEBOOK_VALIDATION_WORKER=1 -w /work/lapis-plugin-notebook lapis-notebook-run-a1c34e01-a83a-4483-b091-31035e3efbf7`
+
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte src/stories/tables/NotebookInputTables.stories.svelte src/stories/PluginWorkspace.stories.svelte -t 'ResultsAndStructuredFilters|RichCellsAndExpandedRows|LargeTypedResults|InspectorSample|IndependentTables|ColumnControls|DisplayControls|SortState|TypedMultipleSelection|OptionalSingleSelection|RequiredSingleSelection|DisabledSelection|TableFilters'`: 15 passed/0 failed/27 unrelated shell skipped. Includes both real desktop/mobile WorkspaceShell filter stories and the full two table families, retaining axe and fatal teardown checks.
+- Prefix + `pnpm check:canvas-table-types`: 0 errors/0 warnings; prior 1-error filter-trigger gate resolved.
+- Prefix + `pnpm test -- src/lib/render/table packages/input/src/__tests__/table-model.test.ts`: 52 passed/0 failed, including the 30-file physical-line audit.
+- Prefix + `pnpm spec:check`: all 3 spec lanes passed; routing 25/0 findings, parity 6/0 findings, ownership 1 passed.
+- Focused Prettier initially found 2 new helper files; formatted them and final changed-source check passed.
+
+Manual browser review confirms white document surfaces, rounded frames, toolbar
+dividers, independent coloured headers, native hover feedback and the fixed
+checkbox foreground. Screenshot: `.local/review/table-review-feedback.png`.
+No screenshot comparison or baseline update. The UI review remains open; full
+Notebook/Design Core/host qualification and packed-plugin ABI acceptance remain
+pending. No push, merge, release or workspace cleanup.
+
+Final evidence-only canonical status update: explicitly native documentation
+diagnosis `LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native pnpm spec:validate` passed
+10 validators/6 chapters/72 requirements. Runtime acceptance remains the fresh
+isolated Docker evidence above; this does not replace it or widen qualification.
+Final focused changed-source Prettier check: 0 findings.

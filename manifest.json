@@ -41,6 +41,7 @@
             "@lapismd/design-core/shadcn/slider",
             "@lapismd/design-core/shadcn/switch",
             "@lapismd/design-core/shadcn/textarea",
+            "@lapismd/design-core/shadcn/toggle-group",
             "@lapismd/design-core/shadcn/tooltip",
             "@lapismd/design-core/workspace/icon",
             "@codemirror/autocomplete",

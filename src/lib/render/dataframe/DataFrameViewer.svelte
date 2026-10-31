@@ -13,6 +13,7 @@
     createFilterState,
     filterConditionCount,
   } from "@lapismd/design-core/shadcn/filter-builder";
+  import TableDisplayControls from "../table/TableDisplayControls.svelte";
   import TableFilters from "../table/TableFilters.svelte";
   import NotebookCanvasTable from "../table/NotebookCanvasTable.svelte";
   import ColumnHeader from "./ColumnHeader.svelte";
@@ -55,6 +56,8 @@
     error = undefined,
   }: DataFrameProps = $props();
 
+  let wrapText = $state(false);
+  let columnColours = $state(false);
   const viewerState = createViewerState(untrack(() => pageSize));
   const searchInputId = `df-search-${Math.random().toString(36).slice(2)}`;
 
@@ -232,6 +235,11 @@
           () => viewerState.filterBarOpen,
           (open) => viewerState.setFilterBarOpen(open)
         }
+      /><TableDisplayControls
+        {wrapText}
+        {columnColours}
+        onWrapTextChange={(value) => (wrapText = value)}
+        onColumnColoursChange={(value) => (columnColours = value)}
       />{/snippet}
   </Toolbar>
 
@@ -291,6 +299,9 @@
       visibleRowIds={pageIds}
       selectionRowIds={filteredIds}
       showFilters={false}
+      framed={false}
+      {wrapText}
+      {columnColours}
       height={maxHeight}
       rowHeight={{ compact: 28, default: 36, relaxed: 48 }[
         viewerState.rowHeight

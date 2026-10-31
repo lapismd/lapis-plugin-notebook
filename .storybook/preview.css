@@ -1,3 +1,9 @@
 .workspace-shell-docs-canvas .docs-story .sb-story {
   padding: 0;
 }
+
+/* Table examples use the document surface rather than catalog chrome. */
+body:has(.notebook-table-review),
+body:has(.notebook-input-table-review) {
+  background: var(--background);
+}

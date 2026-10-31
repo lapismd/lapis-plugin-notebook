@@ -436,7 +436,8 @@
 .notebook-dataframe__cell-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: var(--notebook-table-white-space, nowrap);
+  overflow-wrap: anywhere;
 }
 
 .notebook-dataframe__null {
@@ -603,6 +604,8 @@
 }
 
 .notebook-dataframe__column-head {
+  /* Header controls need an accent distinct from the muted summary surface. */
+  --accent: color-mix(in srgb, var(--foreground) 10%, var(--muted));
   display: flex;
   flex-shrink: 0;
   align-items: flex-start;
@@ -624,8 +627,14 @@
   transition: background-color 150ms ease;
 }
 
-.notebook-dataframe__column-sort:hover {
-  background: color-mix(in srgb, var(--muted) 40%, transparent);
+.notebook-dataframe__column-sort:hover,
+.notebook-dataframe__column-sort:focus-visible {
+  background: var(--accent);
+}
+
+.notebook-dataframe__column-sort:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 
 .notebook-dataframe__column-title {
@@ -641,7 +650,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--foreground);
+  color: inherit;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 600;
@@ -1177,10 +1186,8 @@
 }
 
 .notebook-dataframe__columns-popover {
-  max-height: 18rem;
-  width: 16rem;
-  overflow: auto;
-  padding: 0.5rem;
+  width: 18rem;
+  padding: 0;
 }
 
 .notebook-dataframe__export-popover {
@@ -1208,34 +1215,6 @@
 
 .notebook-dataframe__column-list > * + * {
   margin-top: 0.25rem;
-}
-
-.notebook-dataframe__column-toggle {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  border-radius: 0.125rem;
-  padding: 0.375rem 0.5rem;
-  text-align: left;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
-
-.notebook-dataframe__column-toggle:hover {
-  background: var(--accent);
-}
-
-.notebook-dataframe__column-toggle-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.notebook-dataframe__column-toggle-state {
-  color: var(--muted-foreground);
-  font-size: 0.75rem;
-  line-height: 1rem;
 }
 
 .notebook-dataframe__export-item {
@@ -1949,9 +1928,9 @@
   font-weight: 500;
   border-radius: 0.25rem;
   font-size: var(--text-muted);
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -2049,9 +2028,9 @@
   font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
   border-radius: 0.25rem;
   font-size: var(--text-muted);
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -2186,9 +2165,9 @@
 .notebook-dependencies__gf9c63bef {
   border: 1px solid var(--border);
   border-radius: 9999px;
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -2199,9 +2178,9 @@
 .notebook-dependencies__gaeb8ee94 {
   border: 1px solid var(--border);
   border-radius: 9999px;
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -2334,9 +2313,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -2348,9 +2327,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -2399,9 +2378,9 @@
 .notebook-dependencies__g6a5bb38a {
   font-weight: 500;
   font-size: var(--text-muted);
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -2459,9 +2438,9 @@
   display: inline-flex;
   align-items: center;
   border-radius: 0.375rem;
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -2843,9 +2822,9 @@
   padding-block: 0.25rem;
   border-radius: 9999px;
   color: #92400e;
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -2861,9 +2840,9 @@
   padding-block: 0.25rem;
   border-radius: 9999px;
   color: #be123c;
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -3023,9 +3002,9 @@
   height: 2.25rem;
   align-items: center;
   justify-content: center;
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
   width: 2.25rem;
@@ -3044,9 +3023,9 @@
   height: 2.25rem;
   align-items: center;
   justify-content: center;
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
   width: 2.25rem;
@@ -3118,9 +3097,9 @@
   font-weight: 500;
   font-size: 0.75rem;
   line-height: 1rem;
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -3230,9 +3209,9 @@
   border-radius: 0.375rem;
   font-size: 0.75rem;
   line-height: 1rem;
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -3855,9 +3834,9 @@
   padding-block: 0.25rem;
   border-radius: 0.25rem;
   font-size: var(--text-muted);
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -4049,9 +4028,9 @@
   padding-block: 0.125rem;
   border-radius: 0.25rem;
   font-size: var(--text-muted);
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+    backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -4434,4 +4413,14 @@
   min-width: 0;
 }
 
-.notebook-dataframe__expand-button { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; border: 0; background: transparent; color: var(--muted-foreground); cursor: pointer; margin-inline-end: .25rem; }
+.notebook-dataframe__expand-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  margin-inline-end: 0.25rem;
+}

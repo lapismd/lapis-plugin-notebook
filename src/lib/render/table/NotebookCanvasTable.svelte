@@ -7,11 +7,7 @@
     type CanvasTableSelection,
   } from "@lapismd/design-core/shadcn/canvas-table";
   import { createFilterState } from "@lapismd/design-core/shadcn/filter-builder";
-  import type {
-    Column,
-    DataFrameRow,
-    SortState,
-  } from "../dataframe/dataframe-types";
+  import type { Column, DataFrameRow } from "../dataframe/dataframe-types";
   import { clientSort } from "../dataframe/utils/sort";
   import {
     filterTableRows,
@@ -20,6 +16,11 @@
   } from "./table-filter-model";
   import { identifyTableRows } from "./table-identity";
   import { tableText } from "./table-values";
+  import "./notebook-table.css";
+  import SortIcon from "../dataframe/SortIcon.svelte";
+  import { Badge } from "@lapismd/design-core/shadcn/badge";
+  import { createViewerState } from "../dataframe/state.svelte";
+  import TableDisplayControls from "./TableDisplayControls.svelte";
   import TableFilters from "./TableFilters.svelte";
   let {
     rows,
@@ -40,6 +41,9 @@
     rowHeight = 36,
     headerHeight = 48,
     showFilters = true,
+    wrapText = $bindable(false),
+    columnColours = $bindable(false),
+    framed = true,
     label = "Notebook data table",
     height = "320px",
   }: {
@@ -63,11 +67,16 @@
     rowHeight?: number;
     headerHeight?: number;
     showFilters?: boolean;
+    wrapText?: boolean;
+    columnColours?: boolean;
+    framed?: boolean;
     label?: string;
     height?: string;
   } = $props();
+  const instanceId = $props.id();
   let filter = $state(createFilterState());
-  let sort = $state<SortState[]>([]);
+  const viewState = createViewerState();
+  const sort = $derived(viewState.sortColumns);
   let localWidths = $state<Record<string, number>>({});
   const schemaKey = $derived(
     allColumns.map((c) => c.name + ":" + c.type).join("\0"),
@@ -79,7 +88,7 @@
     untrack(() => {
       inferred = inferTableTypes(source, allColumns);
       filter = createFilterState();
-      sort = [];
+      viewState.clearSort();
     });
   });
   const fields = $derived(tableFilterFields(allColumns, inferred, filter));
@@ -104,14 +113,6 @@
       cell: renderCell,
     })),
   );
-  function nextSort(column: string) {
-    const current = sort.find((entry) => entry.column === column);
-    sort = !current
-      ? [{ column, direction: "asc", priority: 1 }]
-      : current.direction === "asc"
-        ? [{ column, direction: "desc", priority: 1 }]
-        : [];
-  }
   function numbers(ids: CanvasTableRowId[]) {
     return ids.filter((id): id is number => typeof id === "number");
   }
@@ -121,16 +122,36 @@
   {@const column = columns[context.column]}
   {#if column}
     {#if header}{@render header(column)}{:else}
+      {@const currentSort = sort.find((entry) => entry.column === column.name)}
       <button
         type="button"
         class="notebook-canvas-heading"
-        onclick={() => nextSort(column.name)}
-        aria-label={"Sort " + (column.label ?? column.name)}
+        onclick={(event) => viewState.toggleSort(column.name, event.shiftKey)}
+        data-sort-direction={currentSort?.direction ?? "none"}
+        aria-label={"Sort " +
+          (column.label ?? column.name) +
+          (currentSort && currentSort.priority > 1
+            ? " " + currentSort.priority
+            : "")}
+        aria-describedby={instanceId + "-sort-" + context.column}
       >
-        {column.label ?? column.name}{#if sort[0]?.column === column.name}<span
-            >{sort[0].direction === "asc" ? "↑" : "↓"}</span
-          >{/if}
+        <span>{column.label ?? column.name}</span>
+        <span class="notebook-canvas-sort-indicator"
+          ><SortIcon direction={currentSort?.direction} />
+          {#if currentSort && currentSort.priority > 1}<Badge
+              variant="outline"
+              class="notebook-dataframe__column-badge"
+              >{currentSort.priority}</Badge
+            >{/if}
+        </span>
       </button>
+      <span
+        id={instanceId + "-sort-" + context.column}
+        class="notebook-canvas-sort-status"
+        >{currentSort
+          ? `${currentSort.direction === "asc" ? "Ascending" : "Descending"}, sort priority ${currentSort.priority}.`
+          : "Unsorted."} Shift-click to sort by multiple columns.</span
+      >
     {/if}
   {/if}
 {/snippet}
@@ -149,24 +170,36 @@
 {/snippet}
 <div
   class="notebook-canvas-table"
+  data-framed={framed}
+  style:--notebook-table-white-space={wrapText ? "pre-wrap" : "nowrap"}
   style:height
   data-notebook-canvas-table
- 
 >
   {#if showFilters}<div class="notebook-canvas-tools">
-      <TableFilters
-        {fields}
-        value={filter}
-        onValueChange={(next) => {
-          filter = next;
-        }}
-      /><span aria-live="polite">{matched.length} of {rows.length} rows</span>
+      <div class="notebook-canvas-tool-actions">
+        <TableFilters
+          {fields}
+          value={filter}
+          onValueChange={(next) => {
+            filter = next;
+          }}
+        />
+        <TableDisplayControls
+          {wrapText}
+          {columnColours}
+          onWrapTextChange={(value) => (wrapText = value)}
+          onColumnColoursChange={(value) => (columnColours = value)}
+        />
+      </div>
+      <span aria-live="polite">{matched.length} of {rows.length} rows</span>
     </div>{/if}
   <div class="notebook-canvas-grid">
     <CanvasTable
       rows={canvasRows}
       columns={descriptors}
-      columnWidths={widths ?? columns.map(column => localWidths[column.name] ?? 192)} fillWidth
+      columnWidths={widths ??
+        columns.map((column) => localWidths[column.name] ?? 192)}
+      fillWidth
       onColumnWidthsChange={(next) => {
         if (onWidthsChange) onWidthsChange(next);
         else
@@ -179,6 +212,8 @@
       {rowHeight}
       columnHeaderHeight={headerHeight}
       toolbar={false}
+      {wrapText}
+      {columnColours}
       contextMenu={false}
       visibleRowIds={displayIds}
       selectionRowIds={scopeIds}
@@ -196,45 +231,3 @@
     />
   </div>
 </div>
-
-<style>
-  .notebook-canvas-table {
-    display: flex;
-    flex-direction: column;
-    min-height: 100px;
-    min-width: 0;
-    width: 100%;
-    font-family: var(--font-sans, system-ui);
-  }
-  .notebook-canvas-tools {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    padding: 0.25rem;
-    font-size: 0.75rem;
-  }
-  .notebook-canvas-grid {
-    flex: 1;
-    min-height: 0;
-  }
-  .notebook-canvas-heading {
-    border: 0;
-    background: transparent;
-    color: inherit;
-    width: 100%;
-    height: 100%;
-    text-align: start;
-    padding: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font: inherit;
-    font-weight: 600;
-  }
-  .notebook-canvas-value {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-</style>

@@ -4,6 +4,12 @@
   import DataFrameViewer from "../../lib/render/dataframe/DataFrameViewer.svelte";
   import Demo from "./NotebookTables.fixture.svelte";
   import { assertTableHeaders } from "./table-header.story-play";
+  import { assertBasicSort } from "./table-sort.story-play";
+  import {
+    assertTableDisplay,
+    assertFilterClearance,
+  } from "./table-display.story-play";
+  import { assertColumnControls } from "./table-toolbar.story-play";
   const { Story } = defineMeta({
     title: "Plugins/Notebook/Tables",
     component: DataFrameViewer,
@@ -78,9 +84,32 @@
 <Story name="Inspector sample"
   >{#snippet template()}<Demo preview />{/snippet}</Story
 >
-<Story name="Independent tables"
+<Story
+  name="Independent tables"
+  play={async ({ canvasElement }) => {
+    await assertFilterClearance(canvasElement);
+    await assertBasicSort(canvasElement);
+  }}
   >{#snippet template()}<Demo simple /><Demo
       simple
       setup={false}
     />{/snippet}</Story
 >
+
+<Story
+  name="Column controls"
+  play={async ({ canvasElement }) => {
+    await assertColumnControls(canvasElement);
+  }}
+>
+  {#snippet template()}<Demo />{/snippet}
+</Story>
+
+<Story
+  name="Display controls"
+  play={async ({ canvasElement }) => {
+    await assertTableDisplay(canvasElement);
+  }}
+>
+  {#snippet template()}<Demo longText />{/snippet}
+</Story>

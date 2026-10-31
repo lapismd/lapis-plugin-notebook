@@ -1,0 +1,74 @@
+.notebook-canvas-table {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 100px;
+  min-width: 0;
+  width: 100%;
+  font-family: var(--font-sans, system-ui);
+}
+.notebook-canvas-tools {
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem;
+  font-size: 0.75rem;
+}
+.notebook-canvas-grid {
+  flex: 1;
+  min-height: 0;
+}
+.notebook-canvas-heading {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  width: 100%;
+  height: 100%;
+  text-align: start;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: inherit;
+  font-weight: 600;
+}
+.notebook-canvas-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: var(--notebook-table-white-space, nowrap);
+  overflow-wrap: anywhere;
+}
+
+.notebook-canvas-table[data-framed="true"] {
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 0.5rem);
+  overflow: hidden;
+}
+.notebook-canvas-tool-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.notebook-canvas-sort-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.notebook-canvas-heading:hover {
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+.notebook-canvas-heading:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.notebook-canvas-sort-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

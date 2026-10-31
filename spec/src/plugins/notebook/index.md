@@ -249,3 +249,13 @@ The toolbar MUST omit the redundant total-row count while retaining optional que
 Private dataframe filter notifications now carry the structured tree, matching the new editor and raw-value evaluator rather than flattening Any/None groups into incorrect All semantics; no public output wire format changes. Shared viewport width filling owns scrollbar accounting for narrow input data.
 
 The isolated review and final registry intake MUST apply the exact checksum-verified Bits UI 2.20.2 consumer patch required by published Design Core 0.8; source fixes remain in the shared owner and upstream Bits UI. This does not authorize any new package patch or waive focused portal/focus checks.
+
+LN-NB-050 header actions MUST provide visible hover and keyboard-focus feedback on the summary background. Row density MUST use a required single-choice Compact/Default/Relaxed segmented ToggleGroup. The visible-column popover MUST follow Bases' searchable property-list presentation with type icons and checked visibility indicators, without importing plugin code. Search and toggling MUST preserve column identity and settings.
+
+LN-NB-054 Tables and Input Tables review families MUST use the document background (white in the light theme), including independent instances, while retaining the theme's dark document surface in dark mode. Story-only surface styling MUST NOT override private production presentation.
+
+LN-NB-050 Notebook tables MUST expose Wrap text and Column colours toggles beside Filters, using the shared display settings without mutating typed data, selection or input events. Wrapping MUST update central row geometry and retain rich cells. Standalone table/input adapters MUST have a rounded, bordered surface; dataframe shells keep their existing rounded frame without a duplicate inner border. Filter popovers MUST retain at least 12 CSS pixels of viewport clearance.
+
+LN-NB-050/052 basic adapter headers MUST reuse the dataframe's unsorted/ascending/descending Lucide icons and sort-state implementation, including Shift-assisted multiple sort, priority indicators and return to unsorted. Display-only and sort changes MUST NOT emit input-selection events.
+
+The standalone adapter toolbar MUST have a bottom divider. Column-colour mode MUST tint custom header backgrounds consistently with the shared default canvas, without masking that paint in Notebook snippets.
