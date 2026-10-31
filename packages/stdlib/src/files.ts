@@ -57,37 +57,48 @@ export function createNotebookFileAttachment(
   path: string,
   vaultRuntime: NotebookVaultRuntime,
 ): NotebookFileAttachment {
+  return createNotebookFileAttachmentFromReader(
+    path.split("/").pop() ?? path,
+    () => vaultRuntime.readBinary(path),
+    path,
+  );
+}
+
+/** Shared lazy readers for vault attachments and session-local uploaded files. */
+export function createNotebookFileAttachmentFromReader(
+  name: string,
+  read: () => Promise<ArrayBuffer>,
+  path = name,
+): NotebookFileAttachment {
+  const text = async () => decodeNotebookText(await read());
   return {
-    name: path.split("/").pop() ?? path,
+    name,
     path,
     arrayBuffer() {
-      return vaultRuntime.readBinary(path);
+      return read();
     },
     text() {
-      return vaultRuntime.readText(path);
+      return text();
     },
     async json() {
-      return JSON.parse(await vaultRuntime.readText(path)) as unknown;
+      return JSON.parse(await text()) as unknown;
     },
     async csv(options?: NotebookDsvParseOptions) {
       const d3 = await loadD3DsvModule();
       return d3.csvParse(
-        await vaultRuntime.readText(path),
+        await text(),
         options?.typed ? d3.autoType : undefined,
       );
     },
     async tsv(options?: NotebookDsvParseOptions) {
       const d3 = await loadD3DsvModule();
       return d3.tsvParse(
-        await vaultRuntime.readText(path),
+        await text(),
         options?.typed ? d3.autoType : undefined,
       );
     },
     async blob(type?: string) {
-      return new Blob(
-        [await vaultRuntime.readBinary(path)],
-        type ? { type } : undefined,
-      );
+      return new Blob([await read()], type ? { type } : undefined);
     },
   };
 }

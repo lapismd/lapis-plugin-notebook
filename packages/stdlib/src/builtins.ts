@@ -6,6 +6,7 @@ export const LAPIS_BUILTIN_NAMES = [
   "cars",
   "citywages",
   "diamonds",
+  "code",
   "text",
   "markdown",
   "md",

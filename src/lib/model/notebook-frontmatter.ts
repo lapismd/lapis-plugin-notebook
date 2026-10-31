@@ -59,6 +59,7 @@ export function normalizeNotebookFrontmatter(
   const autorun = normalizeNotebookAutorun(record.autorun);
 
   return {
+    ...(typeof record.id === "string" ? { id: record.id.toLowerCase() } : {}),
     version:
       typeof record.version === "number" && Number.isFinite(record.version)
         ? record.version

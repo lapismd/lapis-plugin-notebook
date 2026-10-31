@@ -33,6 +33,12 @@ complete catalog and specification lanes sequentially in one worker, snapshot
 and installation. It stops at the original first failure; individual commands
 and exact selectors remain available. It accepts no selectors of its own.
 
+The aggregate also runs `pnpm packages:pack`: a clean npm installation checks
+the public declaration usage and starts fresh development and production
+browser consumers of the packed runtime and stylesheet. It uses the locked
+Playwright version and fails on browser errors or warnings through teardown.
+CI executes it in the parallel package job after restoring the audited build.
+
 Image identity covers the actual recipe, tool installer, selected pnpm,
 Playwright, Rust toolchain and architecture. Unrelated script/dependency changes
 do not rebuild it. The pnpm cache separately keys the lockfile and verified
@@ -81,6 +87,8 @@ with a writable temporary Corepack/browser cache. Local commands keep their
 Docker default. The image/build stage is followed by parallel quality, unit,
 package lint, static Storybook and three browser-shard jobs, then the stable
 `Validation lanes` aggregate. All jobs must succeed, including every shard.
+Containers use four CPUs from the standard public Ubuntu runner, bounded to
+7 GiB memory and 2 GiB shared memory.
 
 The shared CI setup installs once per job with frozen registry resolution and
 caches the container pnpm store. Turbo caches root build/check/test tasks and
@@ -150,6 +158,6 @@ and visual approval remain separate; this tooling does not approve baselines.
 
 The browser setup installs a fatal Svelte diagnostic guard before story hooks.
 It forwards console warnings/errors and fails Svelte runtime diagnostics during
-mount, interaction and teardown. The wrapper records origin stacks without
+mount, interaction and teardown, plus caught runtime story-extraction errors. The wrapper records origin stacks without
 throwing through framework cleanup; post-test and post-file assertions make
 every retained diagnostic fatal. No suppression or allowlist is permitted.

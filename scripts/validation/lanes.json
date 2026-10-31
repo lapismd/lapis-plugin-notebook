@@ -1,6 +1,6 @@
 {
   "validation:all": "node scripts/validation/all.mjs",
-  "build": "pnpm run prepack && pnpm build:bundle",
+  "build": "pnpm run prepack",
   "check": "pnpm check:validation-routing && pnpm check:storybook-parity && pnpm spec:validate && pnpm check:app-ownership && pnpm check:no-tailwind && pnpm check:svelte && pnpm check:types",
   "check:app-ownership": "vitest run --project unit src/lib/application-ownership.test.ts",
   "check:no-tailwind": "node scripts/check-no-tailwind.mjs",
@@ -10,7 +10,8 @@
   "test:storybook": "node scripts/test-storybook-batches.mjs",
   "build-storybook": "NODE_OPTIONS=\"${NODE_OPTIONS:---max-old-space-size=8192}\" storybook build --config-dir .storybook --output-dir storybook-static",
   "publint": "pnpm run prepack",
-  "prepack": "svelte-package --tsconfig ./tsconfig.pack.json && publint",
+  "packages:pack": "node scripts/check-package-consumer.mjs",
+  "prepack": "node scripts/build-npm-package.mjs",
   "spec:build": "spec-validator build",
   "spec:check": "pnpm check:validation-routing && pnpm check:storybook-parity && spec-validator check && pnpm check:app-ownership",
   "spec:first": "spec-validator first",

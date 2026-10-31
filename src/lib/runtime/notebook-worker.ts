@@ -1,3 +1,9 @@
+import { notebookInputHostContext } from "./notebook-execution-host";
+import { formatNotebookDisplayValue } from "./notebook-display-value";
+import {
+  awaitNotebookTask,
+  throwIfNotebookAborted,
+} from "./notebook-cancellation";
 import {
   createNotebookStdlibRuntime,
   createNotebookVaultRuntime,
@@ -14,6 +20,7 @@ import {
 } from "@lapis-notes/notebook-stdlib";
 import {
   createNotebookViewRuntime,
+  snapshotNotebookInputState,
   isNotebookDomNode,
   isTemplateStringsArray,
   loadNotebookDomRuntime,
@@ -37,6 +44,8 @@ import type { NotebookExecutionHost } from "./notebook-execution-host";
 import { collectDependencyClosure } from "./notebook-graph";
 import {
   clearNotebookDomOutputsForCell,
+  notebookInputDomOutputId,
+  claimNotebookInputDomOutput,
   createNotebookDomOutputId,
   emitNotebookInputChange,
   registerNotebookDomOutput,
@@ -52,6 +61,7 @@ export type NotebookRuntimeDependencyLoader =
   CoreNotebookRuntimeDependencyLoader<NormalizedNotebookUserDependencyDescriptor>;
 export type NotebookExecutionOptions =
   CoreNotebookExecutionOptions<NormalizedNotebookUserDependencyDescriptor> & {
+    signal?: AbortSignal;
     localPackageVersions?: Record<string, string>;
     moduleImportLoader?: NotebookRuntimeModuleLoader;
   };
@@ -81,6 +91,7 @@ export async function executeNotebookDocument(
   options: NotebookExecutionOptions = {},
   reportProgress?: (event: NotebookExecutionProgressEvent) => void,
 ): Promise<NotebookExecutionResult> {
+  throwIfNotebookAborted(options.signal);
   const values: Record<string, unknown> = session.getRuntimeValues();
   const outputs: Record<string, NotebookOutput[]> = {};
   const localModuleCache: NotebookLocalModuleCache = new Map();
@@ -136,6 +147,7 @@ export async function executeNotebookDocument(
         await executionHost.getAppTablesSnapshot(),
       );
     });
+    throwIfNotebookAborted(options.signal);
     session.finishPhase(phaseKey, firstCellId, phaseDetail);
     reportProgress?.({
       type: "phase-completed",
@@ -146,12 +158,15 @@ export async function executeNotebookDocument(
   }
 
   for (const cellId of executionOrder) {
+    throwIfNotebookAborted(options.signal);
     const node = session.graph.nodes.get(cellId);
     if (!node) {
       continue;
     }
     try {
       const invalidation = session.beginCellInvalidation(cellId);
+      // Inputs may have changed while an earlier async cell was running.
+      Object.assign(values, session.getRuntimeValues());
       for (const def of node.defs) {
         delete values[def];
       }
@@ -174,25 +189,36 @@ export async function executeNotebookDocument(
           cellId,
         });
       }
-      const result = await executeCell(
-        executionHost,
-        node.cell,
-        values,
-        node.defs.filter((def) => def !== cellId),
-        duckdbProvider,
-        session,
-        document.sourcePath,
-        reportProgress,
-        options.runtimeDependencies ?? [],
-        options.runtimeDependencyLoader ?? loadNotebookRuntimeDependency,
-        options.localPackageVersions ?? {},
-        localModuleCache,
-        options.moduleImportLoader,
-        options.compileProvider,
-        invalidation,
+      const result = await awaitNotebookTask(
+        executeCell(
+          executionHost,
+          node.cell,
+          values,
+          node.defs.filter((def) => def !== cellId),
+          duckdbProvider,
+          session,
+          document.sourcePath,
+          reportProgress,
+          options.runtimeDependencies ?? [],
+          options.runtimeDependencyLoader ?? loadNotebookRuntimeDependency,
+          options.localPackageVersions ?? {},
+          localModuleCache,
+          options.moduleImportLoader,
+          options.compileProvider,
+          invalidation,
+          options.signal,
+        ),
+        options.signal,
       );
+      throwIfNotebookAborted(options.signal);
       outputs[cellId] = result.outputs;
-      result.definitions.forEach(([name, value]) => {
+      const definitions = new Map(result.definitions);
+      for (const [name, value] of Object.entries(
+        session.getCellInputValues(cellId) ?? {},
+      )) {
+        if (node.defs.includes(name)) definitions.set(name, value);
+      }
+      definitions.forEach((value, name) => {
         values[name] = value;
       });
       values[cellId] =
@@ -202,11 +228,14 @@ export async function executeNotebookDocument(
             ? result.outputs[0]
             : result.outputs;
       session.setRuntimeDefinitions(cellId, [
-        ...result.definitions,
+        ...definitions.entries(),
         [cellId, values[cellId]],
       ]);
       clearNotebookDomOutputsForCell(document.sourcePath, cellId, {
-        exceptOutputIds: collectDomOutputIds(result.outputs),
+        exceptOutputIds: collectDomOutputIds(
+          result.outputs,
+          document.sourcePath,
+        ),
       });
       session.setCellOutput(cellId, result.outputs);
       reportProgress?.({
@@ -215,6 +244,7 @@ export async function executeNotebookDocument(
         outputs: result.outputs,
       });
     } catch (error) {
+      throwIfNotebookAborted(options.signal);
       const message = error instanceof Error ? error.message : String(error);
       const failure = lapis.error(message);
       outputs[cellId] = [failure];
@@ -228,14 +258,28 @@ export async function executeNotebookDocument(
     }
   }
 
+  throwIfNotebookAborted(options.signal);
+  Object.assign(values, session.getRuntimeValues());
   return { outputs, values };
 }
 
-function collectDomOutputIds(outputs: readonly NotebookOutput[]): Set<string> {
+function collectDomOutputIds(
+  outputs: readonly NotebookOutput[],
+  sourcePath?: string,
+): Set<string> {
   return new Set(
-    outputs
-      .filter((output) => output.kind === "dom")
-      .map((output) => output.outputId),
+    outputs.flatMap((output) => {
+      if (output.kind === "dom") return [output.outputId];
+      if (output.kind === "input") {
+        const id = notebookInputDomOutputId(
+          sourcePath,
+          output.cellId,
+          output.variableName,
+        );
+        return id ? [id] : [];
+      }
+      return [];
+    }),
   );
 }
 
@@ -255,6 +299,7 @@ async function executeCell(
   moduleImportLoader?: NotebookRuntimeModuleLoader,
   compileProvider?: NotebookJavaScriptLikeCompileProvider,
   invalidation?: Promise<void>,
+  signal?: AbortSignal,
 ): Promise<{
   outputs: NotebookOutput[];
   definitions: Array<[string, unknown]>;
@@ -317,6 +362,7 @@ async function executeCell(
         moduleImportLoader,
         compileProvider,
         invalidation,
+        signal,
       );
   }
 }
@@ -339,20 +385,41 @@ async function executeJavaScriptLikeCell(
   moduleImportLoader?: NotebookRuntimeModuleLoader,
   compileProvider?: NotebookJavaScriptLikeCompileProvider,
   invalidation?: Promise<void>,
+  signal?: AbortSignal,
 ): Promise<{
   outputs: NotebookOutput[];
   definitions: Array<[string, unknown]>;
   value: unknown;
 }> {
   const runtimeOutputs: NotebookOutput[] = [];
+  let acceptsOutputs = true;
+  const publishOutputs = () => {
+    if (!acceptsOutputs || signal?.aborted || !cellId) return;
+    const outputs = [...runtimeOutputs];
+    session.setCellPartialOutput(cellId, outputs);
+    reportProgress?.({ type: "cell-output", cellId, outputs });
+  };
   const appendDisplayedValue = (value: unknown): unknown => {
+    if (!acceptsOutputs || signal?.aborted) return value;
+    const count = runtimeOutputs.length;
     appendNotebookDisplayValue(runtimeOutputs, value, cellId, sourcePath);
+    if (runtimeOutputs.length !== count) publishOutputs();
     return value;
   };
   const transformed = transformObservableViewof(source);
   const runtimeRequiresDom =
     transformed.requiresDom || hasLiveDomRuntimeReference(source);
-  const domRuntime = runtimeRequiresDom ? await loadNotebookDomRuntime() : null;
+  const domRuntime = runtimeRequiresDom
+    ? await loadNotebookDomRuntime(
+        notebookInputHostContext(
+          host,
+          sourcePath,
+          cellId,
+          () => !signal?.aborted,
+          signal,
+        ),
+      )
+    : null;
   const compiledSource = await compileJavaScriptLikeSource(
     transformed.code,
     transpile,
@@ -362,6 +429,7 @@ async function executeJavaScriptLikeCell(
       cellId,
     },
   );
+  throwIfNotebookAborted(signal);
   const dependencyEntries = await loadReferencedNotebookDependencyGlobals(
     source,
     runtimeDependencies.filter(
@@ -378,6 +446,7 @@ async function executeJavaScriptLikeCell(
     localModuleCache,
     moduleImportLoader,
   );
+  throwIfNotebookAborted(signal);
   const vaultRuntime = createNotebookVaultRuntime(
     (path, targetSourcePath) => host.readVaultFile(path, targetSourcePath),
     sourcePath,
@@ -402,6 +471,7 @@ async function executeJavaScriptLikeCell(
       });
       try {
         await registerVaultFile(duckdbService, host, alias, path, sourcePath);
+        throwIfNotebookAborted(signal);
         session.finishPhase(phaseKey, cellId, path);
         reportProgress?.({
           type: "phase-completed",
@@ -410,6 +480,7 @@ async function executeJavaScriptLikeCell(
           detail: path,
         });
       } catch (error) {
+        throwIfNotebookAborted(signal);
         const message = error instanceof Error ? error.message : String(error);
         session.finishPhase(phaseKey, cellId, message, message);
         reportProgress?.({
@@ -426,13 +497,19 @@ async function executeJavaScriptLikeCell(
 
   const stdlibRuntime = await createNotebookStdlibRuntime({
     outputs: lapis as NotebookStdlibOutputApi<NotebookOutput>,
-    appendOutput: (output) => runtimeOutputs.push(output),
+    appendOutput: (output) => {
+      if (acceptsOutputs && !signal?.aborted) {
+        runtimeOutputs.push(output);
+        publishOutputs();
+      }
+    },
     vault: vaultRuntime,
     duckdb: duckdbRuntime,
     invalidation,
     now: Date.now(),
     visualizationGlobals: inferRequestedVisualizationGlobals(source),
   });
+  throwIfNotebookAborted(signal);
   const lapisRuntime: Record<string, unknown> = {
     ...stdlibRuntime.lapis,
     display(value: unknown) {
@@ -442,8 +519,10 @@ async function executeJavaScriptLikeCell(
       node: Node,
       options?: { label?: string; role?: "input" | "html" | "svg" | "dom" },
     ) {
+      if (!acceptsOutputs || signal?.aborted) return;
       const output = createDomOutput(node, cellId, sourcePath, options);
       runtimeOutputs.push(output);
+      publishOutputs();
       return output;
     },
   };
@@ -467,9 +546,17 @@ async function executeJavaScriptLikeCell(
     lapisRuntime.Inputs = domRuntime.Inputs;
     lapisRuntime.svg = domRuntime.svg;
     lapisRuntime.view = createNotebookViewRuntime({
+      signal,
       cellId,
       sourcePath,
-      getInputValue: (name) => session.getInputValue(name),
+      getInputValue: (name) => {
+        const current = session.getInputValue(name);
+        if (current === undefined) return current;
+        const previous = claimNotebookInputDomOutput(sourcePath, cellId!, name);
+        return previous
+          ? snapshotNotebookInputState(previous, { transient: true })
+          : current;
+      },
       setInputValue: (targetCellId, name, value) =>
         session.setInputValue(targetCellId, name, value),
       emitInputChange: emitNotebookInputChange,
@@ -496,7 +583,12 @@ async function executeJavaScriptLikeCell(
               },
             )
           : lapis.dom(outputId, targetCellId, { label, role }),
-      appendOutput: (output) => runtimeOutputs.push(output),
+      appendOutput: (output) => {
+        if (acceptsOutputs && !signal?.aborted) {
+          runtimeOutputs.push(output);
+          publishOutputs();
+        }
+      },
     });
   }
   // Cell IDs (e.g. "text-output") may contain hyphens that are invalid as
@@ -554,27 +646,38 @@ async function executeJavaScriptLikeCell(
     ${compiledSource.code}
     return { __notebook_return: undefined, __notebook_defs: ${definitionObject} };`,
   ) as (...args: unknown[]) => Promise<unknown>;
-  const executed = await runner(...argValues);
-  const result = isExecutionEnvelope(executed)
-    ? executed
-    : {
-        __notebook_return: executed,
-        __notebook_defs: {},
-      };
-  const definitions = Object.entries(result.__notebook_defs ?? {}).filter(
-    ([, value]) => value !== undefined,
-  );
-  const returnValue = result.__notebook_return;
+  throwIfNotebookAborted(signal);
+  try {
+    const executed = await awaitNotebookTask(runner(...argValues), signal);
+    throwIfNotebookAborted(signal);
+    const result = isExecutionEnvelope(executed)
+      ? executed
+      : {
+          __notebook_return: executed,
+          __notebook_defs: {},
+        };
+    const definitions = Object.entries(result.__notebook_defs ?? {}).filter(
+      ([, value]) => value !== undefined,
+    );
+    const returnValue = result.__notebook_return;
 
-  if (returnValue !== undefined && runtimeOutputs.length === 0) {
-    appendNotebookDisplayValue(runtimeOutputs, returnValue, cellId, sourcePath);
+    if (returnValue !== undefined && runtimeOutputs.length === 0) {
+      appendNotebookDisplayValue(
+        runtimeOutputs,
+        returnValue,
+        cellId,
+        sourcePath,
+      );
+    }
+
+    return {
+      outputs: runtimeOutputs,
+      definitions,
+      value: returnValue,
+    };
+  } finally {
+    acceptsOutputs = false;
   }
-
-  return {
-    outputs: runtimeOutputs,
-    definitions,
-    value: returnValue,
-  };
 }
 
 function appendNotebookDisplayValue(
@@ -590,7 +693,11 @@ function appendNotebookDisplayValue(
     return;
   }
 
-  if (Array.isArray(value) && value.every(isNotebookOutput)) {
+  if (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every(isNotebookOutput)
+  ) {
     for (const output of value) {
       if (!runtimeOutputs.includes(output)) {
         runtimeOutputs.push(output);
@@ -604,14 +711,22 @@ function appendNotebookDisplayValue(
     return;
   }
 
-  if (Array.isArray(value) && value.every(isNotebookDomNode)) {
+  if (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every(isNotebookDomNode)
+  ) {
     runtimeOutputs.push(
       ...value.map((node) => createDomOutput(node, cellId, sourcePath)),
     );
     return;
   }
 
-  runtimeOutputs.push(lapis.text(formatNotebookValue(value)));
+  runtimeOutputs.push(
+    typeof value === "string"
+      ? lapis.text(value)
+      : lapis.code(formatNotebookDisplayValue(value), "javascript"),
+  );
 }
 
 async function resolveDuckDbService(

@@ -1,5 +1,7 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { defineConfig } from "vite";
+import type { Plugin } from "vite";
+import manifest from "./manifest.json";
 
 import { notebookPackagesPlugin } from "./scripts/vite-notebook-packages";
 
@@ -20,12 +22,40 @@ const external = [
   /^@lezer\/highlight$/,
 ];
 
+function auditSharedImports(): Plugin {
+  const shared = new Set<string>(
+    manifest.lapis.runtime.entries.workspace.sharedDependencies,
+  );
+  return {
+    name: "notebook-declared-shared-imports",
+    generateBundle(_options, bundle) {
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== "chunk") continue;
+        for (const id of [...chunk.imports, ...chunk.dynamicImports]) {
+          if (
+            id.startsWith(".") ||
+            id.startsWith("/") ||
+            Object.hasOwn(bundle, id)
+          )
+            continue;
+          if (!shared.has(id))
+            this.error(
+              `Undeclared shared runtime import ${id} in ${chunk.fileName}`,
+            );
+        }
+      }
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [notebookPackagesPlugin(), svelte()],
+  base: "./",
+  define: { "process.env.NODE_ENV": JSON.stringify("production") },
+  plugins: [notebookPackagesPlugin(), svelte(), auditSharedImports()],
   build: {
     target: "esnext",
     outDir: "dist",
-    emptyOutDir: false,
+    emptyOutDir: true,
     lib: {
       entry: "src/bundle-entry.ts",
       formats: ["es"],
@@ -38,10 +68,14 @@ export default defineConfig({
   },
   worker: {
     format: "es",
-    plugins: () => [notebookPackagesPlugin()],
+    plugins: () => [
+      notebookPackagesPlugin(),
+      svelte({ emitCss: false }),
+      auditSharedImports(),
+    ],
     rollupOptions: {
-      // The DOM-less worker never executes the lazy UI runtime; keep Svelte
-      // and Design Core out of the worker bundle graph.
+      // Local controls compile into lazy chunks; the DOM-less worker never
+      // executes them. Host-shared Svelte and Design Core stay external.
       external: [/^@lapismd\/design-core(?:$|\/)/, /^svelte(?:$|\/)/],
     },
   },

@@ -1,7 +1,17 @@
+import { snapshotNotebookInputState } from "@lapis-notes/notebook-input";
+import { claimNotebookInputDomOutput } from "./notebook-dom-registry";
 import type { App, AppDatabaseNotebookState, TFile } from "@lapis-notes/api";
 import type { NotebookOutput } from "../output";
 import type { NotebookSession } from "./notebook-session";
 import type { NotebookCell } from "../model/notebook-cell";
+import {
+  ensureNotebookId,
+  normalizeNotebookId,
+  notebookIdentityHasOtherOwner,
+  notebookStateKey,
+} from "./notebook-identity";
+
+type StoredNotebookState = AppDatabaseNotebookState & { cleared?: true };
 
 const logger = {
   debug: (...a: any[]) => console.debug("[notebook.persistence]", ...a),
@@ -11,6 +21,8 @@ const logger = {
 };
 
 function normalizePersistedValue(value: unknown): unknown {
+  if (typeof value === "function" || typeof value === "symbol")
+    return undefined;
   if (typeof value === "bigint") {
     const asNumber = Number(value);
     return Number.isSafeInteger(asNumber) ? asNumber : value.toString();
@@ -25,6 +37,11 @@ function normalizePersistedValue(value: unknown): unknown {
   }
 
   if (value && typeof value === "object") {
+    if (
+      Object.getPrototypeOf(value) !== Object.prototype &&
+      Object.getPrototypeOf(value) !== null
+    )
+      return undefined;
     return Object.fromEntries(
       Object.entries(value).map(([key, entryValue]) => [
         key,
@@ -39,8 +56,20 @@ function normalizePersistedValue(value: unknown): unknown {
 export async function loadNotebookPersistedState(
   app: App,
   sourcePath: string,
+  notebookId?: string,
 ): Promise<AppDatabaseNotebookState | undefined> {
   try {
+    const id = normalizeNotebookId(notebookId);
+    if (id) {
+      const saved = await app.appDatabase.getMeta<StoredNotebookState | null>(
+        notebookStateKey(id),
+      );
+      if (saved === null || saved?.cleared) return undefined;
+      if (saved)
+        return (await notebookIdentityHasOtherOwner(app, id, sourcePath, saved))
+          ? undefined
+          : saved;
+    }
     return await app.appDatabase.getNotebookState(sourcePath);
   } catch (error) {
     logger.warn("Failed to load notebook persisted state", {
@@ -74,7 +103,24 @@ export async function saveNotebookPersistedState(
           outputs: (state.output ?? []).filter(
             (output) => output.kind !== "dom",
           ) as NotebookOutput[],
-          inputValues: session.getCellInputValues(cell.id),
+          inputValues: (() => {
+            const values = session.getCellInputValues(cell.id);
+            return values
+              ? Object.fromEntries(
+                  Object.entries(values).map(([name, value]) => {
+                    const node = claimNotebookInputDomOutput(
+                      file.path,
+                      cell.id,
+                      name,
+                    );
+                    return [
+                      name,
+                      node ? snapshotNotebookInputState(node) : value,
+                    ];
+                  }),
+                )
+              : undefined;
+          })(),
           error: state.error,
           durationMs: state.durationMs,
           setupPhases: state.setupPhases?.map((phase) => ({
@@ -90,7 +136,21 @@ export async function saveNotebookPersistedState(
   ) as AppDatabaseNotebookState["cells"];
 
   try {
-    await app.appDatabase.setNotebookState(file.path, {
+    let id = normalizeNotebookId(session.document.frontmatter?.id);
+    if (id) {
+      const previous =
+        await app.appDatabase.getMeta<AppDatabaseNotebookState | null>(
+          notebookStateKey(id),
+        );
+      if (
+        previous &&
+        (await notebookIdentityHasOtherOwner(app, id, file.path, previous))
+      ) {
+        id = await ensureNotebookId(app, file, id);
+      }
+    } else id = await ensureNotebookId(app, file);
+    if (session.document.frontmatter) session.document.frontmatter.id = id;
+    await app.appDatabase.setMeta(notebookStateKey(id), {
       sourcePath: file.path,
       mtime: file.stat.mtime,
       updatedAt: Date.now(),
@@ -107,8 +167,31 @@ export async function saveNotebookPersistedState(
 export async function deleteNotebookPersistedState(
   app: App,
   sourcePath: string,
+  notebookId?: string,
 ): Promise<void> {
   try {
+    let id = normalizeNotebookId(notebookId);
+    if (id) {
+      const previous =
+        await app.appDatabase.getMeta<StoredNotebookState | null>(
+          notebookStateKey(id),
+        );
+      if (
+        previous &&
+        (await notebookIdentityHasOtherOwner(app, id, sourcePath, previous))
+      ) {
+        const file = app.vault.getFileByPath(sourcePath);
+        if (!file) return;
+        id = await ensureNotebookId(app, file, id);
+      }
+      await app.appDatabase.setMeta(notebookStateKey(id), {
+        sourcePath,
+        mtime: 0,
+        updatedAt: Date.now(),
+        cells: {},
+        cleared: true,
+      } satisfies StoredNotebookState);
+    }
     await app.appDatabase.deleteNotebookState(sourcePath);
   } catch (error) {
     logger.warn("Failed to delete notebook persisted state", {

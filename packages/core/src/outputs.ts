@@ -1,4 +1,5 @@
 export type NotebookOutputKind =
+  | "code"
   | "text"
   | "markdown"
   | "html"
@@ -58,6 +59,13 @@ export type NotebookTableColumnarData = {
 export type NotebookTextOutput = {
   kind: "text";
   text: string;
+};
+
+export type NotebookCodeOutput = {
+  kind: "code";
+  code: string;
+  language: string;
+  title?: string;
 };
 
 export type NotebookMarkdownOutput = {
@@ -126,6 +134,7 @@ export type NotebookErrorOutput = {
 };
 
 export type NotebookOutput =
+  | NotebookCodeOutput
   | NotebookTextOutput
   | NotebookMarkdownOutput
   | NotebookHtmlOutput

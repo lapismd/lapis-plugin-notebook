@@ -13,7 +13,8 @@
     "./view-runtime": "./src/view-runtime.ts"
   },
   "dependencies": {
-    "@lapis-notes/notebook-stdlib": "workspace:*"
+    "@lapis-notes/notebook-stdlib": "workspace:*",
+    "mrmime": "^2.0.1"
   },
   "peerDependencies": {
     "@lapismd/design-core": "^0.6.0",

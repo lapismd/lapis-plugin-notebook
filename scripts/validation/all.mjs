@@ -7,6 +7,7 @@ export const aggregateLanes = Object.freeze([
   "test",
   "build",
   "publint",
+  "packages:pack",
   "build-storybook",
   "test:storybook",
   "spec:check",
@@ -25,7 +26,9 @@ if (
 ) {
   try {
     if (process.env.LAPIS_NOTEBOOK_VALIDATION_RUNTIME !== "native")
-      throw Error("Use pnpm validation:all; direct native execution is explicit");
+      throw Error(
+        "Use pnpm validation:all; direct native execution is explicit",
+      );
     await runAll(runNative, process.argv.slice(2));
   } catch (error) {
     console.error(error);

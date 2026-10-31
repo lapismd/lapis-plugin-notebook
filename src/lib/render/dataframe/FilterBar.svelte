@@ -1,7 +1,12 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
+  import { SvelteMap } from "svelte/reactivity";
+  import { Funnel, RotateCcw, X } from "@lucide/svelte";
+  import { Badge } from "@lapismd/design-core/shadcn/badge";
   import { Button } from "@lapismd/design-core/shadcn/button";
+  import * as Field from "@lapismd/design-core/shadcn/field";
   import { Input } from "@lapismd/design-core/shadcn/input";
+  import * as Select from "@lapismd/design-core/shadcn/select";
   import type {
     Column,
     DataFrameOptions,
@@ -16,10 +21,24 @@
     "decimal",
     "number",
   ]);
+  const TEXT_OPERATORS = [
+    { value: "contains", label: "Contains" },
+    { value: "starts_with", label: "Starts with" },
+    { value: "ends_with", label: "Ends with" },
+    { value: "equals", label: "Equals" },
+    { value: "regex", label: "Regex" },
+    { value: "is_null", label: "Is null" },
+    { value: "is_not_null", label: "Is not null" },
+  ] as const;
+  const BOOLEAN_VALUES = [
+    { value: "all", label: "Any value" },
+    { value: "true", label: "True" },
+    { value: "false", label: "False" },
+  ];
 
   let {
     columns,
-    state,
+    state: filterState,
     options = {},
     onFilter,
   }: {
@@ -34,12 +53,21 @@
     onFilter?: (filters: FilterState[]) => void;
   } = $props();
 
-  function currentFilter(column: string): FilterState | undefined {
-    return state.filters.find((filter) => filter.column === column);
+  // An operator can be chosen before a value without creating an active filter.
+  const operators = new SvelteMap<string, FilterState["operator"]>();
+
+  function currentFilter(column: string) {
+    return filterState.filters.find((filter) => filter.column === column);
   }
 
   function syncFilters() {
-    onFilter?.(state.filters);
+    onFilter?.(filterState.filters);
+  }
+
+  function clearFilter(column: string) {
+    operators.delete(column);
+    filterState.removeFilter(column);
+    syncFilters();
   }
 
   function updateTextFilter(
@@ -47,13 +75,14 @@
     operator: FilterState["operator"],
     value: string,
   ) {
-    if (!value) {
-      state.removeFilter(column);
-      syncFilters();
-      return;
+    operators.set(column, operator);
+    if (operator === "is_null" || operator === "is_not_null") {
+      filterState.addFilter({ column, operator });
+    } else if (value) {
+      filterState.addFilter({ column, operator, value });
+    } else {
+      filterState.removeFilter(column);
     }
-
-    state.addFilter({ column, operator, value });
     syncFilters();
   }
 
@@ -63,205 +92,204 @@
     valueTo: string | undefined,
   ) {
     if (!value && !valueTo) {
-      state.removeFilter(column);
-      syncFilters();
-      return;
+      filterState.removeFilter(column);
+    } else {
+      filterState.addFilter({
+        column,
+        operator: value && valueTo ? "between" : value ? "gte" : "lte",
+        value: value ?? valueTo,
+        valueTo,
+      });
     }
-
-    state.addFilter({
-      column,
-      operator: value && valueTo ? "between" : value ? "gte" : "lte",
-      value,
-      valueTo,
-    });
     syncFilters();
   }
 
   function updateBooleanFilter(column: string, value: string) {
-    if (value === "all") {
-      state.removeFilter(column);
-      syncFilters();
-      return;
-    }
-
-    state.addFilter({ column, operator: "equals", value: value === "true" });
+    if (value === "all") filterState.removeFilter(column);
+    else
+      filterState.addFilter({
+        column,
+        operator: "equals",
+        value: value === "true",
+      });
     syncFilters();
   }
 </script>
 
 {#if options.filterable !== false}
-  <div
+  <section
     transition:slide
     class="notebook-dataframe__filters"
+    aria-label="Column filters"
   >
-    <div
-      class="notebook-dataframe__filters-header"
-    >
-      <div
-        class="notebook-dataframe__filters-title"
-      >
-        Column filters
+    <div class="notebook-dataframe__filters-header">
+      <div class="notebook-dataframe__filters-heading">
+        <Funnel class="notebook-dataframe__filters-icon" aria-hidden="true" />
+        <span class="notebook-dataframe__filters-title">Column filters</span>
+        {#if filterState.filters.length}
+          <Badge variant="secondary">{filterState.filters.length} active</Badge>
+        {/if}
       </div>
       <Button
         variant="ghost"
         size="sm"
+        disabled={!filterState.filters.length && !operators.size}
         onclick={() => {
-          state.clearFilters();
+          operators.clear();
+          filterState.clearFilters();
           syncFilters();
-        }}>Clear filters</Button
+        }}
       >
+        <RotateCcw data-icon="inline-start" aria-hidden="true" />
+        Clear filters
+      </Button>
     </div>
 
-    <div
-      class="notebook-dataframe__filters-grid"
-    >
-      {#each columns as column}
+    <Field.Group class="notebook-dataframe__filters-grid">
+      {#each columns as column (column.name)}
         {@const filter = currentFilter(column.name)}
-        <div
+        {@const operator =
+          filter?.operator ?? operators.get(column.name) ?? "contains"}
+        {@const label = column.label ?? column.name}
+        {@const range =
+          NUMERIC_TYPES.has(column.type) ||
+          column.type === "date" ||
+          column.type === "timestamp"}
+        {@const minimum =
+          filter?.operator === "between" || filter?.operator === "gte"
+            ? String(filter.value ?? "")
+            : ""}
+        {@const maximum =
+          filter?.operator === "between"
+            ? String(filter.valueTo ?? "")
+            : filter?.operator === "lte"
+              ? String(filter.value ?? "")
+              : ""}
+        <Field.Field
           class="notebook-dataframe__filter"
+          aria-label={`${label} column filter`}
+          data-active={Boolean(filter)}
         >
-          <div
-            class="notebook-dataframe__filter-title"
+          <Field.Title class="notebook-dataframe__filter-title"
+            >{label}</Field.Title
           >
-            {column.label ?? column.name}
-          </div>
-
-          {#if NUMERIC_TYPES.has(column.type)}
+          {#if range}
             <div class="notebook-dataframe__filter-range">
               <Input
-                type="number"
-                placeholder="Min"
-                value={filter?.operator === "between" ||
-                filter?.operator === "gte"
-                  ? String(filter.value ?? "")
-                  : ""}
-                oninput={(event: Event) =>
+                type={NUMERIC_TYPES.has(column.type) ? "number" : "date"}
+                aria-label={`${label} minimum`}
+                placeholder="Minimum"
+                value={minimum}
+                oninput={(event) =>
                   updateRangeFilter(
                     column.name,
-                    (event.currentTarget as HTMLInputElement).value ||
-                      undefined,
-                    filter?.operator === "between"
-                      ? String(filter.valueTo ?? "")
-                      : undefined,
+                    event.currentTarget.value || undefined,
+                    maximum || undefined,
                   )}
               />
+              <span
+                class="notebook-dataframe__filter-range-separator"
+                aria-hidden="true">–</span
+              >
               <Input
-                type="number"
-                placeholder="Max"
-                value={filter?.operator === "between" ||
-                filter?.operator === "lte"
-                  ? String(
-                      filter.operator === "between"
-                        ? (filter.valueTo ?? "")
-                        : (filter.value ?? ""),
-                    )
-                  : ""}
-                oninput={(event: Event) =>
+                type={NUMERIC_TYPES.has(column.type) ? "number" : "date"}
+                aria-label={`${label} maximum`}
+                placeholder="Maximum"
+                value={maximum}
+                oninput={(event) =>
                   updateRangeFilter(
                     column.name,
-                    filter?.operator === "between" || filter?.operator === "gte"
-                      ? String(filter.value ?? "")
-                      : undefined,
-                    (event.currentTarget as HTMLInputElement).value ||
-                      undefined,
+                    minimum || undefined,
+                    event.currentTarget.value || undefined,
                   )}
               />
             </div>
           {:else if column.type === "boolean"}
             <div class="notebook-dataframe__filter-boolean">
-              <Button
-                variant={!filter ? "secondary" : "outline"}
-                size="sm"
-                onclick={() => updateBooleanFilter(column.name, "all")}
-                >All</Button
+              <Select.Root
+                type="single"
+                value={filter ? String(filter.value) : "all"}
+                onValueChange={(value) =>
+                  updateBooleanFilter(column.name, value)}
               >
-              <Button
-                variant={filter?.value === true ? "secondary" : "outline"}
-                size="sm"
-                onclick={() => updateBooleanFilter(column.name, "true")}
-                >True</Button
-              >
-              <Button
-                variant={filter?.value === false ? "secondary" : "outline"}
-                size="sm"
-                onclick={() => updateBooleanFilter(column.name, "false")}
-                >False</Button
-              >
-            </div>
-          {:else if column.type === "date" || column.type === "timestamp"}
-            <div class="notebook-dataframe__filter-range">
-              <Input
-                type="date"
-                value={filter?.operator === "between" ||
-                filter?.operator === "gte"
-                  ? String(filter.value ?? "")
-                  : ""}
-                oninput={(event: Event) =>
-                  updateRangeFilter(
-                    column.name,
-                    (event.currentTarget as HTMLInputElement).value ||
-                      undefined,
-                    filter?.operator === "between"
-                      ? String(filter.valueTo ?? "")
-                      : undefined,
-                  )}
-              />
-              <Input
-                type="date"
-                value={filter?.operator === "between" ||
-                filter?.operator === "lte"
-                  ? String(
-                      filter.operator === "between"
-                        ? (filter.valueTo ?? "")
-                        : (filter.value ?? ""),
-                    )
-                  : ""}
-                oninput={(event: Event) =>
-                  updateRangeFilter(
-                    column.name,
-                    filter?.operator === "between" || filter?.operator === "gte"
-                      ? String(filter.value ?? "")
-                      : undefined,
-                    (event.currentTarget as HTMLInputElement).value ||
-                      undefined,
-                  )}
-              />
+                <Select.Trigger
+                  class="notebook-dataframe__filter-select"
+                  aria-label={`${label} filter value`}
+                >
+                  {BOOLEAN_VALUES.find(
+                    (item) =>
+                      item.value === (filter ? String(filter.value) : "all"),
+                  )?.label}
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Group>
+                    {#each BOOLEAN_VALUES as item}
+                      <Select.Item value={item.value} label={item.label}
+                        >{item.label}</Select.Item
+                      >
+                    {/each}
+                  </Select.Group>
+                </Select.Content>
+              </Select.Root>
             </div>
           {:else}
             <div class="notebook-dataframe__filter-text">
-              <select
-                class="notebook-dataframe__filter-select"
-                value={filter?.operator ?? "contains"}
-                onchange={(event: Event) =>
+              <Select.Root
+                type="single"
+                value={operator}
+                onValueChange={(value) =>
                   updateTextFilter(
                     column.name,
-                    (event.currentTarget as HTMLSelectElement)
-                      .value as FilterState["operator"],
+                    value as FilterState["operator"],
                     String(filter?.value ?? ""),
                   )}
               >
-                <option value="contains">Contains</option>
-                <option value="starts_with">Starts with</option>
-                <option value="ends_with">Ends with</option>
-                <option value="equals">Equals</option>
-                <option value="regex">Regex</option>
-                <option value="is_null">Is null</option>
-                <option value="is_not_null">Is not null</option>
-              </select>
+                <Select.Trigger
+                  class="notebook-dataframe__filter-select"
+                  aria-label={`${label} filter operator`}
+                >
+                  {TEXT_OPERATORS.find((item) => item.value === operator)
+                    ?.label}
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Group>
+                    {#each TEXT_OPERATORS as item}
+                      <Select.Item value={item.value} label={item.label}
+                        >{item.label}</Select.Item
+                      >
+                    {/each}
+                  </Select.Group>
+                </Select.Content>
+              </Select.Root>
               <Input
-                placeholder="Filter value"
+                aria-label={`${label} filter value`}
+                placeholder={operator === "is_null" ||
+                operator === "is_not_null"
+                  ? "No value needed"
+                  : "Filter value…"}
+                disabled={operator === "is_null" || operator === "is_not_null"}
                 value={String(filter?.value ?? "")}
-                oninput={(event: Event) =>
+                oninput={(event) =>
                   updateTextFilter(
                     column.name,
-                    filter?.operator ?? "contains",
-                    (event.currentTarget as HTMLInputElement).value,
+                    operator,
+                    event.currentTarget.value,
                   )}
               />
             </div>
           {/if}
-        </div>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={`Clear ${label} filter`}
+            title={`Clear ${label} filter`}
+            disabled={!filter && !operators.has(column.name)}
+            onclick={() => clearFilter(column.name)}
+          >
+            <X aria-hidden="true" />
+          </Button>
+        </Field.Field>
       {/each}
-    </div>
-  </div>
+    </Field.Group>
+  </section>
 {/if}

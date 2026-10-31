@@ -106,6 +106,188 @@ function createRuntimeControllerStub(options: {
 }
 
 describe("NotebookRenderService", () => {
+  test("reuses a parsed snapshot across concurrent cell polls and invalidates edits, metadata and renames", async () => {
+    let source = ':::cell{#one lang="js"}\nconst answer = 1;\n:::';
+    const file = { path: "Notebook.notebook.md", stat: { mtime: 123 } } as any;
+    const frontmatter = {
+      version: 1,
+      mode: "lazy",
+      mounts: {} as Record<string, string>,
+    };
+    const app = {
+      vault: { cachedRead: vi.fn(async () => source) },
+      metadataCache: {
+        getFileCache: () => ({ frontmatter: { notebook: { ...frontmatter } } }),
+      },
+    } as any;
+    const service = new NotebookRenderService(
+      app,
+      {} as any,
+      vi.fn(),
+      new Map(),
+    );
+    const snapshots = await Promise.all(
+      Array.from({ length: 54 }, () =>
+        service.loadNotebookDocument(file, file.path),
+      ),
+    );
+    expect(snapshots.every((snapshot) => snapshot === snapshots[0])).toBe(true);
+    source = source.replace("answer = 1", "answer = 2");
+    const edited = await service.loadNotebookDocument(file, file.path);
+    expect(edited).not.toBe(snapshots[0]);
+    expect(edited.cells[0].source).toContain("answer = 2");
+    frontmatter.mounts.data = "assets/data.csv";
+    const changedMetadata = await service.loadNotebookDocument(file, file.path);
+    expect(changedMetadata).not.toBe(edited);
+    expect(changedMetadata.frontmatter?.mounts.data).toBe("assets/data.csv");
+    file.path = "Renamed.notebook.md";
+    const renamed = await service.loadNotebookDocument(file, file.path);
+    expect(renamed).not.toBe(changedMetadata);
+    expect(renamed.sourcePath).toBe(file.path);
+    const otherFile = { ...file };
+    expect(await service.loadNotebookDocument(otherFile, file.path)).not.toBe(
+      renamed,
+    );
+    expect(app.vault.cachedRead).toHaveBeenCalledTimes(58);
+  });
+
+  test.each(["run", "clear"] as const)(
+    "late persisted-state hydration cannot overwrite a newer %s",
+    async (action) => {
+      const source = ':::cell{#one lang="md"}\nSaved text\n:::';
+      const document = createNotebook(source);
+      const session = new NotebookSession(document);
+      let release!: (state: unknown) => void;
+      const stored = new Promise((resolve) => {
+        release = resolve;
+      });
+      const getNotebookState = vi.fn(async () => stored);
+      const app = {
+        vault: {
+          getFileByPath: () => ({
+            path: "Notebook.notebook.md",
+            stat: { mtime: 123 },
+          }),
+          cachedRead: async () => source,
+        },
+        metadataCache: {
+          getFileCache: () => ({
+            frontmatter: { notebook: { version: 1, mode: "lazy" } },
+          }),
+        },
+        appDatabase: { getNotebookState },
+      } as any;
+      const service = new NotebookRenderService(
+        app,
+        createRuntimeControllerStub({
+          getSessionForDocument: () => session,
+          getSessionByPath: () => session,
+        }),
+        vi.fn(),
+        new Map(),
+      );
+      const rendered = service.getRenderedCell("Notebook.notebook.md", "one");
+      await vi.waitFor(() => expect(getNotebookState).toHaveBeenCalledOnce());
+      if (action === "run") {
+        session.beginExecution(["one"]);
+        session.setCellOutput("one", [{ kind: "text", text: "New result" }]);
+      } else session.clearOutputs();
+      release({
+        sourcePath: "Notebook.notebook.md",
+        mtime: 123,
+        updatedAt: 1,
+        cells: {
+          one: {
+            state: "completed",
+            outputs: [{ kind: "text", text: "Old result" }],
+          },
+        },
+      });
+      expect((await rendered)?.outputs).toEqual(
+        action === "run" ? [{ kind: "text", text: "New result" }] : [],
+      );
+      expect(session.getCellState("one").state).toBe(
+        action === "run" ? "completed" : "idle",
+      );
+    },
+  );
+
+  test("all concurrently rendered cells await the same persisted-state hydration", async () => {
+    const source = ["one", "two"]
+      .map(
+        (id) =>
+          `:::cell{#${id} lang="md"}\n\`\`\`md\nPlaceholder ${id}\n\`\`\`\n:::`,
+      )
+      .join("\n");
+    const document = createNotebook(source);
+    const session = new NotebookSession(document);
+    let release!: (state: unknown) => void;
+    const stored = new Promise((resolve) => {
+      release = resolve;
+    });
+    const getNotebookState = vi.fn(async () => stored);
+    const app = {
+      vault: {
+        getFileByPath: () => ({
+          path: "Notebook.notebook.md",
+          stat: { mtime: 123 },
+        }),
+        cachedRead: async () => source,
+      },
+      metadataCache: {
+        getFileCache: () => ({
+          frontmatter: { notebook: { version: 1, mode: "lazy" } },
+        }),
+      },
+      appDatabase: { getNotebookState },
+    } as any;
+    const execute = vi.fn();
+    const service = new NotebookRenderService(
+      app,
+      createRuntimeControllerStub({
+        getSessionForDocument: () => session,
+        getSessionByPath: () => session,
+      }),
+      execute,
+      new Map(),
+    );
+    const first = service.getRenderedCell("Notebook.notebook.md", "one");
+    await vi.waitFor(() => expect(getNotebookState).toHaveBeenCalledOnce());
+    let secondFinished = false;
+    const second = service
+      .getRenderedCell("Notebook.notebook.md", "two")
+      .then((value) => {
+        secondFinished = true;
+        return value;
+      });
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(secondFinished).toBe(false);
+    } finally {
+      release({
+        sourcePath: "Notebook.notebook.md",
+        mtime: 123,
+        updatedAt: 1,
+        cells: Object.fromEntries(
+          document.cells.map((cell) => [
+            cell.id,
+            {
+              state: "completed",
+              sourceHash: getNotebookCellSourceHash(cell),
+              outputs: [{ kind: "text", text: `Saved ${cell.id}` }],
+            },
+          ]),
+        ),
+      });
+      await Promise.all([first, second]);
+    }
+    expect((await second)?.outputs).toEqual([
+      { kind: "text", text: "Saved two" },
+    ]);
+    expect(getNotebookState).toHaveBeenCalledOnce();
+    expect(execute).not.toHaveBeenCalled();
+  });
+
   test("hydrates persisted state only once per session", async () => {
     const source = [
       ':::cell{#load lang="ts"}',
@@ -448,103 +630,114 @@ describe("NotebookRenderService", () => {
     expect(executeDocument).not.toHaveBeenCalled();
   });
 
-  test("reruns non-reconstructable structured input outputs during restore", async () => {
-    const source = [
-      ':::cell{#controls lang="ts"}',
-      "```ts",
-      'const region = view(Inputs.select(["North", "South"], { value: "North", label: "Region" }));',
-      "```",
-      ":::",
-    ].join("\n");
-    const document = createNotebook(source);
-    const sourceHashByCell = Object.fromEntries(
-      document.cells.map((cell) => [cell.id, getNotebookCellSourceHash(cell)]),
-    );
-    const session = new NotebookSession(document);
-    const executeDocument = vi.fn(
-      async (_document, activeSession: NotebookSession) => {
-        activeSession.setCellOutput("controls", [
-          {
-            kind: "input",
-            cellId: "controls",
-            variableName: "region",
-            inputType: "select",
-            value: "North",
-            label: "Region",
-            config: { options: undefined, label: "Region" },
-            reconstructable: false,
-            source: {
-              library: "@lapis-notes/notebook-input",
-              factory: "select",
+  test.each([undefined, true, false])(
+    "only recreates callback-dependent inputs when allowed (%s)",
+    async (recreateInputs) => {
+      const source = [
+        ':::cell{#controls lang="ts"}',
+        "```ts",
+        'const region = view(Inputs.select(["North", "South"], { value: "North", label: "Region" }));',
+        "```",
+        ":::",
+      ].join("\n");
+      const document = createNotebook(source);
+      const sourceHashByCell = Object.fromEntries(
+        document.cells.map((cell) => [
+          cell.id,
+          getNotebookCellSourceHash(cell),
+        ]),
+      );
+      const session = new NotebookSession(document);
+      const executeDocument = vi.fn(
+        async (_document, activeSession: NotebookSession) => {
+          activeSession.setCellOutput("controls", [
+            {
+              kind: "input",
+              cellId: "controls",
+              variableName: "region",
+              inputType: "select",
+              value: "North",
+              label: "Region",
+              config: { options: undefined, label: "Region" },
+              reconstructable: false,
+              source: {
+                library: "@lapis-notes/notebook-input",
+                factory: "select",
+              },
             },
-          },
-        ]);
-      },
-    );
-    const app = {
-      vault: {
-        getFileByPath: () => ({
-          path: "Notebook.notebook.md",
-          stat: { mtime: 999 },
-        }),
-        cachedRead: async () => source,
-      },
-      metadataCache: {
-        getFileCache: () => ({
-          frontmatter: { notebook: { version: 1, mode: "lazy" } },
-        }),
-      },
-      appDatabase: {
-        getNotebookState: vi.fn(async () => ({
-          sourcePath: "Notebook.notebook.md",
-          mtime: 123,
-          updatedAt: 456,
-          cells: {
-            controls: {
-              state: "completed",
-              sourceHash: sourceHashByCell.controls,
-              outputs: [
-                {
-                  kind: "input",
-                  cellId: "controls",
-                  variableName: "region",
-                  inputType: "select",
-                  value: "North",
-                  label: "Region",
-                  config: { options: undefined, label: "Region" },
-                  reconstructable: false,
-                  source: {
-                    library: "@lapis-notes/notebook-input",
-                    factory: "select",
+          ]);
+        },
+      );
+      const app = {
+        vault: {
+          getFileByPath: () => ({
+            path: "Notebook.notebook.md",
+            stat: { mtime: 999 },
+          }),
+          cachedRead: async () => source,
+        },
+        metadataCache: {
+          getFileCache: () => ({
+            frontmatter: { notebook: { version: 1, mode: "lazy" } },
+          }),
+        },
+        appDatabase: {
+          getNotebookState: vi.fn(async () => ({
+            sourcePath: "Notebook.notebook.md",
+            mtime: 123,
+            updatedAt: 456,
+            cells: {
+              controls: {
+                state: "completed",
+                sourceHash: sourceHashByCell.controls,
+                outputs: [
+                  {
+                    kind: "input",
+                    cellId: "controls",
+                    variableName: "region",
+                    inputType: "select",
+                    value: "North",
+                    label: "Region",
+                    config: { options: undefined, label: "Region" },
+                    reconstructable: false,
+                    source: {
+                      library: "@lapis-notes/notebook-input",
+                      factory: "select",
+                    },
                   },
-                },
-              ],
-              inputValues: { region: "North" },
+                ],
+                inputValues: { region: "North" },
+              },
             },
-          },
-        })),
-        setNotebookState: vi.fn(async () => undefined),
-      },
-    } as any;
-    const service = new NotebookRenderService(
-      app,
-      createRuntimeControllerStub({
-        getSessionForDocument: () => session,
-        getSessionByPath: () => session,
-      }),
-      executeDocument,
-      new Map(),
-    );
+          })),
+          setNotebookState: vi.fn(async () => undefined),
+        },
+      } as any;
+      const service = new NotebookRenderService(
+        app,
+        createRuntimeControllerStub({
+          getSessionForDocument: () => session,
+          getSessionByPath: () => session,
+        }),
+        executeDocument,
+        new Map(),
+      );
 
-    await service.getRenderedCell("Notebook.notebook.md", "controls");
+      await service.getRenderedCell("Notebook.notebook.md", "controls", {
+        recreateInputs,
+      });
 
-    expect(executeDocument).toHaveBeenCalledTimes(1);
-    expect(executeDocument).toHaveBeenCalledWith(
-      expect.objectContaining({ sourcePath: "Notebook.notebook.md" }),
-      session,
-      { cellIds: ["controls"] },
-    );
-  });
+      expect(executeDocument).toHaveBeenCalledTimes(
+        recreateInputs === false ? 0 : 1,
+      );
+      if (recreateInputs === false) return;
+      expect(executeDocument).toHaveBeenCalledWith(
+        expect.objectContaining({ sourcePath: "Notebook.notebook.md" }),
+        session,
+        { cellIds: ["controls"] },
+      );
+    },
+  );
 
   test("marks changed cells and dependents stale when restoring by source hash", async () => {
     const previousSource = [

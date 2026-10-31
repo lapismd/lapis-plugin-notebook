@@ -14,7 +14,7 @@
 
   const kind = "inspector" as const;
 
-  const { Meta, Story } = defineMeta({
+  const { Story } = defineMeta({
     title: "Plugins/Notebook/Panels/Variables",
     component: NotebookPanelDemo,
     args: { kind, layout: "middle-top-tabs" as PanelDemoLayout },
@@ -71,8 +71,6 @@
     };
   }
 </script>
-
-<Meta />
 
 <Story
   name="Middle (Top Tabs)"

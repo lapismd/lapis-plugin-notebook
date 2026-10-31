@@ -1,9 +1,14 @@
+import { createExtraInput } from "./extra-model";
+import { createFileInput } from "./file-model";
+import type { NotebookInputHostContext } from "./host-context";
+
 const UI_BACKED_NOTEBOOK_INPUT_FACTORIES = new Set([
   "range",
   "number",
   "toggle",
   "text",
   "textarea",
+  "markdown",
   "date",
   "datetime",
   "color",
@@ -12,9 +17,6 @@ const UI_BACKED_NOTEBOOK_INPUT_FACTORIES = new Set([
   "url",
   "password",
   "table",
-]);
-
-const UNSUPPORTED_NOTEBOOK_INPUT_FACTORIES = [
   "button",
   "checkbox",
   "radio",
@@ -22,11 +24,7 @@ const UNSUPPORTED_NOTEBOOK_INPUT_FACTORIES = [
   "file",
   "search",
   "form",
-] as const;
-
-const SUPPORTED_NOTEBOOK_INPUT_LIST = Array.from(
-  UI_BACKED_NOTEBOOK_INPUT_FACTORIES,
-).join(", ");
+]);
 
 type SvelteRuntimeModule = {
   mount: (...args: any[]) => any;
@@ -34,6 +32,7 @@ type SvelteRuntimeModule = {
 };
 
 type NotebookUiRuntimeModules = SvelteRuntimeModule & {
+  createControlProps: <T extends Record<string, unknown>>(props: T) => T;
   Input: unknown;
   Slider: unknown;
   Switch: unknown;
@@ -72,20 +71,23 @@ type NotebookTableOptions = Record<string, unknown> & {
 
 let notebookTableInputId = 0;
 
-export async function loadUiBackedNotebookInputs(): Promise<{
+export async function loadUiBackedNotebookInputs(
+  context: NotebookInputHostContext = {},
+): Promise<{
   inputs: Record<string, unknown>;
 }> {
   if (!canUseUiBackedNotebookInputs()) {
     return {
-      inputs: createHeadlessNotebookInputs(),
+      inputs: createHeadlessNotebookInputs(context),
     };
   }
 
   const runtime = await loadNotebookUiRuntimeModules();
+  const extra = await import("./extra-runtime");
 
   return {
     inputs: {
-      ...createUnsupportedNotebookInputs(),
+      ...extra.createExtraNotebookInputs(context),
       range: (
         extent: unknown,
         options?: Record<string, unknown>,
@@ -128,9 +130,28 @@ function canUseUiBackedNotebookInputs(): boolean {
   return typeof document !== "undefined" && typeof HTMLElement !== "undefined";
 }
 
-function createHeadlessNotebookInputs(): Record<string, unknown> {
+function createHeadlessNotebookInputs(
+  context: NotebookInputHostContext,
+): Record<string, unknown> {
   return {
-    ...createUnsupportedNotebookInputs(),
+    ...Object.fromEntries(
+      (
+        [
+          "markdown",
+          "button",
+          "checkbox",
+          "radio",
+          "select",
+          "search",
+          "form",
+        ] as const
+      ).map((kind) => [
+        kind,
+        (...args: any[]) => createExtraInput(kind, args, context),
+      ]),
+    ),
+    file: (options?: Record<string, unknown>) =>
+      createFileInput(options, context),
     range: (extent: unknown, options?: Record<string, unknown>): Node => {
       const [min] = normalizeExtent(extent);
       return createHeadlessNotebookInputNode(coerceNumber(options?.value, min));
@@ -171,23 +192,6 @@ function createHeadlessNotebookInputs(): Record<string, unknown> {
   };
 }
 
-function createUnsupportedNotebookInputs(): Record<string, unknown> {
-  return Object.fromEntries(
-    UNSUPPORTED_NOTEBOOK_INPUT_FACTORIES.map((factory) => [
-      factory,
-      createUnsupportedNotebookInputFactory(factory),
-    ]),
-  );
-}
-
-function createUnsupportedNotebookInputFactory(factory: string) {
-  return () => {
-    throw new Error(
-      `Inputs.${factory} is not supported. Supported notebook inputs: ${SUPPORTED_NOTEBOOK_INPUT_LIST}.`,
-    );
-  };
-}
-
 function createHeadlessNotebookInputNode(value: unknown): Node {
   if (typeof Node !== "function") {
     throw new Error("Notebook inputs require a DOM-capable runtime.");
@@ -208,11 +212,13 @@ async function loadNotebookUiRuntimeModules(): Promise<NotebookUiRuntimeModules>
       import("@lapismd/design-core/shadcn/slider"),
       import("@lapismd/design-core/shadcn/switch"),
       import("@lapismd/design-core/shadcn/textarea"),
+      import("./control-props.svelte"),
     ]).then(
-      ([svelte, input, slider, toggleSwitch, textarea]) =>
+      ([svelte, input, slider, toggleSwitch, textarea, controls]) =>
         ({
           mount: svelte.mount,
           unmount: svelte.unmount,
+          createControlProps: controls.createNotebookControlProps,
           Input: input.Input,
           Slider: slider.Slider,
           Switch: toggleSwitch.Switch,
@@ -263,56 +269,46 @@ function createRangeInput(
       dispatchInput,
     ) => {
       hiddenInput.value = String(currentValue);
-      const syncFromHiddenInput = () => {
-        const nextValue = coerceNumber(hiddenInput.value, min);
+      const props = runtime.createControlProps({
+        "aria-label": notebookInputAriaLabel(options),
+        min,
+        max,
+        step,
+        disabled,
+        value: [currentValue],
+        onValueChange(values: unknown) {
+          const nextValue = coerceNumber(
+            Array.isArray(values) ? values[0] : values,
+            min,
+          );
+          setCurrentValue(nextValue);
+          hiddenInput.value = String(nextValue);
+          dispatchInput();
+        },
+      });
+      const updateValue = (value: number) => {
+        const nextValue = coerceNumber(value, min);
         setCurrentValue(nextValue);
-        render();
+        hiddenInput.value = String(nextValue);
+        props.value = [nextValue];
       };
-
+      const syncFromHiddenInput = () => updateValue(Number(hiddenInput.value));
       hiddenInput.addEventListener("input", syncFromHiddenInput);
       hiddenInput.addEventListener("change", syncFromHiddenInput);
-
       host.replaceChildren(mountTarget, hiddenInput);
+      mounted = runtime.mount(runtime.Slider, { target: mountTarget, props });
 
-      const render = () => {
-        if (mounted) {
-          runtime.unmount(mounted);
-          mounted = null;
+      return {
+        updateValue,
+        dispose() {
+          hiddenInput.removeEventListener("input", syncFromHiddenInput);
+          hiddenInput.removeEventListener("change", syncFromHiddenInput);
+          if (mounted) {
+            runtime.unmount(mounted);
+            mounted = null;
+          }
           mountTarget.replaceChildren();
-        }
-
-        mounted = runtime.mount(runtime.Slider, {
-          target: mountTarget,
-          props: {
-            "aria-label": notebookInputAriaLabel(options),
-            min,
-            max,
-            step,
-            disabled,
-            value: [currentValue],
-            onValueChange(values: unknown) {
-              const nextValue = coerceNumber(
-                Array.isArray(values) ? values[0] : values,
-                min,
-              );
-              setCurrentValue(nextValue);
-              hiddenInput.value = String(nextValue);
-              dispatchInput();
-            },
-          },
-        });
-      };
-
-      render();
-
-      return () => {
-        hiddenInput.removeEventListener("input", syncFromHiddenInput);
-        hiddenInput.removeEventListener("change", syncFromHiddenInput);
-        if (mounted) {
-          runtime.unmount(mounted);
-          mounted = null;
-        }
-        mountTarget.replaceChildren();
+        },
       };
     },
   });
@@ -678,7 +674,12 @@ function createNotebookInputHost<TValue>({
     currentValue: TValue,
     setCurrentValue: (value: TValue) => void,
     dispatchInput: () => void,
-  ) => () => void;
+  ) =>
+    | (() => void)
+    | {
+        dispose: () => void;
+        updateValue: (value: TValue) => void;
+      };
 }): HTMLElement {
   const host = document.createElement("div");
   host.className = `lapis-notebook-input lapis-notebook-input--${inputType}`;
@@ -686,12 +687,13 @@ function createNotebookInputHost<TValue>({
 
   let currentValue = initialValue;
   let disposeMountedControl = () => {};
+  let updateMountedValue: ((value: TValue) => void) | undefined;
 
   const mountControl = () => {
     disposeMountedControl();
     const mountTarget = document.createElement("div");
     mountTarget.className = "lapis-notebook-input__mount";
-    disposeMountedControl = onMount(
+    const control = onMount(
       host,
       mountTarget,
       currentValue,
@@ -702,6 +704,10 @@ function createNotebookInputHost<TValue>({
         host.dispatchEvent(new Event("input", { bubbles: true }));
       },
     );
+    disposeMountedControl =
+      typeof control === "function" ? control : control.dispose;
+    updateMountedValue =
+      typeof control === "function" ? undefined : control.updateValue;
     if (!host.contains(mountTarget)) {
       host.replaceChildren(mountTarget);
     }
@@ -714,7 +720,8 @@ function createNotebookInputHost<TValue>({
     },
     set(nextValue: TValue) {
       currentValue = nextValue;
-      mountControl();
+      if (updateMountedValue) updateMountedValue(nextValue);
+      else mountControl();
     },
   });
 

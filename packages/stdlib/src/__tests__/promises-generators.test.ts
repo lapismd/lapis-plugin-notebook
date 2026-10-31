@@ -65,3 +65,39 @@ describe("notebook stdlib promises and generators", () => {
     await expect(nextInput).resolves.toBe(7);
   });
 });
+
+describe("cell-owned promise helpers", () => {
+  test("invalidation clears all timer helpers without cancelling another cell", async () => {
+    const { createNotebookPromises } = await import("../promises");
+    vi.useFakeTimers();
+    try {
+      let invalidate!: () => void;
+      const scoped = createNotebookPromises(
+        new Promise<void>((resolve) => {
+          invalidate = resolve;
+        }),
+      );
+      const other = createNotebookPromises(new Promise<void>(() => {}));
+      const cancelled = [
+        scoped.delay(30_000),
+        scoped.when(Date.now() + 30_000),
+        scoped.tick(30_000),
+      ].map((promise) => promise.catch((error: Error) => error.name));
+      const stillRunning = other.delay(10, "other cell");
+      invalidate();
+      expect(await Promise.all(cancelled)).toEqual([
+        "AbortError",
+        "AbortError",
+        "AbortError",
+      ]);
+      expect(vi.getTimerCount()).toBe(1);
+      await vi.advanceTimersByTimeAsync(10);
+      await expect(stillRunning).resolves.toBe("other cell");
+      await expect(scoped.delay(1)).rejects.toMatchObject({
+        name: "AbortError",
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

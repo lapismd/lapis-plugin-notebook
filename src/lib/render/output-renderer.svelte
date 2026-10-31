@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { App } from "@lapis-notes/api";
   import type { NotebookOutput } from "../output";
+  import CodeOutput from "./renderers/code-output.svelte";
   import TableOutput from "./renderers/table-output.svelte";
   import ChartOutput from "./renderers/chart-output.svelte";
   import MarkdownOutput from "./renderers/markdown-output.svelte";
@@ -14,14 +15,17 @@
     app: App;
     sourcePath: string;
     outputs: NotebookOutput[];
+    embedded?: boolean;
   };
 
-  let { app, sourcePath, outputs }: Props = $props();
+  let { app, sourcePath, outputs, embedded = false }: Props = $props();
 </script>
 
 <div class="notebook-output" data-notebook-output-root>
   {#each outputs as output, index (output.kind === "input" ? `${output.cellId}:${output.variableName}` : output.kind === "dom" ? output.outputId : index)}
-    {#if output.kind === "table"}
+    {#if output.kind === "code"}
+      <CodeOutput {output} />
+    {:else if output.kind === "table"}
       <TableOutput {output} />
     {:else if output.kind === "chart"}
       <ChartOutput {output} />
@@ -30,7 +34,7 @@
     {:else if output.kind === "html"}
       <HtmlOutput {output} />
     {:else if output.kind === "input"}
-      <InputOutput {sourcePath} {output} />
+      <InputOutput {sourcePath} {output} {embedded} />
     {:else if output.kind === "dom"}
       <DomOutput {output} />
     {:else if output.kind === "error"}
@@ -41,12 +45,12 @@
         class="notebook-output__image"
         src={`data:${output.mime};base64,${output.data}`}
       />
+    {:else if output.kind === "text"}
+      <div class="notebook-output__text">{output.text}</div>
     {:else}
-      <pre
-        class="notebook-output__fallback">{output.kind ===
-        "text"
-          ? output.text
-          : stringifyNotebookValue(output)}</pre>
+      <pre class="notebook-output__fallback">{stringifyNotebookValue(
+          output,
+        )}</pre>
     {/if}
   {/each}
 </div>

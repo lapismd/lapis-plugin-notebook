@@ -138,6 +138,9 @@ export function collectDependencyClosure(
 function topologicalOrder<TCell extends NotebookGraphCellLike>(
   nodes: Map<string, NotebookGraphNode<TCell>>,
 ): string[] {
+  const sourceOrder = new Map(
+    Array.from(nodes.keys(), (id, index) => [id, index] as const),
+  );
   const indegree = new Map<string, number>();
   nodes.forEach((node, id) => {
     indegree.set(id, node.dependencies.length);
@@ -155,7 +158,10 @@ function topologicalOrder<TCell extends NotebookGraphCellLike>(
       const nextDegree = (indegree.get(dependent) ?? 0) - 1;
       indegree.set(dependent, nextDegree);
       if (nextDegree === 0) {
-        queue.push(dependent);
+        const position = sourceOrder.get(dependent)!;
+        const next = queue.findIndex((id) => sourceOrder.get(id)! > position);
+        if (next < 0) queue.push(dependent);
+        else queue.splice(next, 0, dependent);
       }
     }
   }

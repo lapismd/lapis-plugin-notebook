@@ -54,6 +54,30 @@ function createNotebook(sourcePath: string, source: string) {
 }
 
 describe("NotebookRuntimeController", () => {
+  test("polling an immutable document preserves its graph and running cell state", () => {
+    const controller = new NotebookRuntimeController();
+    const document = createNotebook(
+      "Notebook.notebook.md",
+      ':::cell{#one lang="js"}\nconst answer = 1;\n:::',
+    );
+    const session = controller.getOrCreateSession(document);
+    session.beginExecution(["one"]);
+    session.markRunning("one", "Running one");
+    const graph = session.graph;
+    const state = session.getCellState("one");
+    for (let i = 0; i < 54; i++) controller.getCellState(document, "one");
+    expect(session.graph).toBe(graph);
+    expect(session.getCellState("one")).toBe(state);
+    const edited = createNotebook(
+      document.sourcePath!,
+      document.source.replace("answer = 1", "answer = 2"),
+    );
+    controller.getOrCreateSession(edited);
+    expect(session.graph).not.toBe(graph);
+    expect(session.getCellState("one").state).toBe("stale");
+    controller.destroy();
+  });
+
   test("creates snapshots from notebook sessions", () => {
     const controller = new NotebookRuntimeController();
     const document = createNotebook(

@@ -16,6 +16,7 @@
   <div class="notebook-output__markdown-body">
     <MarkdownEmbed
       {app}
+      class="notebook-output__markdown-surface"
       value={output.markdown}
       {sourcePath}
       htmlPolicy="trusted"

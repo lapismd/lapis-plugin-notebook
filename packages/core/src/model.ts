@@ -44,6 +44,7 @@ export type NotebookDocumentBlock = NotebookMarkdownBlock | NotebookCellBlock;
 export type NotebookMode = "autorun" | "lazy";
 
 export interface NotebookFrontmatter {
+  id?: string;
   version: number;
   mode: NotebookMode;
   autorun?: boolean;

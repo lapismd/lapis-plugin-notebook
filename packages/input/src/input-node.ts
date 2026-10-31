@@ -1,11 +1,9 @@
+import { disposeNotebookInput, restoreNotebookInputState } from "./input-state";
+
 export interface NotebookInputNodeBinding {
   currentValue: unknown;
   dispose: () => void;
 }
-
-type NotebookDisposableInputNode = Node & {
-  __lapisNotebookInputDispose?: () => void;
-};
 
 export interface BindNotebookInputNodeOptions {
   initialValue?: unknown;
@@ -32,7 +30,7 @@ export function bindNotebookInputNode(
     dispose: () => {
       node.removeEventListener("input", listener);
       node.removeEventListener("change", listener);
-      (node as NotebookDisposableInputNode).__lapisNotebookInputDispose?.();
+      disposeNotebookInput(node);
     },
   };
 }
@@ -42,6 +40,7 @@ export function getNotebookInputNodeValue(node: Node): unknown {
 }
 
 export function setNotebookInputNodeValue(node: Node, value: unknown): void {
+  if (restoreNotebookInputState(node, value)) return;
   if (!("value" in node)) {
     return;
   }

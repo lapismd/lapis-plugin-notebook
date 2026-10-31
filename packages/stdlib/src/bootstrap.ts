@@ -4,7 +4,7 @@ import {
 } from "./files";
 import { DOM } from "./dom";
 import { Generators } from "./generators";
-import { Promises } from "./promises";
+import { Promises, createNotebookPromises } from "./promises";
 import aapl from "./sample-datasets/aapl.json";
 import alphabet from "./sample-datasets/alphabet.json";
 import cars from "./sample-datasets/cars.json";
@@ -19,6 +19,7 @@ import pizza from "./sample-datasets/pizza.json";
 import weather from "./sample-datasets/weather.json";
 
 export interface NotebookStdlibOutputApi<TOutput> {
+  code(value: string, language?: string, options?: { title?: string }): TOutput;
   text(value: string): TOutput;
   markdown(value: string): TOutput;
   html(value: string): TOutput;
@@ -94,6 +95,7 @@ export async function createNotebookStdlibRuntime<TOutput>(
   ]);
   const now = options.now ?? Date.now();
   const invalidation = options.invalidation ?? new Promise<void>(() => {});
+  const scopedPromises = createNotebookPromises(invalidation);
   const md = createMarkdownTemplateHelper(options);
   const tex = createTexTemplateHelper(options);
 
@@ -103,6 +105,11 @@ export async function createNotebookStdlibRuntime<TOutput>(
     cars,
     citywages,
     diamonds,
+    code(value: string, language?: string, config?: { title?: string }) {
+      const output = options.outputs.code(value, language, config);
+      options.appendOutput(output);
+      return output;
+    },
     text(value: string) {
       const output = options.outputs.text(value);
       options.appendOutput(output);
@@ -154,7 +161,7 @@ export async function createNotebookStdlibRuntime<TOutput>(
     olympians,
     penguins,
     pizza,
-    Promises,
+    Promises: scopedPromises,
     tex,
     weather,
     d3,
@@ -182,7 +189,7 @@ export async function createNotebookStdlibRuntime<TOutput>(
       penguins,
       pizza,
       Plot,
-      Promises,
+      Promises: scopedPromises,
       tex,
       weather,
     },

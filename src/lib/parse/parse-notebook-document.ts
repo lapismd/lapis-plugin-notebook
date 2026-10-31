@@ -120,17 +120,21 @@ function resolveFrontmatter(
   frontmatter: unknown,
 ): NotebookFrontmatter {
   const fromOption = normalizeNotebookFrontmatter(frontmatter);
+  const yamlBlock = source.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  const fromSource = yamlBlock
+    ? parseNotebookFrontmatterFromYaml(yamlBlock[1])
+    : null;
   if (fromOption) {
-    return fromOption;
+    if (!fromSource) return fromOption;
+    const { id: _cachedId, ...cached } = fromOption;
+    return { ...cached, ...(fromSource.id ? { id: fromSource.id } : {}) };
   }
-
-  const yamlBlock = source.match(/^---\n([\s\S]*?)\n---\n?/);
   if (!yamlBlock) {
     return { ...DEFAULT_NOTEBOOK_FRONTMATTER };
   }
 
   return (
-    parseNotebookFrontmatterFromYaml(yamlBlock[1]) ?? {
+    fromSource ?? {
       ...DEFAULT_NOTEBOOK_FRONTMATTER,
     }
   );

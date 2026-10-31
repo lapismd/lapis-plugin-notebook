@@ -5,5 +5,9 @@
     "noEmit": true,
     "types": ["node", "vitest/globals"]
   },
-  "include": ["vite.config.ts", "scripts/vite-notebook-packages.ts"]
+  "include": [
+    "vite.config.ts",
+    "vite.bundle.config.ts",
+    "scripts/vite-notebook-packages.ts"
+  ]
 }

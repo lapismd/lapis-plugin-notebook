@@ -28,3 +28,14 @@ export {
   type NotebookViewDomOutputRegistration,
   type NotebookViewInputChange,
 } from "./view-runtime";
+
+export {
+  snapshotNotebookInputState,
+  settleNotebookInputState,
+  disposeNotebookInput,
+} from "./input-state";
+export { hasTemporaryNotebookFiles } from "./file-values";
+export type {
+  NotebookInputHostContext,
+  NotebookVaultFile,
+} from "./host-context";

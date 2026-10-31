@@ -1,4 +1,5 @@
-const svelteDiagnostic = /(?:\[svelte\]|svelte\.dev\/e\/[a-z_]+)/u;
+const fatalStorybookDiagnostic =
+  /(?:\[svelte\]|svelte\.dev\/e\/[a-z_]+|Error in mounting stories)/u;
 
 function diagnosticMessage(args) {
   return args
@@ -22,10 +23,8 @@ function diagnosticStack(message) {
 
 export function assertNoFatalStorybookRuntimeWarning(args) {
   const message = diagnosticMessage(args);
-  if (!svelteDiagnostic.test(message)) return;
-  throw new Error(
-    `Storybook emitted a fatal Svelte runtime warning: ${message}`,
-  );
+  if (!fatalStorybookDiagnostic.test(message)) return;
+  throw new Error(`Storybook emitted a fatal runtime diagnostic: ${message}`);
 }
 
 /** Retain diagnostic stacks without interrupting framework cleanup. */
@@ -38,7 +37,7 @@ export function installFatalStorybookRuntimeWarningGuard(target = console) {
     (...args) => {
       original.apply(target, args);
       const message = diagnosticMessage(args);
-      if (!svelteDiagnostic.test(message)) return;
+      if (!fatalStorybookDiagnostic.test(message)) return;
       diagnostics.push(diagnosticStack(message));
     };
   const warn = wrap(originalWarn),
@@ -50,7 +49,7 @@ export function installFatalStorybookRuntimeWarningGuard(target = console) {
       if (!diagnostics.length) return;
       const messages = diagnostics.splice(0);
       throw new Error(
-        `Storybook emitted fatal Svelte runtime diagnostics:\n${messages.join("\n")}`,
+        `Storybook emitted fatal runtime diagnostics:\n${messages.join("\n")}`,
       );
     },
     dispose() {
