@@ -1,5 +1,10 @@
 # Specification Governance
 
+Notebook's CI and catalog workflows use `actions/checkout@v7`; catalog Node
+setup uses `actions/setup-node@v7`. The Node 24 CI container, frozen installs,
+parallel stages, Turbo caching and blocking aggregate remain governed by
+LPN-SPEC-021. Both open action updates are consolidated into one dependency PR.
+
 Tracked dependencies use registry Design Core `0.7.0` and Mira `0.1.2`, with
 the published Lapis host cohort at `@lapis-notes/api@0.2.0`,
 `@lapis-notes/ui@0.1.4`, `@lapis-notes/workspace@0.3.0`,
