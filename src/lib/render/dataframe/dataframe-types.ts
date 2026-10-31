@@ -91,6 +91,8 @@ export type DataFrameOptions = {
 export type DataFrameProps = {
   schema: DataFrameSchema;
   rows: DataFrameRow[];
+  /** Transient source generation; defaults to the rows array identity. */
+  resultIdentity?: unknown;
   title?: string;
   options?: DataFrameOptions;
   onSort?: (sorts: SortState[]) => void;

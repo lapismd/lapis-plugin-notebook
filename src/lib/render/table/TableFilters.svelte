@@ -27,6 +27,7 @@
 >
 <Popover.Root bind:open>
   <Popover.Trigger
+    data-notebook-table-filter-trigger
     aria-describedby={descriptionId}
     data-ui-component="button"
     data-slot="button"

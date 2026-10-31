@@ -24,6 +24,7 @@
   import TableFilters from "./TableFilters.svelte";
   let {
     rows,
+    resultIdentity,
     columns,
     allColumns = columns,
     visibleRowIds,
@@ -48,6 +49,7 @@
     height = "320px",
   }: {
     rows: readonly DataFrameRow[];
+    resultIdentity?: unknown;
     columns: readonly Column[];
     allColumns?: readonly Column[];
     visibleRowIds?: readonly number[];
@@ -73,7 +75,24 @@
     label?: string;
     height?: string;
   } = $props();
+  let root: HTMLDivElement;
   const instanceId = $props.id();
+  const generation = $derived(
+    resultIdentity === undefined ? rows : resultIdentity,
+  );
+  let previousGeneration = untrack(() => generation);
+  $effect.pre(() => {
+    if (
+      generation !== previousGeneration &&
+      root?.contains(root.ownerDocument.activeElement)
+    )
+      root
+        .querySelector<HTMLButtonElement>(
+          "[data-notebook-table-filter-trigger]",
+        )
+        ?.focus();
+    previousGeneration = generation;
+  });
   let filter = $state(createFilterState());
   const viewState = createViewerState();
   const sort = $derived(viewState.sortColumns);
@@ -84,9 +103,9 @@
   let inferred = $state<ReturnType<typeof inferTableTypes>>([]);
   $effect(() => {
     void schemaKey;
-    const source = rows;
+    void generation;
     untrack(() => {
-      inferred = inferTableTypes(source, allColumns);
+      inferred = inferTableTypes(rows, allColumns);
       filter = createFilterState();
       viewState.clearSort();
     });
@@ -169,6 +188,7 @@
   {#if details && row}{@render details(row)}{/if}
 {/snippet}
 <div
+  bind:this={root}
   class="notebook-canvas-table"
   data-framed={framed}
   style:--notebook-table-white-space={wrapText ? "pre-wrap" : "nowrap"}
@@ -194,40 +214,40 @@
       <span aria-live="polite">{matched.length} of {rows.length} rows</span>
     </div>{/if}
   <div class="notebook-canvas-grid">
-    <CanvasTable
-      rows={canvasRows}
-      columns={descriptors}
-      columnWidths={widths ??
-        columns.map((column) => localWidths[column.name] ?? 192)}
-      fillWidth
-      onColumnWidthsChange={(next) => {
-        if (onWidthsChange) onWidthsChange(next);
-        else
-          localWidths = Object.fromEntries(
-            columns.map((c, i) => [c.name, next[i]]),
-          );
-      }}
-      headerRow={false}
-      rowNumbers
-      {rowHeight}
-      columnHeaderHeight={headerHeight}
-      toolbar={false}
-      {wrapText}
-      {columnColours}
-      contextMenu={false}
-      visibleRowIds={displayIds}
-      selectionRowIds={scopeIds}
-      {rowSelection}
-      {selectedRowIds}
-      onSelectedRowIdsChange={onSelectedRowIdsChange
-        ? (ids) => onSelectedRowIdsChange?.(numbers(ids))
-        : undefined}
-      {expandedRowIds}
-      onExpandedRowIdsChange={onExpandedRowIdsChange
-        ? (ids) => onExpandedRowIdsChange?.(numbers(ids))
-        : undefined}
-      rowDetails={details ? renderDetails : undefined}
-      aria-label={label}
-    />
+    {#key generation}<CanvasTable
+        rows={canvasRows}
+        columns={descriptors}
+        columnWidths={widths ??
+          columns.map((column) => localWidths[column.name] ?? 192)}
+        fillWidth
+        onColumnWidthsChange={(next) => {
+          if (onWidthsChange) onWidthsChange(next);
+          else
+            localWidths = Object.fromEntries(
+              columns.map((c, i) => [c.name, next[i]]),
+            );
+        }}
+        headerRow={false}
+        rowNumbers
+        {rowHeight}
+        columnHeaderHeight={headerHeight}
+        toolbar={false}
+        {wrapText}
+        {columnColours}
+        contextMenu={false}
+        visibleRowIds={displayIds}
+        selectionRowIds={scopeIds}
+        {rowSelection}
+        {selectedRowIds}
+        onSelectedRowIdsChange={onSelectedRowIdsChange
+          ? (ids) => onSelectedRowIdsChange?.(numbers(ids))
+          : undefined}
+        {expandedRowIds}
+        onExpandedRowIdsChange={onExpandedRowIdsChange
+          ? (ids) => onExpandedRowIdsChange?.(numbers(ids))
+          : undefined}
+        rowDetails={details ? renderDetails : undefined}
+        aria-label={label}
+      />{/key}
   </div>
 </div>

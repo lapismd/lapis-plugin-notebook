@@ -4,6 +4,9 @@ import { expect, it } from "vitest";
 const root = process.cwd();
 const directories = ["src/lib/render/table", "src/stories/tables"];
 const extra = [
+  "scripts/consumer-archives.mjs",
+  "scripts/package-consumer-entry.mjs",
+  "scripts/consumer-archives.test.mjs",
   "src/lib/render/dataframe/ColumnVisibility.svelte",
   "src/lib/render/dataframe/SortIcon.svelte",
   "packages/input/src/input-host.ts",

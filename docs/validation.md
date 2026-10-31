@@ -127,6 +127,12 @@ verified. Only the isolated installation projection changes; tracked manifests
 and the lockfile are restored before checks, and archive provenance is retained
 in the report.
 
+The clean packed consumer revalidates worker archive checksums and package
+identities and projects them only into its disposable installation. Design Core
+consumer patch metadata is read from the public archive and verified before
+application. Outside an isolated worker, the consumer always installs registry
+packages with npm. Candidate receipts do not replace final registry qualification.
+
 Passed containers are removed after collection; failures remain inspectable.
 An active worker or failed remote-state query retains its checkout lease.
 Lease removal uses its container ID, so an older caller cannot remove a
@@ -161,3 +167,8 @@ It forwards console warnings/errors and fails Svelte runtime diagnostics during
 mount, interaction and teardown, plus caught runtime story-extraction errors. The wrapper records origin stacks without
 throwing through framework cleanup; post-test and post-file assertions make
 every retained diagnostic fatal. No suppression or allowlist is permitted.
+
+Clean public consumers verify every declared runtime module in the public Web and
+electron-renderer host catalog, boot the packed Notebook through App, assert its
+execution command, and verify disposal before reporting success. Diagnostics stay
+fatal through browser teardown. Registry and candidate receipts remain distinct.

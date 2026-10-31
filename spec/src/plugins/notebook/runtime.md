@@ -193,3 +193,10 @@ Auto and type overrides. No formatted cell string participates in typed
 filtering or export. Regex is a structured predicate, not a query language.
 
 The LN-NB-055 UI slice extracts existing table normalization and host lifecycle into owned modules; selected IDs map back to original objects and nested control input events do not escape as input-value changes. Full lifecycle qualification remains deferred.
+
+LN-NB-006 producer builds MUST use the API-owned rendererHostModulePlugin with
+the exact locked Svelte version. Runtime manifests MUST declare its versioned
+renderer namespace, and clean npm host acceptance MUST resolve it through the
+same public adapter. Bare private compiler aliases MUST NOT be newly admitted in
+the host. Compiler/runtime versions MUST match; existing registry manifests stay
+portable while candidate source qualification uses isolated verified archives.

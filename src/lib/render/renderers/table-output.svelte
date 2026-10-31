@@ -62,6 +62,7 @@
   <DataFrameViewer
     {schema}
     {rows}
+    resultIdentity={output}
     title={output.title}
     options={{
       searchable: true,

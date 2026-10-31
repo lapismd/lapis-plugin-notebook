@@ -14,6 +14,7 @@
     onToggleSort,
     onOpenProfile,
     showSummary = true,
+    sortable = true,
   }: {
     column: Column;
     summary?: ColumnSummary;
@@ -22,6 +23,7 @@
     onToggleSort: (multi: boolean) => void;
     onOpenProfile: () => void;
     showSummary?: boolean;
+    sortable?: boolean;
   } = $props();
 </script>
 
@@ -30,7 +32,8 @@
     <button
       type="button"
       class="notebook-dataframe__column-sort"
-      onclick={(event: MouseEvent) => onToggleSort(event.shiftKey)}
+      disabled={!sortable}
+      onclick={(event: MouseEvent) => sortable && onToggleSort(event.shiftKey)}
     >
       <span class="notebook-dataframe__column-title">
         <span class="notebook-dataframe__column-label"

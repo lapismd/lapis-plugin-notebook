@@ -19,5 +19,14 @@
     "kind": "integration",
     "requirement": "LN-NB-055",
     "reason": "Exercises the actual lazy Inputs.table runtime, typed host .value, event protocol and retained Svelte control rather than a replacement fixture."
+  },
+  "src/stories/tables/NotebookTableLifecycle.stories.svelte": {
+    "kind": "component",
+    "subject": "src/lib/render/dataframe/DataFrameViewer.svelte#default"
+  },
+  "src/stories/tables/NotebookTableSelection.stories.svelte": {
+    "kind": "integration",
+    "requirement": "LN-NB-055",
+    "reason": "Exercises shared read-only row navigation through actual Notebook results and lazy Inputs.table, including modifiers, typed values, event counts and disabled/required controls."
   }
 }

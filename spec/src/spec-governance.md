@@ -164,3 +164,5 @@ sibling `file:` specifiers fails the worker install fail-closed.
 | LPN-SPEC-022 | Registered focused table and Docker Storybook review lanes MUST reuse fingerprinted tools, exact Jujutsu source snapshots, verified archives, bounded resources and owned leases/reports. The review endpoint MUST bind loopback, support remote forwarding and terminate owned workers safely. No host fallback, source/node_modules/secret/socket mounts or diagnostic suppression is permitted. |
 
 LPN-SPEC-022 review workers now project verified archive overrides over existing worker-only pins, restore tracked package/workspace/lock inputs, retain actual installed graphs, and expose only a checkout-owned loopback endpoint. Exact focused receipts remain separate from full qualification.
+
+LPN-SPEC-022 packed-consumer qualification MUST revalidate candidate archive identities and checksums inside the isolated worker, retain registry-portable tracked inputs, and verify strict public types plus cold development/production App boot and teardown. The generated consumer MUST own App creation in a mounted Svelte lifecycle and retain fatal runtime diagnostics through unmount.

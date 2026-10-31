@@ -44,6 +44,7 @@
   let {
     schema,
     rows,
+    resultIdentity,
     title = undefined,
     options = {},
     onSort,
@@ -56,6 +57,10 @@
     error = undefined,
   }: DataFrameProps = $props();
 
+  let root: HTMLDivElement;
+  const generation = $derived(
+    resultIdentity === undefined ? rows : resultIdentity,
+  );
   let wrapText = $state(false);
   let columnColours = $state(false);
   const viewerState = createViewerState(untrack(() => pageSize));
@@ -123,10 +128,13 @@
   );
   $effect(() => {
     void schemaKey;
-    const source = rows;
+    void generation;
     untrack(() => {
-      inferred = inferTableTypes(source, schema.columns);
+      inferred = inferTableTypes(rows, schema.columns);
       viewerState.setStructured(createFilterState());
+      viewerState.clearSort();
+      viewerState.setSearch("");
+      viewerState.setProfile(null);
       viewerState.clearSelectedRows();
       viewerState.setExpandedRows([]);
     });
@@ -181,7 +189,29 @@
     }
   });
 
+  let previousGeneration = untrack(() => generation);
+  $effect.pre(() => {
+    const replaced = previousGeneration !== generation;
+    previousGeneration = generation;
+    if (
+      replaced ||
+      (!loading && (error || !visibleColumns.length || !sortedRows.length))
+    ) {
+      const active = root?.ownerDocument.activeElement;
+      if (
+        active &&
+        root?.querySelector("[data-notebook-canvas-table]")?.contains(active)
+      )
+        root
+          .querySelector<HTMLButtonElement>(
+            "[data-notebook-table-filter-trigger]",
+          )
+          ?.focus();
+    }
+  });
+
   function handleToggleSort(column: string, multi: boolean) {
+    if (options.sortable === false) return;
     viewerState.toggleSort(column, multi);
     onSort?.(viewerState.sortColumns);
   }
@@ -201,6 +231,7 @@
 </script>
 
 <div
+  bind:this={root}
   class="notebook-dataframe"
   style:--df-max-height={maxHeight}
   use:keyNav={{
@@ -294,6 +325,7 @@
   {:else}
     <NotebookCanvasTable
       {rows}
+      resultIdentity={generation}
       columns={visibleColumns}
       allColumns={schema.columns}
       visibleRowIds={pageIds}
@@ -323,6 +355,7 @@
       {#snippet header(column)}
         <ColumnHeader
           {column}
+          sortable={options.sortable !== false}
           summary={summaryByKey[column.name]}
           sortState={viewerState.sortColumns.find(
             (sort) => sort.column === column.name,

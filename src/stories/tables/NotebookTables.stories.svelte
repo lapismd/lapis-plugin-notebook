@@ -4,6 +4,7 @@
   import DataFrameViewer from "../../lib/render/dataframe/DataFrameViewer.svelte";
   import Demo from "./NotebookTables.fixture.svelte";
   import { assertTableHeaders } from "./table-header.story-play";
+  import { assertScrollingSelection } from "./table-selection.story-play";
   import { assertBasicSort } from "./table-sort.story-play";
   import {
     assertTableDisplay,
@@ -78,8 +79,11 @@
     ).not.toBeInTheDocument();
   }}>{#snippet template()}<Demo />{/snippet}</Story
 >
-<Story name="Large typed results"
-  >{#snippet template()}<Demo large />{/snippet}</Story
+<Story
+  name="Large typed results"
+  play={async ({ canvasElement }) => {
+    await assertScrollingSelection(canvasElement);
+  }}>{#snippet template()}<Demo large />{/snippet}</Story
 >
 <Story name="Inspector sample"
   >{#snippet template()}<Demo preview />{/snippet}</Story
