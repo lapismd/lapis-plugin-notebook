@@ -70,11 +70,12 @@ export type RenderedNotebookCell = {
 };
 
 export class NotebookRenderService {
-  private readonly parsedDocuments = new WeakMap<
-    TFile,
+  private readonly parsedDocuments = new Map<
+    string,
     {
       source: string;
-      sourcePath: string;
+      filePath: string;
+      createdAt: number | undefined;
       frontmatterKey: string;
       document: NotebookDocument;
     }
@@ -117,21 +118,28 @@ export class NotebookRenderService {
     const frontmatterKey = JSON.stringify(
       normalizeNotebookFrontmatter(frontmatter),
     );
-    const cached = this.parsedDocuments.get(file);
+    const cached = this.parsedDocuments.get(sourcePath);
     if (
       cached?.source === source &&
-      cached.sourcePath === sourcePath &&
+      cached.filePath === file.path &&
+      cached.createdAt === file.stat?.ctime &&
       cached.frontmatterKey === frontmatterKey
     ) {
+      this.parsedDocuments.delete(sourcePath);
+      this.parsedDocuments.set(sourcePath, cached);
       return cached.document;
     }
     const document = parseNotebookDocument(source, { sourcePath, frontmatter });
-    this.parsedDocuments.set(file, {
+    this.parsedDocuments.set(sourcePath, {
       source,
-      sourcePath,
+      filePath: file.path,
+      createdAt: file.stat?.ctime,
       frontmatterKey,
       document,
     });
+    while (this.parsedDocuments.size > 16) {
+      this.parsedDocuments.delete(this.parsedDocuments.keys().next().value!);
+    }
     return document;
   }
 

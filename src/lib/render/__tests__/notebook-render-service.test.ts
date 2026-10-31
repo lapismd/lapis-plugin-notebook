@@ -1,4 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
+import { TFile } from "@lapis-notes/api/vault";
 import { parseNotebookDocument } from "../../parse/parse-notebook-document";
 import { NotebookRenderService } from "../notebook-render-service";
 import { NotebookSession } from "../../runtime/notebook-session";
@@ -106,6 +107,43 @@ function createRuntimeControllerStub(options: {
 }
 
 describe("NotebookRenderService", () => {
+  test("reuses parsing across public vault file copies without retaining an unbounded path cache", async () => {
+    const source = ':::cell{#one lang="js"}\nconst answer = 1;\n:::';
+    const file = new TFile(
+      "Notebook.notebook.md",
+      { ctime: 1, mtime: 1, size: source.length },
+      null,
+    );
+    const app = {
+      vault: { cachedRead: async () => source },
+      metadataCache: {
+        getFileCache: () => ({ frontmatter: { notebook: { version: 1 } } }),
+      },
+    } as any;
+    const service = new NotebookRenderService(
+      app,
+      {} as any,
+      vi.fn(),
+      new Map(),
+    );
+    const first = await service.loadNotebookDocument(file, file.path);
+    const copies = Array.from({ length: 54 }, () => file.copy());
+    expect(copies.every((copy) => copy !== file)).toBe(true);
+    for (const copy of copies)
+      expect(await service.loadNotebookDocument(copy, copy.path)).toBe(first);
+    for (let i = 0; i < 100; i++) {
+      const other = new TFile(
+        `Other-${i}.notebook.md`,
+        { ctime: 1, mtime: 1, size: source.length },
+        null,
+      );
+      await service.loadNotebookDocument(other, other.path);
+    }
+    expect(await service.loadNotebookDocument(file.copy(), file.path)).not.toBe(
+      first,
+    );
+  });
+
   test("reuses a parsed snapshot across concurrent cell polls and invalidates edits, metadata and renames", async () => {
     let source = ':::cell{#one lang="js"}\nconst answer = 1;\n:::';
     const file = { path: "Notebook.notebook.md", stat: { mtime: 123 } } as any;
@@ -144,7 +182,7 @@ describe("NotebookRenderService", () => {
     const renamed = await service.loadNotebookDocument(file, file.path);
     expect(renamed).not.toBe(changedMetadata);
     expect(renamed.sourcePath).toBe(file.path);
-    const otherFile = { ...file };
+    const otherFile = { ...file, stat: { ...file.stat, ctime: 456 } };
     expect(await service.loadNotebookDocument(otherFile, file.path)).not.toBe(
       renamed,
     );

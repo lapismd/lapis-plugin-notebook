@@ -357,6 +357,17 @@
     );
     await userEvent.click(sweet);
     await expect(sweet).toHaveAttribute("aria-checked", "false");
+    // The table and checkbox changes can share an asynchronous rerun. Verify
+    // its completed result before checking that the DOM paints that result.
+    await pollUntil(async () => {
+      const rendered = await getNotebookRenderService()!.getRenderedCell(
+        NOTEBOOK_FIXTURE_PATHS.inputTypes,
+        "checkbox-input-value",
+      );
+      return rendered?.state === "completed" && rendered.outputs.some(
+        (output) => output.kind === "code" && output.code === "[]",
+      );
+    });
     await waitFor(() =>
       expect(
         canvasElement.querySelector(

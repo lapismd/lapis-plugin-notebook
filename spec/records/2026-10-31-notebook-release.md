@@ -223,3 +223,39 @@ eight required lanes are green: 438 unit cases, two cold consumers, static
 Storybook, 47 actual interaction/accessibility stories and specifications.
 The installed graph remains registry-only with no archives or file resolutions.
 Visual status stays pending and baselines are unchanged.
+
+## Public vault-copy regression before publication
+
+Merged-main CI `41181600305` exposes two remaining shell failures: desktop
+checks checkbox output before its async rerun completes; mobile reaches the
+60-second deadline after the initial run consumes 37 seconds. All other lanes
+pass. Publication stays paused even though PR CI passed. npm login is now valid.
+
+The owning API deliberately returns `file.copy()` from `getFileByPath`; a
+weak cache keyed by wrapper identity misses these ordinary reads. A source
+regression using public `TFile.copy()` records one failure / 15 passes. The
+cache now keys stable path, source, normalized metadata and creation time,
+with bounded retention. Copied wrappers reuse parsing; changed creation time
+represents replacement. The earlier same-object fixture is strengthened to
+model actual replacement, rather than treating a wrapper copy as replacement.
+
+The checkbox play now awaits its actual completed `[]` result, as its existing
+button play does, then retains the original DOM assertion. Assertions and the
+60-second story limit remain unchanged. The complete shared-helper story suite
+and source lanes must requalify before the release draft is finalized.
+
+The corrected public-copy boundary passes all 26 focused cases. The unchanged
+input catalogs pass at 14.9 seconds desktop / 11.3 seconds mobile in a fresh
+four-CPU / 7 GiB worker, report
+`lapis-notebook-run-67d93014-00ba-417a-ba73-8632f9b0acb0`. The runtime and
+DOM checkbox assertions both remain required. Full qualification follows.
+
+The final corrected `pnpm validation:all` passes all eight lanes, report
+`lapis-notebook-run-e4844ad9-2166-4026-b0c3-4a4811cc9661`: quality, 439 unit
+cases, build, publint, both cold public npm consumers, static Storybook, all
+47 interaction/accessibility cases and specifications. The source uses no
+dependency archives or file resolutions. Its qualified consumer tarball SHA-256
+is `346a29751a19a0c2fc3b415e0e686c9712b956ea8648f21b40f9066af352c8e6`.
+The SDK-copy regression and the runtime-completion/DOM assertions are retained.
+Visual status stays pending and baselines are unchanged. The initial 0.1.0
+release artifact will be rebuilt from the corrected merged source.
