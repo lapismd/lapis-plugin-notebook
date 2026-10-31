@@ -217,14 +217,13 @@
             >
               <div
                 class="notebook-dataframe__summary-boolean-fill"
-                style={`width: ${segmentWidth(bucket.count)}%; background-color: ${bucket.isNull ? NULL_BAR_COLOR : BAR_COLOR}; color: ${MUTED_TEXT_COLOR}; min-width: ${bucket.count > 0 ? 18 : 0}px; opacity: ${UNHOVERED_BAR_OPACITY};`}
+                style={`width: ${segmentWidth(bucket.count)}%; background-color: ${bucket.isNull ? NULL_BAR_COLOR : BAR_COLOR}; opacity: ${UNHOVERED_BAR_OPACITY};`}
                 title={`${bucket.label}: ${formatCount(bucket.count)}`}
-              >
-                {#if segmentWidth(bucket.count) >= 20}
-                  {formatCount(bucket.count)}
-                {/if}
-              </div>
+              ></div>
             </div>
+            <span class="notebook-dataframe__summary-boolean-count"
+              >{formatCount(bucket.count)}</span
+            >
           </div>
         {/each}
       </div>

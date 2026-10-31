@@ -739,7 +739,7 @@
 
 .notebook-dataframe__summary-boolean {
   display: flex;
-  width: 80px;
+  width: min(100%, 112px);
   flex-direction: column;
   gap: 2px;
 }
@@ -753,7 +753,15 @@
 .notebook-dataframe__summary-boolean-label {
   width: 1.75rem;
   flex-shrink: 0;
-  font-size: 9px;
+  font-size: 10px;
+}
+
+.notebook-dataframe__summary-boolean-count {
+  min-width: 2ch;
+  font-size: 10px;
+  color: var(--muted-foreground);
+  text-align: end;
+  font-variant-numeric: tabular-nums;
 }
 
 .notebook-dataframe__summary-boolean-track {

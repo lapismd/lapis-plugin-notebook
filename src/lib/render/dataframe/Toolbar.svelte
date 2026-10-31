@@ -283,10 +283,7 @@
     </Tooltip.Provider>
   </div>
 
-  <div class="notebook-dataframe__toolbar-meta">
-    {schema.rowCount.toLocaleString()} rows
-    {#if schema.queryTimeMs != null}
-      · {schema.queryTimeMs}ms
-    {/if}
-  </div>
+  {#if schema.queryTimeMs != null}
+    <div class="notebook-dataframe__toolbar-meta">{schema.queryTimeMs}ms</div>
+  {/if}
 </div>

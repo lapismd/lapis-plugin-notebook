@@ -244,6 +244,8 @@ LN-NB-050 row disclosure uses decorative Lucide right/down chevrons for collapse
 
 LN-NB-050 custom column headers reserve 144 CSS pixels when summaries are shown (64 without summaries). Title/type controls and chart/range content MUST fit that shared header geometry. Notebook header snippets use sans typography, border-box summary widths, and public Design Core chart/muted colour tokens so histograms and boolean distributions remain visible in supported themes.
 
+The toolbar MUST omit the redundant total-row count while retaining optional query timing; pagination remains the row-count display. Boolean-summary counts MUST appear beside the decorative bars at full text opacity on the header background. The shared CanvasTable MUST use Design Core ScrollArea for the actual viewport, preserving both-axis alignment, keyboard access and teardown.
+
 Private dataframe filter notifications now carry the structured tree, matching the new editor and raw-value evaluator rather than flattening Any/None groups into incorrect All semantics; no public output wire format changes. Shared viewport width filling owns scrollbar accounting for narrow input data.
 
 The isolated review and final registry intake MUST apply the exact checksum-verified Bits UI 2.20.2 consumer patch required by published Design Core 0.8; source fixes remain in the shared owner and upstream Bits UI. This does not authorize any new package patch or waive focused portal/focus checks.

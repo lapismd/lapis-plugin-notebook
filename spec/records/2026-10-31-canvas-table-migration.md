@@ -3,8 +3,10 @@
 ## Delivery state
 
 - Specified: complete contract written before runtime changes.
-- Implemented: pending.
-- Focused-tested: pending; no passing runtime evidence claimed.
+- Implemented: result/input/preview UI candidate and subsequent feedback slices;
+  host compatibility and final migration cleanup remain in progress.
+- Focused-tested: review stories and feedback regressions as recorded below;
+  remaining migration gates and the filter-trigger type issue stay open.
 - UI-approved: pending.
 - Fully-qualified: deferred until UI approval.
 
@@ -48,7 +50,8 @@ Existing workspaces and Storybook 10329 are preserved. No push/merge/publication
 - Notebook `pnpm install --frozen-lockfile`: one configuration failure because
   the local hook checksum was active. `pnpm install --frozen-lockfile --ignore-pnpmfile`
   succeeds with registry resolution; no tracked lock mutation.
-- All runtime test counts are pending. No screenshot comparisons/baseline updates.
+- Initial specification-stage runtime counts were pending; executed feedback
+  evidence follows below, without screenshot comparisons or baseline updates.
 
 ## Resume
 
@@ -150,3 +153,42 @@ Commands and failure counts:
 
 Full qualification remains deferred. The previously recorded filter-trigger type
 error and the broader migration's remaining focused gates are still outstanding.
+
+## UI feedback: toolbar count, boolean contrast and ScrollArea (31 October)
+
+Implemented and focused-tested; UI approval and full qualification remain pending.
+Remove the duplicate total from Toolbar while retaining optional query timing
+and pagination counts. Place boolean counts beside decorative, translucent bars
+at full opacity on the header surface. CanvasTable now uses Design Core's public
+ScrollArea viewport; Notebook adds no outer scroller or private shared CSS override.
+
+Review source `fd7f4e61`, owned worker
+`lapis-notebook-run-f606e779-3a8d-44a4-a256-f30a5630abf2`, loopback port 10529.
+Updated Design Core 0.8.0 review archive SHA256:
+`a54f27c6f604910e9a003638f409b286733576bc23dd5823754fc0bc6359d354`.
+Tracked dependency manifests/locks remain registry-portable. The archive is
+temporary review intake, not a release or completed packed-consumer qualification.
+
+- Baseline `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte -t RichCellsAndExpandedRows`:
+  1 failed, 4 skipped; expected no duplicate toolbar count, received `Filters 45 rows`.
+  Receipt `.local/validation/runs/lapis-notebook-run-14d15645-275f-4092-856e-107611b49291`.
+- Restarted the owned review with
+  `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm storybook:review`.
+- Post-fix command prefix:
+  `docker --context omarchy exec -e LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native -e LAPIS_NOTEBOOK_VALIDATION_WORKER=1 -w /work/lapis-plugin-notebook lapis-notebook-run-f606e779-3a8d-44a4-a256-f30a5630abf2`.
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte -t RichCellsAndExpandedRows`:
+  1 passed, 0 failed, 4 skipped; checks no duplicated count, real ScrollArea grid,
+  summary containment, coloured bars, and separate full-opacity boolean counts.
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte src/stories/PluginWorkspace.stories.svelte -t 'ResultsAndStructuredFilters|RichCellsAndExpandedRows|LargeTypedResults|InspectorSample|IndependentTables|TableFilters'`:
+  7 passed, 0 failed, 27 unrelated shell stories skipped, retaining runtime/a11y guards.
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookInputTables.stories.svelte`:
+  4 passed, 0 failed (typed multiple, optional/required single, disabled), including
+  filtering, focus return, event suppression and reactive selection replacement.
+- Prefix + `pnpm test -- src/lib/render/table/table-files.test.ts`: 24 passed, 0 failed.
+- Prefix + `pnpm spec:check`: all 3 specification lanes passed; routing 25/0 findings,
+  parity 6/0 findings, ownership 1 passed.
+- `/Users/stevejuma/code/lapismd/design-core-notebook-tables/node_modules/.bin/prettier --plugin /Users/stevejuma/code/lapismd/design-core-notebook-tables/node_modules/prettier-plugin-svelte/plugin.js --check src/lib/render/dataframe/Toolbar.svelte src/lib/render/dataframe/DataFrameColumnSummary.svelte src/stories/tables/table-header.story-play.ts`:
+  all 3 files passed.
+
+Keep the shared and Notebook reviews running. Resume remaining migration checks
+from the records; full qualification and publication are still gated by UI approval.

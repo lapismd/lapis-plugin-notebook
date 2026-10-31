@@ -3,7 +3,11 @@ import { expect, within } from "storybook/test";
 /** Header snippets must fit the shared viewport and paint visible charts. */
 export async function assertTableHeaders(canvasElement: HTMLElement) {
   const canvas = within(canvasElement);
-  await canvas.findByRole("grid");
+  const grid = await canvas.findByRole("grid");
+  await expect(
+    canvasElement.querySelector(".notebook-dataframe__toolbar"),
+  ).not.toHaveTextContent(/\d+ rows/);
+  await expect(grid).toHaveAttribute("data-ui-part", "scroll-area-viewport");
   const summaries = canvasElement.querySelectorAll<HTMLElement>(
     ".notebook-dataframe__summary-compact",
   );
@@ -30,5 +34,16 @@ export async function assertTableHeaders(canvasElement: HTMLElement) {
       "rgba(0, 0, 0, 0)",
     );
     await expect(bar.getBoundingClientRect().height).toBeGreaterThan(0);
+  }
+  const counts = canvasElement.querySelectorAll<HTMLElement>(
+    ".notebook-dataframe__summary-boolean-count",
+  );
+  await expect(counts.length).toBeGreaterThan(0);
+  for (const count of counts) {
+    await expect(count).toBeVisible();
+    await expect(
+      count.closest(".notebook-dataframe__summary-boolean-fill"),
+    ).toBeNull();
+    await expect(getComputedStyle(count).opacity).toBe("1");
   }
 }
