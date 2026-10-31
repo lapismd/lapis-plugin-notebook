@@ -156,3 +156,9 @@ and matches the Docker workers' frozen `--ignore-pnpmfile` installation;
 local development then relinks sibling sources with
 `pnpm install --lockfile=false`. A lockfile carrying pnpmfile checksums or
 sibling `file:` specifiers fails the worker install fail-closed.
+
+## Shared-table review worker
+
+| ID           | Requirement                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LPN-SPEC-022 | Registered focused table and Docker Storybook review lanes MUST reuse fingerprinted tools, exact Jujutsu source snapshots, verified archives, bounded resources and owned leases/reports. The review endpoint MUST bind loopback, support remote forwarding and terminate owned workers safely. No host fallback, source/node_modules/secret/socket mounts or diagnostic suppression is permitted. |
