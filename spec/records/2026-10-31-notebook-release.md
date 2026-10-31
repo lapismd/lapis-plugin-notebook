@@ -178,3 +178,48 @@ installed lock has zero file dependency resolutions. The final runtime tarball
 SHA-256 is `0202c384718bec6f96a607b6d3a89c20f714ff85641c98d02d361eefaff9e67e`.
 Visual status stays pending and no baselines changed. Hosted PR checks and npm
 publication remain separate gates.
+
+## Live polling performance
+
+Hosted run `41179552482` passes every lane except the two unchanged Input Types
+60-second cases (27 other shell plays pass). Both time out before initial
+execution returns, so increasing CPU capacity alone does not resolve them.
+The exact public package command now passes both cold consumers, and its
+restored build reports one local Turbo hit / zero executed build tasks. Signed
+remote caching is enabled.
+
+Cell polling reparses the entire notebook and updates the session graph twice
+per cell. Scheduled cells poll every 150 ms, multiplying parsing and graph
+analysis while the initial 54-cell run is still active. The two exact source
+regressions first record two failures / 23 passes. The render service now owns
+a weak cache keyed by the actual file, source text, path and normalized
+metadata. Session polling retains the immutable cached snapshot's graph and
+cell state. Source edits with unchanged mtime, in-place metadata edits, renames
+and replacement files invalidate the snapshot. Live progress/output polling
+and all existing story assertions/timeouts remain intact.
+
+The exact two source files now pass all 25 cases (two failures before, zero
+after). The unchanged exact browser selector passes in a fresh four-CPU /
+7 GiB worker: Input Types 23.0 seconds and mobile 18.6 seconds. Report:
+`lapis-notebook-run-aae9a3df-f173-4294-afd9-c3a5d77bd20b`. Status, inspector
+and dependency refresh paths also load through this owned render service.
+The full aggregate and hosted shell shard must requalify this runtime change.
+
+The bounded full run `lapis-notebook-run-011c51c1-9a09-4f04-8efb-8f04bc774add`
+passes quality, all 438 unit cases, build, publint, both cold npm consumers,
+static Storybook and all 47 interaction/accessibility cases. Input Types and
+mobile finish in 23.9 and 23.8 seconds. The final specification lane alone
+fails once because mapped source changes also require the canonical Notebook
+index chapter, in addition to runtime.md. Add that chapter's reuse/invalidation
+summary without changing implementation, then rerun the exact specification
+lane. The public consumer tarball SHA-256 is
+`f02149eabfd5994f19f772121e1137f2dea538f459e20181184e186855db0ff5`.
+
+The exact Docker `pnpm spec:check` rerun passes after the documentation-only
+chapter correction, report
+`lapis-notebook-run-e147a92c-585e-419f-8901-b081734e64d6`. QMD index and doctor
+pass. Together with the unchanged implementation lanes from `011c51c1`, all
+eight required lanes are green: 438 unit cases, two cold consumers, static
+Storybook, 47 actual interaction/accessibility stories and specifications.
+The installed graph remains registry-only with no archives or file resolutions.
+Visual status stays pending and baselines are unchanged.

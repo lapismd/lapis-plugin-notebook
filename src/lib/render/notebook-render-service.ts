@@ -16,6 +16,7 @@ import {
 } from "@lapis-notes/notebook-input";
 import type { NotebookCell } from "../model/notebook-cell";
 import type { NotebookDocument } from "../model/notebook-document";
+import { normalizeNotebookFrontmatter } from "../model/notebook-frontmatter";
 import { parseNotebookDocument } from "../parse/parse-notebook-document";
 import type { NotebookInputOutput, NotebookOutput } from "../output";
 import type {
@@ -69,6 +70,15 @@ export type RenderedNotebookCell = {
 };
 
 export class NotebookRenderService {
+  private readonly parsedDocuments = new WeakMap<
+    TFile,
+    {
+      source: string;
+      sourcePath: string;
+      frontmatterKey: string;
+      document: NotebookDocument;
+    }
+  >();
   private readonly persistedSessionHydrations = new WeakMap<
     NotebookSession,
     Promise<void>
@@ -102,11 +112,27 @@ export class NotebookRenderService {
     sourcePath: string,
   ): Promise<NotebookDocument> {
     const source = await this.app.vault.cachedRead(file);
-    return parseNotebookDocument(source, {
+    const frontmatter =
+      this.app.metadataCache.getFileCache(file)?.frontmatter?.notebook;
+    const frontmatterKey = JSON.stringify(
+      normalizeNotebookFrontmatter(frontmatter),
+    );
+    const cached = this.parsedDocuments.get(file);
+    if (
+      cached?.source === source &&
+      cached.sourcePath === sourcePath &&
+      cached.frontmatterKey === frontmatterKey
+    ) {
+      return cached.document;
+    }
+    const document = parseNotebookDocument(source, { sourcePath, frontmatter });
+    this.parsedDocuments.set(file, {
+      source,
       sourcePath,
-      frontmatter:
-        this.app.metadataCache.getFileCache(file)?.frontmatter?.notebook,
+      frontmatterKey,
+      document,
     });
+    return document;
   }
 
   async getRenderedCell(

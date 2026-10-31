@@ -70,6 +70,7 @@ export class NotebookSession {
   }
 
   updateDocument(document: NotebookDocument): string[] {
+    if (document === this.document) return [];
     const changed = findChangedCellIds(this.document, document);
     const previousGraph = this.graph;
     const previousExecutionState = this.executionState;

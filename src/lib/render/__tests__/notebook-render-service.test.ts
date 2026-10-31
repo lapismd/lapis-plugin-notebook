@@ -106,6 +106,51 @@ function createRuntimeControllerStub(options: {
 }
 
 describe("NotebookRenderService", () => {
+  test("reuses a parsed snapshot across concurrent cell polls and invalidates edits, metadata and renames", async () => {
+    let source = ':::cell{#one lang="js"}\nconst answer = 1;\n:::';
+    const file = { path: "Notebook.notebook.md", stat: { mtime: 123 } } as any;
+    const frontmatter = {
+      version: 1,
+      mode: "lazy",
+      mounts: {} as Record<string, string>,
+    };
+    const app = {
+      vault: { cachedRead: vi.fn(async () => source) },
+      metadataCache: {
+        getFileCache: () => ({ frontmatter: { notebook: { ...frontmatter } } }),
+      },
+    } as any;
+    const service = new NotebookRenderService(
+      app,
+      {} as any,
+      vi.fn(),
+      new Map(),
+    );
+    const snapshots = await Promise.all(
+      Array.from({ length: 54 }, () =>
+        service.loadNotebookDocument(file, file.path),
+      ),
+    );
+    expect(snapshots.every((snapshot) => snapshot === snapshots[0])).toBe(true);
+    source = source.replace("answer = 1", "answer = 2");
+    const edited = await service.loadNotebookDocument(file, file.path);
+    expect(edited).not.toBe(snapshots[0]);
+    expect(edited.cells[0].source).toContain("answer = 2");
+    frontmatter.mounts.data = "assets/data.csv";
+    const changedMetadata = await service.loadNotebookDocument(file, file.path);
+    expect(changedMetadata).not.toBe(edited);
+    expect(changedMetadata.frontmatter?.mounts.data).toBe("assets/data.csv");
+    file.path = "Renamed.notebook.md";
+    const renamed = await service.loadNotebookDocument(file, file.path);
+    expect(renamed).not.toBe(changedMetadata);
+    expect(renamed.sourcePath).toBe(file.path);
+    const otherFile = { ...file };
+    expect(await service.loadNotebookDocument(otherFile, file.path)).not.toBe(
+      renamed,
+    );
+    expect(app.vault.cachedRead).toHaveBeenCalledTimes(58);
+  });
+
   test.each(["run", "clear"] as const)(
     "late persisted-state hydration cannot overwrite a newer %s",
     async (action) => {

@@ -43,6 +43,10 @@ imports missing from the manifest. Relative asset URLs remain checkout-neutral.
 
 Notebook execution feedback is owned by the active-notebook status item and its
 run-details popover, with session-local outcomes and no completion toast.
+Live cell refreshes reuse immutable parsed documents and their dependency
+graphs through the owned render service. Source, normalized metadata, path
+and file-identity changes invalidate the parsed snapshot (LN-NB-042); live
+progress and partial-output polling stay enabled.
 
 Cell chrome retains legacy gutter alignment and delegates source-language
 highlighting to Mira. Inline ID badges rename cell metadata through the vault
