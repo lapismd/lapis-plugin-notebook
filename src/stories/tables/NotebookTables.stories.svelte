@@ -41,8 +41,34 @@
     ).toBeChecked();
   }}>{#snippet template()}<Demo />{/snippet}</Story
 >
-<Story name="Rich cells and expanded rows"
-  >{#snippet template()}<Demo />{/snippet}</Story
+<Story
+  name="Rich cells and expanded rows"
+  play={async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const expand = (
+      await c.findAllByRole("button", { name: /^Expand row / })
+    )[0];
+    await expect(expand.querySelector("svg")).toHaveClass(
+      "lucide-chevron-right",
+    );
+    await expect(expand).toHaveAttribute("aria-expanded", "false");
+    await userEvent.click(expand);
+    const collapse = c.getByRole("button", { name: /^Collapse row / });
+    await expect(collapse.querySelector("svg")).toHaveClass(
+      "lucide-chevron-down",
+    );
+    await expect(collapse).toHaveAttribute("aria-expanded", "true");
+    await expect(c.getByText("name", { selector: "dt" })).toBeVisible();
+    collapse.focus();
+    await userEvent.keyboard("{Enter}");
+    await expect(expand).toHaveAttribute("aria-expanded", "false");
+    await expect(expand.querySelector("svg")).toHaveClass(
+      "lucide-chevron-right",
+    );
+    await expect(
+      c.queryByText("name", { selector: "dt" }),
+    ).not.toBeInTheDocument();
+  }}>{#snippet template()}<Demo />{/snippet}</Story
 >
 <Story name="Large typed results"
   >{#snippet template()}<Demo large />{/snippet}</Story

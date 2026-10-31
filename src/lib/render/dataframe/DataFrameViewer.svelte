@@ -1,5 +1,7 @@
 <script lang="ts">
   import { untrack } from "svelte";
+  import ChevronDown from "@lucide/svelte/icons/chevron-down";
+  import ChevronRight from "@lucide/svelte/icons/chevron-right";
   import {
     Alert,
     AlertDescription,
@@ -195,11 +197,20 @@
   }
 </script>
 
-<div class="notebook-dataframe" style:--df-max-height={maxHeight} use:keyNav={{
-  focusSearch: () => document.getElementById(searchInputId)?.focus(),
-  toggleFilters: () => viewerState.setFilterBarOpen(!viewerState.filterBarOpen),
-  clearOverlay: () => { if (viewerState.activeProfile) viewerState.setProfile(null); else if (viewerState.searchQuery) viewerState.setSearch(""); else viewerState.setFilterBarOpen(false); },
-}}>
+<div
+  class="notebook-dataframe"
+  style:--df-max-height={maxHeight}
+  use:keyNav={{
+    focusSearch: () => document.getElementById(searchInputId)?.focus(),
+    toggleFilters: () =>
+      viewerState.setFilterBarOpen(!viewerState.filterBarOpen),
+    clearOverlay: () => {
+      if (viewerState.activeProfile) viewerState.setProfile(null);
+      else if (viewerState.searchQuery) viewerState.setSearch("");
+      else viewerState.setFilterBarOpen(false);
+    },
+  }}
+>
   <div class="notebook-dataframe__live-region" aria-live="polite">
     {viewerState.sortColumns.length} sort(s), {filterCount} filter(s)
   </div>
@@ -217,7 +228,10 @@
         {fields}
         value={viewerState.structured}
         onValueChange={handleFilter}
-        bind:open={() => viewerState.filterBarOpen, (open) => viewerState.setFilterBarOpen(open)}
+        bind:open={
+          () => viewerState.filterBarOpen,
+          (open) => viewerState.setFilterBarOpen(open)
+        }
       />{/snippet}
   </Toolbar>
 
@@ -311,10 +325,17 @@
         {#if context.column === 0}<button
             type="button"
             class="notebook-dataframe__expand-button"
-            aria-label={"Expand row " + context.rowNumber}
+            aria-label={(context.expanded ? "Collapse row " : "Expand row ") +
+              context.rowNumber}
             aria-expanded={context.expanded}
             onclick={context.toggleExpanded}
-            >{context.expanded ? "▾" : "▸"}</button
+            >{#if context.expanded}<ChevronDown
+                size={14}
+                aria-hidden="true"
+              />{:else}<ChevronRight
+                size={14}
+                aria-hidden="true"
+              />{/if}</button
           >{/if}
         <DataCell
           value={row[column.name]}

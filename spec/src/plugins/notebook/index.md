@@ -240,6 +240,8 @@ Observable-style examples and a runtime-backed coverage audit.
 
 The UI review implementation uses one typed NotebookCanvasTable adapter, real public FilterBuilder popovers, original typed selection values and explicit App-owned inspector metadata. It remains unapproved and not fully qualified (LN-NB-050–054).
 
+LN-NB-050 row disclosure uses decorative Lucide right/down chevrons for collapsed/expanded states. The native button exposes the matching Expand/Collapse row label and aria-expanded state, and supports pointer and keyboard activation.
+
 Private dataframe filter notifications now carry the structured tree, matching the new editor and raw-value evaluator rather than flattening Any/None groups into incorrect All semantics; no public output wire format changes. Shared viewport width filling owns scrollbar accounting for narrow input data.
 
 The isolated review and final registry intake MUST apply the exact checksum-verified Bits UI 2.20.2 consumer patch required by published Design Core 0.8; source fixes remain in the shared owner and upstream Bits UI. This does not authorize any new package patch or waive focused portal/focus checks.

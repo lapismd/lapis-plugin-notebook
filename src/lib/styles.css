@@ -4421,4 +4421,4 @@
   min-width: 0;
 }
 
-.notebook-dataframe__expand-button { border: 0; background: transparent; color: var(--muted-foreground); cursor: pointer; margin-inline-end: .25rem; }
+.notebook-dataframe__expand-button { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; border: 0; background: transparent; color: var(--muted-foreground); cursor: pointer; margin-inline-end: .25rem; }
