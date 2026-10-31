@@ -13,6 +13,90 @@ describe("executeNotebookDocument", () => {
     vi.unstubAllGlobals();
   });
 
+  test.each([
+    ["[]", [{ kind: "code", language: "javascript", code: "[]" }]],
+    ["null", [{ kind: "code", language: "javascript", code: "null" }]],
+    [
+      "undefined",
+      [{ kind: "code", language: "javascript", code: "undefined" }],
+    ],
+    [
+      "[1, 2]",
+      [{ kind: "code", language: "javascript", code: "[\n  1,\n  2\n]" }],
+    ],
+    [
+      '({name: "Ada"})',
+      [{ kind: "code", language: "javascript", code: '{\n  "name": "Ada"\n}' }],
+    ],
+    [
+      '[{kind:"text", text:"first"}, {kind:"text", text:"second"}]',
+      [
+        { kind: "text", text: "first" },
+        { kind: "text", text: "second" },
+      ],
+    ],
+    ['"Readable text"', [{ kind: "text", text: "Readable text" }]],
+    ["42", [{ kind: "code", language: "javascript", code: "42" }]],
+    ["true", [{ kind: "code", language: "javascript", code: "true" }]],
+    ["12n", [{ kind: "code", language: "javascript", code: "12n" }]],
+    [
+      "[undefined, NaN, Infinity, -0, 12n]",
+      [
+        {
+          kind: "code",
+          language: "javascript",
+          code: "[\n  undefined,\n  NaN,\n  Infinity,\n  -0,\n  12n\n]",
+        },
+      ],
+    ],
+    [
+      '(() => { const value = { name: "Ada" }; value.self = value; return value; })()',
+      [
+        {
+          kind: "code",
+          language: "javascript",
+          code: '{\n  "name": "Ada",\n  "self": "[Circular]"\n}',
+        },
+      ],
+    ],
+    [
+      "(() => { const value = []; value.push(value); return value; })()",
+      [{ kind: "code", language: "javascript", code: '[\n  "[Circular]"\n]' }],
+    ],
+    [
+      "(() => { const value = { id: 1 }; return [value, value]; })()",
+      [
+        {
+          kind: "code",
+          language: "javascript",
+          code: '[\n  {\n    "id": 1\n  },\n  {\n    "id": 1\n  }\n]',
+        },
+      ],
+    ],
+  ])(
+    "renders display values without caller serialization: %s",
+    async (value, expected) => {
+      const document = parseNotebookDocument(
+        `:::cell{#value lang="js"}\n\`\`\`js\ndisplay(${value});\n\`\`\`\n:::`,
+        { sourcePath: "Values.notebook.md" },
+      );
+      const host: NotebookExecutionHost = {
+        getAppTablesSnapshot: async () => ({
+          notes: [],
+          links: [],
+          searchDocuments: [],
+        }),
+        readVaultFile: async () => new ArrayBuffer(0),
+      };
+      const result = await executeNotebookDocument(
+        host,
+        document,
+        new NotebookSession(document),
+      );
+      expect(result.outputs.value).toEqual(expected);
+    },
+  );
+
   test("skips duckdb app table setup for ts cells that do not use duckdb", async () => {
     const document = parseNotebookDocument(
       [
@@ -659,7 +743,7 @@ describe("executeNotebookDocument", () => {
             ? `${event.type}:${event.cellIds.join(",")}`
             : event.type === "cell-running"
               ? `${event.type}:${event.cellId}`
-              : event.type === "cell-completed"
+              : event.type === "cell-completed" || event.type === "cell-output"
                 ? `${event.type}:${event.cellId}`
                 : event.type === "status"
                   ? `${event.type}:${event.cellId ?? "notebook"}:${event.message}`
@@ -672,6 +756,7 @@ describe("executeNotebookDocument", () => {
       "execution-started:load,summary",
       "cell-running:load",
       "status:load:Running load",
+      "cell-output:load",
       "cell-completed:load",
       "cell-running:summary",
       "cell-completed:summary",
@@ -1939,4 +2024,253 @@ describe("sql table metadata", () => {
       },
     ]);
   });
+});
+
+test("retains live structured input owners after execution, including callback buttons", async () => {
+  class FakeNode extends EventTarget {}
+  vi.stubGlobal("Node", FakeNode);
+  const { claimNotebookInputDomOutput, clearNotebookDomOutputsForSource } =
+    await import("../notebook-dom-registry");
+  const document = parseNotebookDocument(
+    ':::cell{#controls lang="js"}\n```js\nconst count = view(Inputs.button("Increment", { reduce: value => value + 1 }));\n```\n:::',
+    {
+      sourcePath: "Callback.notebook.md",
+      frontmatter: { version: 1, mode: "lazy" },
+    },
+  );
+  try {
+    const session = new NotebookSession(document);
+    await executeNotebookDocument(
+      {
+        getAppTablesSnapshot: async () => ({
+          notes: [],
+          links: [],
+          searchDocuments: [],
+        }),
+        readVaultFile: async () => new ArrayBuffer(0),
+      },
+      document,
+      session,
+    );
+    expect(
+      claimNotebookInputDomOutput(document.sourcePath, "controls", "count"),
+    ).toBeInstanceOf(FakeNode);
+  } finally {
+    clearNotebookDomOutputsForSource(document.sourcePath!);
+    vi.unstubAllGlobals();
+  }
+});
+
+test("ordinary reruns preserve the search query as well as its matching row value", async () => {
+  class FakeNode extends EventTarget {}
+  vi.stubGlobal("Node", FakeNode);
+  const { claimNotebookInputDomOutput, clearNotebookDomOutputsForSource } =
+    await import("../notebook-dom-registry");
+  const { getExtraInputModel } = await import(
+    "../../../../packages/input/src/extra-model"
+  );
+  const document = parseNotebookDocument(
+    ':::cell{#search lang="js"}\n```js\nconst matches = view(Inputs.search(["Ada", "Grace"], { query: "Ada" }));\n```\n:::',
+    {
+      sourcePath: "Search.notebook.md",
+      frontmatter: { version: 1, mode: "lazy" },
+    },
+  );
+  const session = new NotebookSession(document);
+  const host = {
+    getAppTablesSnapshot: async () => ({
+      notes: [],
+      links: [],
+      searchDocuments: [],
+    }),
+    readVaultFile: async () => new ArrayBuffer(0),
+  };
+  try {
+    await executeNotebookDocument(host, document, session);
+    getExtraInputModel(
+      claimNotebookInputDomOutput(document.sourcePath, "search", "matches")!,
+    )!.setQuery("Grace");
+    await executeNotebookDocument(host, document, session);
+    const restored = claimNotebookInputDomOutput(
+      document.sourcePath,
+      "search",
+      "matches",
+    ) as Node & { query: string; value: unknown };
+    expect(restored.query).toBe("Grace");
+    expect(restored.value).toEqual(["Grace"]);
+  } finally {
+    clearNotebookDomOutputsForSource(document.sourcePath!);
+    vi.unstubAllGlobals();
+  }
+});
+
+test("dependent cells read input changes made while another cell awaits a promise", async () => {
+  let release!: () => void;
+  vi.stubGlobal(
+    "__inputGate",
+    new Promise<void>((resolve) => (release = resolve)),
+  );
+  const document = parseNotebookDocument(
+    [
+      ':::cell{#input lang="js"}\n```js\nconst counter = 0;\n```\n:::',
+      ':::cell{#slow lang="js"}\n```js\nawait __inputGate;\n```\n:::',
+      ':::cell{#value lang="js"}\n```js\ndisplay(counter);\n```\n:::',
+    ].join("\n"),
+    { sourcePath: "Reactive.notebook.md" },
+  );
+  const session = new NotebookSession(document);
+  const host: NotebookExecutionHost = {
+    getAppTablesSnapshot: async () => ({
+      notes: [],
+      links: [],
+      searchDocuments: [],
+    }),
+    readVaultFile: async () => new ArrayBuffer(0),
+  };
+  const pending = executeNotebookDocument(host, document, session);
+  try {
+    await vi.waitFor(() =>
+      expect(session.getCellState("slow").state).toBe("running"),
+    );
+    session.setInputValue("input", "counter", 7);
+    release();
+    const result = await pending;
+    expect(result.outputs.value).toEqual([
+      { kind: "code", language: "javascript", code: "7" },
+    ]);
+    expect(result.values.counter).toBe(7);
+  } finally {
+    release();
+    await pending;
+    vi.unstubAllGlobals();
+  }
+});
+
+test("a running input cell cannot overwrite a newer control value on completion", async () => {
+  class FakeNode extends EventTarget {}
+  vi.stubGlobal("Node", FakeNode);
+  let release!: () => void;
+  vi.stubGlobal(
+    "__ownInputGate",
+    new Promise<void>((resolve) => (release = resolve)),
+  );
+  const { claimNotebookInputDomOutput, clearNotebookDomOutputsForSource } =
+    await import("../notebook-dom-registry");
+  const { getExtraInputModel } = await import(
+    "../../../../packages/input/src/extra-model"
+  );
+  const document = parseNotebookDocument(
+    ':::cell{#input lang="js"}\n```js\nconst counter = view(Inputs.button("Click"));\nawait __ownInputGate;\n```\n:::\n:::cell{#value lang="js"}\n```js\ndisplay(counter);\n```\n:::',
+    { sourcePath: "Running-input.notebook.md" },
+  );
+  const session = new NotebookSession(document);
+  const pending = executeNotebookDocument(
+    {
+      getAppTablesSnapshot: async () => ({
+        notes: [],
+        links: [],
+        searchDocuments: [],
+      }),
+      readVaultFile: async () => new ArrayBuffer(0),
+    },
+    document,
+    session,
+  );
+  try {
+    await vi.waitFor(() =>
+      expect(
+        claimNotebookInputDomOutput(document.sourcePath, "input", "counter"),
+      ).toBeTruthy(),
+    );
+    getExtraInputModel(
+      claimNotebookInputDomOutput(document.sourcePath, "input", "counter")!,
+    )!.activate(0);
+    release();
+    const result = await pending;
+    expect(result.values.counter).toBe(1);
+    expect(result.outputs.value).toEqual([
+      { kind: "code", language: "javascript", code: "1" },
+    ]);
+  } finally {
+    release();
+    await pending;
+    clearNotebookDomOutputsForSource(document.sourcePath!);
+    vi.unstubAllGlobals();
+  }
+});
+
+test("display publishes while its cell is awaiting a promise without completing it", async () => {
+  let release!: () => void;
+  vi.stubGlobal(
+    "__displayGate",
+    new Promise<void>((resolve) => (release = resolve)),
+  );
+  const document = parseNotebookDocument(
+    ':::cell{#value lang="js"}\n```js\ndisplay("ready");\nawait __displayGate;\ndisplay("done");\n```\n:::',
+    { sourcePath: "Streaming.notebook.md" },
+  );
+  const session = new NotebookSession(document);
+  const progress: any[] = [];
+  const pending = executeNotebookDocument(
+    {
+      getAppTablesSnapshot: async () => ({
+        notes: [],
+        links: [],
+        searchDocuments: [],
+      }),
+      readVaultFile: async () => new ArrayBuffer(0),
+    },
+    document,
+    session,
+    undefined,
+    {},
+    (event) => progress.push(event),
+  );
+  try {
+    await vi.waitFor(() =>
+      expect(session.getCellState("value").output).toEqual([
+        { kind: "text", text: "ready" },
+      ]),
+    );
+    expect(session.getCellState("value").state).toBe("running");
+    expect(session.getExecutionState().completedCellIds).toEqual([]);
+    expect(progress.some((event) => event.type === "cell-output")).toBe(true);
+  } finally {
+    release();
+    await pending;
+    vi.unstubAllGlobals();
+  }
+});
+
+test("late display callbacks cannot mutate completed cell outputs", async () => {
+  let late!: () => void;
+  vi.stubGlobal(
+    "__captureDisplay",
+    (callback: () => void) => (late = callback),
+  );
+  const document = parseNotebookDocument(
+    ':::cell{#value lang="js"}\n```js\n__captureDisplay(() => display("late"));\ndisplay("done");\n```\n:::',
+    { sourcePath: "Late-display.notebook.md" },
+  );
+  const session = new NotebookSession(document);
+  try {
+    await executeNotebookDocument(
+      {
+        getAppTablesSnapshot: async () => ({
+          notes: [],
+          links: [],
+          searchDocuments: [],
+        }),
+        readVaultFile: async () => new ArrayBuffer(0),
+      },
+      document,
+      session,
+    );
+    late();
+    expect(session.getCellState("value").output).toEqual([
+      { kind: "text", text: "done" },
+    ]);
+  } finally {
+    vi.unstubAllGlobals();
+  }
 });

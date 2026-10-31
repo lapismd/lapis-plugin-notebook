@@ -15,13 +15,12 @@ own routing, vault state, persistence, and application policy.
 
 ## Current package status
 
-- Public package: `@lapis-notes/lapis-plugin-notebook@0.1.0` (release
-  pending; the repository validates against published registry
-  dependencies).
+- Public package: `@lapis-notes/lapis-plugin-notebook@0.1.0`. The repository
+  validates against published registry dependencies.
 - Runtime plugin id: `lapis-notebook` (preserved from the legacy plugin so
   persisted plugin-data keys stay compatible).
-- Runtime peers: `@lapis-notes/api@^0.2.0`, `@lapis-notes/markdown@^0.2.0`,
-  `@lapismd/design-core@^0.7.0`, `svelte@^5`.
+- Runtime peers: `@lapis-notes/api@^0.2.2`, `@lapis-notes/markdown@^0.2.0`,
+  `@lapismd/design-core@^0.7.2`, `@lapis-notes/ui@^0.1.5`, `svelte@^5`.
 - Canonical repository: `lapismd/lapis-plugin-notebook`.
 - Live catalog: <https://lapismd.github.io/lapis-plugin-notebook/>.
 - The port is staged per `spec/src/plugins/notebook/`; verification
@@ -45,17 +44,23 @@ import "@lapis-notes/lapis-plugin-notebook/styles.css";
 
 ## Runtime surfaces
 
-| Surface           | Entry                                                          | Use for                                                                                    |
-| ----------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Notebook view     | `*.notebook.md` exclusive editor-view contribution             | Cell rendering, source/preview modes, run-all header action, inline editors                |
-| Execution         | Shared engine with Web Worker transport and in-process fallback | TypeScript/JavaScript, SQL, and Markdown/HTML cells with dependency-graph ordering         |
-| Inputs            | `packages/input` DOM runtime on Design Core primitives         | `viewof` text/table/range and every UI-backed input factory with targeted reruns           |
-| DuckDB            | `packages/duckdb` on pinned DuckDB-WASM                        | SQL cells over app snapshot tables (`lapis.notes`, `lapis.links`, `lapis.search_documents`) |
-| Panels            | Variables, Dependencies, and Packages right-sidebar views      | Data-source inspection, dependency graphs, and npm package management                      |
-| Default grouping  | `Notebook` sidebar group seeded from layout state              | One right-sidebar group presenting Variables, Dependencies, and Packages together          |
-| Settings          | Versioned plugin data plus settings tab                        | Execution, autorun, and panel auto-open policy                                             |
+| Surface          | Entry                                                           | Use for                                                                                     |
+| ---------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Notebook view    | `*.notebook.md` exclusive editor-view contribution              | Cell rendering, source/preview modes, run-all header action, inline editors                 |
+| Execution        | Shared engine with Web Worker transport and in-process fallback | TypeScript/JavaScript, SQL, and Markdown/HTML cells with dependency-graph ordering          |
+| Inputs           | `packages/input` DOM runtime on Design Core primitives          | `viewof` text/table/range and every UI-backed input factory with targeted reruns            |
+| DuckDB           | `packages/duckdb` on pinned DuckDB-WASM                         | SQL cells over app snapshot tables (`lapis.notes`, `lapis.links`, `lapis.search_documents`) |
+| Panels           | Variables, Dependencies, and Packages right-sidebar views       | Data-source inspection, dependency graphs, and npm package management                       |
+| Default grouping | `Notebook` sidebar group seeded from layout state               | One right-sidebar group presenting Variables, Dependencies, and Packages together           |
+| Settings         | Versioned plugin data plus settings tab                         | Execution, autorun, and panel auto-open policy                                              |
 
 ## Cell and output coverage
+
+Embed a rendered notebook in another note with `![[Analysis.notebook.md]]`.
+The embed shows notebook prose and available cell outputs, with an action to
+open the source notebook. Saved results restore without running cells; first
+execution remains manual. Repeated embeds share input values while keeping
+separate controls.
 
 Cells execute through one shared engine reachable over two transports: a
 dedicated module Web Worker for eligible notebooks and an in-process
@@ -112,16 +117,25 @@ A notebook document is ordinary Markdown with `:::cell` directives:
 
 ````markdown
 ---
-notebook.autorun: true
+notebook:
+  autorun: true
 ---
 
-:::cell lang="ts" id="calc"
+:::cell{#calc lang="ts"}
+
+```ts
 const answer = 6 * 7;
 display(`The answer is ${answer}.`);
+```
+
 :::
 
-:::cell lang="sql" id="query"
+:::cell{#query lang="sql"}
+
+```sql
 SELECT count(*) AS note_count FROM lapis.notes;
+```
+
 :::
 ````
 
@@ -214,12 +228,12 @@ pnpm validation:all
 
 ## Further reading
 
-| Resource                                                                     | Use                                        |
-| ---------------------------------------------------------------------------- | ------------------------------------------ |
-| [`spec/src/plugins/notebook/index.md`](./spec/src/plugins/notebook/index.md) | Canonical plugin specification           |
-| [`spec/src/plugins/notebook/runtime.md`](./spec/src/plugins/notebook/runtime.md) | Execution, panels, and settings runtime |
-| [`spec/src/spec-governance.md`](./spec/src/spec-governance.md)               | Governance, validation, and discovery rules |
-| [`spec/src/verification.md`](./spec/src/verification.md)                     | Requirement verification evidence          |
-| [`docs/validation.md`](./docs/validation.md)                                 | Docker validation contexts and reports   |
-| [`AGENTS.md`](./AGENTS.md)                                                   | Contributor and agent workflow             |
-| [`PROVENANCE.md`](./PROVENANCE.md)                                           | Legacy port provenance and exclusions      |
+| Resource                                                                         | Use                                         |
+| -------------------------------------------------------------------------------- | ------------------------------------------- |
+| [`spec/src/plugins/notebook/index.md`](./spec/src/plugins/notebook/index.md)     | Canonical plugin specification              |
+| [`spec/src/plugins/notebook/runtime.md`](./spec/src/plugins/notebook/runtime.md) | Execution, panels, and settings runtime     |
+| [`spec/src/spec-governance.md`](./spec/src/spec-governance.md)                   | Governance, validation, and discovery rules |
+| [`spec/src/verification.md`](./spec/src/verification.md)                         | Requirement verification evidence           |
+| [`docs/validation.md`](./docs/validation.md)                                     | Docker validation contexts and reports      |
+| [`AGENTS.md`](./AGENTS.md)                                                       | Contributor and agent workflow              |
+| [`PROVENANCE.md`](./PROVENANCE.md)                                               | Legacy port provenance and exclusions       |

@@ -280,3 +280,34 @@ describe("notebook graph", () => {
     expect(onChange).toHaveBeenCalledWith("execution");
   });
 });
+
+test("restored temporary files keep reselection markers and mark dependents stale", () => {
+  const document = createNotebook(
+    ':::cell{#files lang="js"}\n```js\nconst selected = view(Inputs.file());\n```\n:::\n:::cell{#read lang="js"}\n```js\nconst contents = selected;\n```\n:::',
+  );
+  const session = new NotebookSession(document);
+  const marker = {
+    __notebookInputState: 1,
+    factory: "file",
+    value: {
+      __notebookFile: 1,
+      source: "upload",
+      name: "data.csv",
+      needsReselection: true,
+    },
+  };
+  session.restorePersistedState(
+    {
+      files: {
+        state: "success",
+        outputs: [],
+        inputValues: { selected: marker },
+      },
+      read: { state: "success", outputs: [{ kind: "text", value: "old" }] },
+    } as any,
+    { trustAll: true },
+  );
+  expect(session.getCellState("files").state).toBe("stale");
+  expect(session.getCellState("read").state).toBe("stale");
+  expect(session.getCellInputValues("files")?.selected).toEqual(marker);
+});

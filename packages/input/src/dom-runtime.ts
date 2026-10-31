@@ -3,6 +3,14 @@ import {
   type NotebookHtlTemplateTag as NotebookStdlibHtlTemplateTag,
 } from "@lapis-notes/notebook-stdlib/dom";
 import { loadUiBackedNotebookInputs } from "./ui-runtime";
+import { getExtraInputModel } from "./extra-model";
+import { getNotebookFileModel } from "./file-model";
+import {
+  isNotebookInputSnapshot,
+  restoreNotebookInputState,
+  snapshotNotebookInputState,
+} from "./input-state";
+import type { NotebookInputHostContext } from "./host-context";
 
 export type NotebookHtlTemplateTag = NotebookStdlibHtlTemplateTag;
 
@@ -29,6 +37,7 @@ const SIMPLE_CONFIG_FACTORIES = new Set([
   "toggle",
   "text",
   "textarea",
+  "markdown",
   "date",
   "datetime",
   "color",
@@ -53,10 +62,12 @@ type NotebookInputReconstructionConfig = Pick<
   "inputType" | "value" | "label" | "config" | "reconstructable" | "source"
 >;
 
-export async function loadNotebookDomRuntime(): Promise<NotebookDomRuntime> {
+export async function loadNotebookDomRuntime(
+  context: NotebookInputHostContext = {},
+): Promise<NotebookDomRuntime> {
   const [domRuntime, notebookInputs] = await Promise.all([
     loadNotebookStdlibDomRuntime(),
-    loadUiBackedNotebookInputs(),
+    loadUiBackedNotebookInputs(context),
   ]);
 
   return {
@@ -135,26 +146,58 @@ export function canReconstructNotebookInput(
     return false;
   }
 
+  if (factory === "form") {
+    const children = metadata.config?.children;
+    return Boolean(
+      children &&
+        typeof children === "object" &&
+        Object.values(children).every((child) =>
+          canReconstructNotebookInput(child as NotebookInputMetadata),
+        ),
+    );
+  }
   return buildNotebookInputFactoryArgs(factory, metadata) !== null;
 }
 
 export async function reconstructNotebookInputNode(
   metadata: NotebookInputReconstructionConfig,
+  context: NotebookInputHostContext = {},
 ): Promise<Node | null> {
   if (!canReconstructNotebookInput(metadata)) {
     return null;
   }
 
-  const domRuntime = await loadNotebookDomRuntime();
+  const domRuntime = await loadNotebookDomRuntime(context);
   const factory = metadata.source?.factory ?? metadata.inputType;
   const inputFactory = domRuntime.Inputs[factory];
-  const args = buildNotebookInputFactoryArgs(factory, metadata);
+  let args = buildNotebookInputFactoryArgs(factory, metadata);
+  if (factory === "form") {
+    const children = metadata.config!.children as Record<
+      string,
+      NotebookInputMetadata
+    >;
+    const entries = await Promise.all(
+      Object.entries(children).map(
+        async ([key, child]) =>
+          [key, await reconstructNotebookInputNode(child, context)] as const,
+      ),
+    );
+    if (entries.some(([, child]) => !child)) return null;
+    args = [
+      Array.isArray(children)
+        ? entries.map(([, child]) => child)
+        : Object.fromEntries(entries),
+      {},
+    ];
+  }
   if (typeof inputFactory !== "function" || !args) {
     return null;
   }
 
   const node = Reflect.apply(inputFactory, domRuntime.Inputs, args);
-  return isNotebookDomNode(node) ? node : null;
+  if (!isNotebookDomNode(node)) return null;
+  restoreNotebookInputState(node, metadata.value);
+  return node;
 }
 
 function buildNotebookInputMetadata(
@@ -167,6 +210,57 @@ function buildNotebookInputMetadata(
     library: sourceLibrary,
     factory,
   } satisfies NotebookInputMetadata["source"];
+
+  const model =
+    value && typeof value === "object" ? getExtraInputModel(value) : undefined;
+  const fileModel =
+    value && typeof value === "object"
+      ? getNotebookFileModel(value)
+      : undefined;
+  if (model || fileModel) {
+    const options = model?.options ?? fileModel!.options;
+    const safeOptions = cloneSerializableRecord(
+      Object.fromEntries(
+        Object.entries(options).filter(
+          ([key]) => key !== "value" && key !== "__choices",
+        ),
+      ),
+    );
+    let config: Record<string, unknown> = safeOptions ?? {};
+    let reconstructable = safeOptions !== undefined;
+    if (OPTION_LIST_FACTORIES.has(factory) && model) {
+      const choices = cloneSerializableValue(model.choices);
+      config = { ...config, __choices: choices, options: [] };
+      reconstructable &&= choices !== undefined;
+    } else if (factory === "form" && model) {
+      const children = Object.entries(args[0] as Record<string, unknown>).map(
+        ([key, child]) => [key, getNotebookInputMetadata(child)] as const,
+      );
+      config = {
+        ...config,
+        children: Array.isArray(args[0])
+          ? children.map(([, child]) => child)
+          : Object.fromEntries(children),
+      };
+      reconstructable &&= children.every(
+        ([, child]) => child && canReconstructNotebookInput(child),
+      );
+    } else if (factory === "search") {
+      config = { ...config, data: cloneSerializableValue(args[0]) };
+      reconstructable &&= config.data !== undefined;
+    } else if (factory === "button") {
+      config = { ...config, content: cloneSerializableValue(args[0] ?? "≡") };
+      reconstructable &&= typeof config.content === "string";
+    }
+    return {
+      inputType: factory,
+      value: snapshotNotebookInputState(value as Node),
+      label: typeof options.label === "string" ? options.label : undefined,
+      config,
+      reconstructable,
+      source,
+    };
+  }
 
   if (factory === "range" || factory === "number") {
     const extent = normalizeRangeExtent(args[0]);
@@ -250,8 +344,20 @@ function buildNotebookInputFactoryArgs(
     ...(metadata.label && metadata.config?.label === undefined
       ? { label: metadata.label }
       : {}),
-    value: metadata.value,
+    ...(!isNotebookInputSnapshot(metadata.value)
+      ? { value: metadata.value }
+      : {}),
   };
+
+  if (factory === "file") return [config];
+  if (factory === "button") {
+    const { content, ...options } = config;
+    return [content, options];
+  }
+  if (factory === "search") {
+    const { data, ...options } = config;
+    return Array.isArray(data) ? [data, options] : null;
+  }
 
   if (factory === "range" || factory === "number") {
     const { min, max, ...options } = config;
@@ -374,6 +480,11 @@ function cloneSerializableValue(value: unknown): unknown {
   }
 
   if (typeof value === "object") {
+    if (
+      Object.getPrototypeOf(value) !== Object.prototype &&
+      Object.getPrototypeOf(value) !== null
+    )
+      return undefined;
     const entries = Object.entries(value);
     const clonedEntries: Array<[string, unknown]> = [];
     for (const [key, entryValue] of entries) {

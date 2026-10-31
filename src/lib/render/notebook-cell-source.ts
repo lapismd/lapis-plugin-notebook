@@ -3,6 +3,37 @@ import type {
   NotebookCellAttributes,
   NotebookCellRange,
 } from "../model/notebook-cell";
+import { parseNotebookDocument } from "../parse/parse-notebook-document";
+
+export function renameNotebookCellId(
+  documentSource: string,
+  currentId: string,
+  nextId: string,
+): string {
+  if (!nextId || /[\s{}#'"\\]/u.test(nextId)) {
+    throw new Error(
+      "Use a cell ID without spaces, quotes, braces, # or backslashes.",
+    );
+  }
+  const document = parseNotebookDocument(documentSource, {
+    sourcePath: "rename.notebook.md",
+  });
+  const matches = document.cells.filter((cell) => cell.id === currentId);
+  if (matches.length !== 1)
+    throw new Error(
+      "The cell changed or its ID is ambiguous. Reload the notebook and try again.",
+    );
+  if (
+    document.cells.some((cell) => cell.id === nextId && cell !== matches[0])
+  ) {
+    throw new Error(`Cell ID “${nextId}” already exists.`);
+  }
+  const cell = matches[0]!;
+  return replaceNotebookCellAttributes(documentSource, cell, {
+    ...cell.attributes,
+    id: nextId,
+  });
+}
 
 export function replaceNotebookCellSource(
   documentSource: string,

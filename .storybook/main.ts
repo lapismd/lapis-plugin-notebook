@@ -81,8 +81,8 @@ const config: StorybookConfig = {
     name: "@storybook/svelte-vite",
     options: {},
   },
-  viteFinal: async (viteConfig) =>
-    mergeConfig(viteConfig, {
+  viteFinal: async (viteConfig) => {
+    const merged = mergeConfig(viteConfig, {
       plugins: [
         notebookPackagesPlugin(),
         ...(!process.env.VITEST
@@ -120,11 +120,9 @@ const config: StorybookConfig = {
       esbuild: { target: "esnext" },
       worker: {
         format: "es",
-        plugins: () => [notebookPackagesPlugin()],
         rollupOptions: {
-          // Design Core ships precompiled .svelte components and the lazy
-          // notebook-input UI runtime never executes inside a DOM-less
-          // worker; keep both out of the worker bundle graph.
+          // Private controls compile into lazy chunks. The DOM-less worker
+          // never executes them; host UI dependencies remain external.
           external: [/^@lapismd\/design-core/, /^svelte(?:$|\/)/],
         },
       },
@@ -135,7 +133,12 @@ const config: StorybookConfig = {
         include: [
           "aria-query",
           "typescript",
+          // The catalog declares these development dependencies so Vite can
+          // prebundle Plot's transitive CommonJS modules by their import IDs.
+          // Runtime visualization imports remain lazy in the private stdlib.
           "htl",
+          "d3",
+          "@observablehq/plot",
           "@duckdb/duckdb-wasm",
           "bits-ui",
           "@lapismd/design-core > bits-ui",
@@ -170,6 +173,13 @@ const config: StorybookConfig = {
         ],
       },
       server: {
+        watch: {
+          ignored: [
+            `${repoRoot}/.local/**`,
+            `${repoRoot}/dist/**`,
+            `${repoRoot}/storybook-static/**`,
+          ],
+        },
         fs: {
           allow: [
             repoRoot,
@@ -179,7 +189,16 @@ const config: StorybookConfig = {
           ],
         },
       },
-    }),
+    });
+    // Vite concatenates worker plugin factories while merging Storybook and
+    // project configs. Install this pipeline once, after the merge, so rune
+    // modules are not compiled twice.
+    merged.worker = {
+      ...merged.worker,
+      plugins: () => [notebookPackagesPlugin(), svelte({ emitCss: false })],
+    };
+    return merged;
+  },
 };
 
 export default config;

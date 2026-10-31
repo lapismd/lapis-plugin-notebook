@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 import { createNotebookFileAttachment, createNotebookVaultRuntime } from "..";
+import * as fileHelpers from "../files";
 
 describe("notebook file attachments", () => {
   test("loads CSV attachments with optional typed parsing", async () => {
@@ -38,4 +39,17 @@ describe("notebook file attachments", () => {
     expect(Array.from(rows)).toEqual([{ name: "Ada", score: 7 }]);
     expect((rows as { columns?: string[] }).columns).toEqual(["name", "score"]);
   });
+});
+test("reader-backed attachments share binary and CSV parsing without eager reads", async () => {
+  const read = vi.fn(
+    async () => new TextEncoder().encode("name,count\nAda,2").buffer,
+  );
+  const attachment = (
+    fileHelpers as any
+  ).createNotebookFileAttachmentFromReader("data.csv", read);
+  expect(read).not.toHaveBeenCalled();
+  expect(Array.from(await attachment.csv({ typed: true }))).toEqual([
+    { name: "Ada", count: 2 },
+  ]);
+  expect(await attachment.blob("text/csv")).toBeInstanceOf(Blob);
 });

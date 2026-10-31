@@ -117,3 +117,21 @@ describe("lapis output builders", () => {
     });
   });
 });
+
+test("builds language-aware literal code output", () => {
+  expect(
+    (lapis as any).code('const message = "<script>";', "javascript", {
+      title: "Example",
+    }),
+  ).toEqual({
+    kind: "code",
+    code: 'const message = "<script>";',
+    language: "javascript",
+    title: "Example",
+  });
+  expect((lapis as any).code("plain")).toMatchObject({
+    kind: "code",
+    language: "plaintext",
+    code: "plain",
+  });
+});

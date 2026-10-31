@@ -42,6 +42,11 @@ export type NotebookExecutionProgressEvent =
       statusMessage?: string;
     }
   | {
+      type: "cell-output";
+      cellId: string;
+      outputs: NotebookOutput[];
+    }
+  | {
       type: "cell-completed";
       cellId: string;
       outputs: NotebookOutput[];

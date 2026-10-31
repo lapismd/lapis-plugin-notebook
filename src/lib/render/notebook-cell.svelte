@@ -20,6 +20,8 @@
   } from "../runtime/notebook-session";
   import { getNotebookCellCodeActionState } from "./notebook-cell-actions";
   import NotebookCellSourceEditor from "./notebook-cell-source-editor.svelte";
+  import NotebookCellId from "./notebook-cell-id.svelte";
+  import { alignNotebookCellToGutter } from "./notebook-cell-gutter";
   import {
     replaceNotebookCellAttributes,
     replaceNotebookCellSource,
@@ -50,6 +52,7 @@
     onRun?: () => void | Promise<void>;
     onStop?: () => void | Promise<void>;
     onClearOutputs?: () => void | Promise<void>;
+    onRename?: (id: string) => void;
   };
 
   let {
@@ -67,6 +70,7 @@
     onRun,
     onStop,
     onClearOutputs,
+    onRename,
   }: Props = $props();
   let editingSource = $state(false);
   let savingSource = $state(false);
@@ -207,6 +211,11 @@
 
   function selectCell(): void {
     setSelectedNotebookCellId(sourcePath, cell.id);
+  }
+
+  function handleCellRename(id: string): void {
+    setSelectedNotebookCellId(sourcePath, id);
+    onRename?.(id);
   }
 
   async function toggleCodeSection(): Promise<void> {
@@ -475,6 +484,10 @@
   }
 
   $effect(() => {
+    if (sectionElement) return alignNotebookCellToGutter(sectionElement);
+  });
+
+  $effect(() => {
     const signature = [
       cell.id,
       cell.sourceRange.startOffset,
@@ -520,6 +533,7 @@
   bind:this={sectionElement}
   class="notebook-cell"
   data-notebook-cell={cell.id}
+  class:notebook-cell--selected={cellSelected}
 >
   <!-- Code section -->
   <div
@@ -528,9 +542,7 @@
     onfocusin={selectCell}
   >
     <!-- Left rail: accent strip plus the empty rail space under the action button toggle collapse -->
-    <div
-      class="notebook-cell__rail notebook-cell__rail--code"
-    >
+    <div class="notebook-cell__rail notebook-cell__rail--code">
       <button
         type="button"
         class="notebook-cell__rail-toggle notebook-cell__rail-toggle--code"
@@ -585,6 +597,7 @@
       <div
         class="notebook-cell__surface notebook-cell__surface--code"
         class:notebook-cell__surface--stale={isStale}
+        class:notebook-cell__surface--selected={cellSelected}
         role={editingSource ? undefined : "button"}
         tabindex={editingSource ? undefined : 0}
         onclick={handleSectionClick}
@@ -594,9 +607,7 @@
       >
         <div class="notebook-cell__source" data-notebook-source>
           {#if executionState === "scheduled"}
-            <div
-              class="notebook-cell__badge notebook-cell__scheduled-badge"
-            >
+            <div class="notebook-cell__badge notebook-cell__scheduled-badge">
               queued
             </div>
           {/if}
@@ -631,6 +642,7 @@
                 <MarkdownEmbed
                   {app}
                   value={sourcePreview}
+                  class="notebook-cell__source-preview"
                   {sourcePath}
                   htmlPolicy="trusted"
                   surface={{ id: "notebook-cell" }}
@@ -640,12 +652,13 @@
           </div>
         </div>
 
-        <div
-          class="notebook-cell__footer"
-        >
+        <div class="notebook-cell__footer">
           <span class={`notebook-cell__status ${statusTone}`.trim()}>
             {#if executionState === "running"}
-              <LoaderCircle class="notebook-cell__icon notebook-cell__icon--spin" aria-hidden="true" />
+              <LoaderCircle
+                class="notebook-cell__icon notebook-cell__icon--spin"
+                aria-hidden="true"
+              />
             {:else if executionState === "scheduled"}
               <Clock3 class="notebook-cell__icon" aria-hidden="true" />
             {:else if executionState === "stale"}
@@ -663,16 +676,40 @@
           {#if executionState === "error" && error}
             <span class="notebook-cell__error">{error}</span>
           {/if}
+          <NotebookCellId
+            {app}
+            cellId={cell.id}
+            {sourcePath}
+            onRename={handleCellRename}
+            disabled={isBusy ||
+              savingSource ||
+              persistingCellAttributes ||
+              editingSource}
+          />
         </div>
       </div>
     {:else}
       <!-- Collapsed: show syntax-highlighted first non-blank source line -->
       <div
         class="notebook-cell__collapsed"
+        class:notebook-cell__surface--selected={cellSelected}
         role="button"
         tabindex="0"
-        onclick={() => void toggleCodeSection()}
-        onkeydown={(event) => handleCollapsedSectionKeydown(event, "code")}
+        onclick={(event) => {
+          if (
+            !shouldIgnoreNotebookSectionClick(event.target, event.currentTarget)
+          )
+            void toggleCodeSection();
+        }}
+        onkeydown={(event) => {
+          if (
+            shouldHandleNotebookSectionKeydown(
+              event.target,
+              event.currentTarget,
+            )
+          )
+            handleCollapsedSectionKeydown(event, "code");
+        }}
       >
         {#if firstSourceLine}
           <div class="notebook-cell__collapsed-preview">
@@ -685,12 +722,17 @@
             />
           </div>
         {:else}
-          <div
-            class="notebook-cell__collapsed-empty"
-          >
-            Code is collapsed
-          </div>
+          <div class="notebook-cell__collapsed-empty">Code is collapsed</div>
         {/if}
+        <div class="notebook-cell__collapsed-id">
+          <NotebookCellId
+            {app}
+            cellId={cell.id}
+            {sourcePath}
+            onRename={handleCellRename}
+            disabled={isBusy || savingSource || persistingCellAttributes}
+          />
+        </div>
       </div>
     {/if}
   </div>
@@ -702,9 +744,7 @@
     onfocusin={selectCell}
   >
     <!-- Left rail: accent strip plus the empty rail space under the menu button toggle collapse -->
-    <div
-      class="notebook-cell__rail notebook-cell__rail--output"
-    >
+    <div class="notebook-cell__rail notebook-cell__rail--output">
       <button
         type="button"
         class="notebook-cell__rail-toggle notebook-cell__rail-toggle--output"

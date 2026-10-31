@@ -5,15 +5,11 @@ packages:
 linkWorkspacePackages: true
 
 overrides:
-  # Converge the published peer graph onto one kernel instance. The whole
-  # cohort now declares the current ranges (api@0.2.0, ui@0.1.4,
-  # markdown@0.2.0, search@0.1.4 -> design-core ^0.7.0 / mira ~0.1.2 /
-  # ui ^0.1.4 / api ^0.2.0); the exact pins are kept so pnpm can never
-  # materialize nested duplicate kernel instances and host typechecks stay
-  # on a single instance.
-  "@lapismd/design-core": "0.7.0"
-  "@lapismd/mira": "0.1.2"
-  "@lapis-notes/ui": "0.1.4"
+  # Converge the published peer graph onto API 0.2.2's host cohort.
+  # These registry pins keep one kernel instance for runtime and typechecks.
+  "@lapismd/design-core": "0.7.2"
+  "@lapismd/mira": "0.1.3"
+  "@lapis-notes/ui": "0.1.5"
   "@codemirror/autocomplete": "6.20.3"
   "@codemirror/commands": "6.10.4"
   "@codemirror/lang-markdown": "6.5.2"

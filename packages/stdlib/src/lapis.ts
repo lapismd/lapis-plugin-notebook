@@ -1,6 +1,7 @@
 import type {
   NotebookChartLibrary,
   NotebookChartOutput,
+  NotebookCodeOutput,
   NotebookDomOutput,
   NotebookErrorOutput,
   NotebookHtmlOutput,
@@ -17,6 +18,19 @@ export function text(value: string): NotebookTextOutput {
   return {
     kind: "text",
     text: value,
+  };
+}
+
+export function code(
+  value: string,
+  language = "plaintext",
+  options: { title?: string } = {},
+): NotebookCodeOutput {
+  return {
+    kind: "code",
+    code: value,
+    language,
+    ...(options.title ? { title: options.title } : {}),
   };
 }
 
@@ -141,6 +155,7 @@ export function error(
 }
 
 export const lapis = Object.freeze({
+  code,
   text,
   markdown,
   html,

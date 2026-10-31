@@ -5,6 +5,9 @@ import {
   saveNotebookPersistedState,
 } from "../notebook-output-store";
 
+const UUID = "8e627840-f468-4d72-912e-6136c21317ba";
+const stateKey = `plugin:lapis-notebook:state:v1:${UUID}`;
+
 vi.mock("@lapis-notes/api", async () => {
   const noop = () => undefined;
   const mockLogger = { debug: noop, info: noop, warn: noop, error: noop };
@@ -19,9 +22,9 @@ vi.mock("@lapis-notes/api", async () => {
 
 describe("saveNotebookPersistedState", () => {
   test("normalizes generated values before saving notebook state", async () => {
-    const setNotebookState = vi.fn(async () => {});
+    const setMeta = vi.fn(async () => {});
     const app = {
-      appDatabase: { setNotebookState },
+      appDatabase: { setMeta, getMeta: vi.fn(async () => undefined) },
     } as any;
     const file = {
       path: "Notebook Demo/Notebook Feature Tour.md",
@@ -29,6 +32,7 @@ describe("saveNotebookPersistedState", () => {
     } as any;
     const session = {
       document: {
+        frontmatter: { id: UUID },
         cells: [{ id: "query" }],
       },
       getCellState: () => ({
@@ -57,8 +61,8 @@ describe("saveNotebookPersistedState", () => {
 
     await saveNotebookPersistedState(app, file, session);
 
-    expect(setNotebookState).toHaveBeenCalledWith(
-      file.path,
+    expect(setMeta).toHaveBeenCalledWith(
+      stateKey,
       expect.objectContaining({
         cells: {
           query: {
@@ -79,13 +83,11 @@ describe("saveNotebookPersistedState", () => {
   });
 
   test("swallows persisted-state save errors", async () => {
-    const setNotebookState = vi.fn(async () => {
-      throw new Error(
-        "Remote app database request timed out: setNotebookState",
-      );
+    const setMeta = vi.fn(async () => {
+      throw new Error("Remote app database request timed out: setMeta");
     });
     const app = {
-      appDatabase: { setNotebookState },
+      appDatabase: { setMeta, getMeta: vi.fn(async () => undefined) },
     } as any;
     const file = {
       path: "Notebook Demo/Notebook Feature Tour.md",
@@ -93,6 +95,7 @@ describe("saveNotebookPersistedState", () => {
     } as any;
     const session = {
       document: {
+        frontmatter: { id: UUID },
         cells: [{ id: "query" }],
       },
       getCellState: () => ({
@@ -105,7 +108,7 @@ describe("saveNotebookPersistedState", () => {
     await expect(
       saveNotebookPersistedState(app, file, session),
     ).resolves.toBeUndefined();
-    expect(setNotebookState).toHaveBeenCalledTimes(1);
+    expect(setMeta).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -144,4 +147,65 @@ describe("notebook persisted state access", () => {
     ).resolves.toBeUndefined();
     expect(deleteNotebookState).toHaveBeenCalledTimes(1);
   });
+});
+
+test("persists upload markers and vault references without live readers or bytes", async () => {
+  const { createFileInput, getNotebookFileModel } = await import(
+    "../../../../packages/input/src/file-model"
+  );
+  const { registerNotebookDomOutput, clearNotebookDomOutputsForSource } =
+    await import("../notebook-dom-registry");
+  class FakeNode extends EventTarget {}
+  vi.stubGlobal("Node", FakeNode);
+  const node = createFileInput({ multiple: true });
+  const model = getNotebookFileModel(node)!;
+  model.addUploads([
+    {
+      name: "private.json",
+      type: "application/json",
+      size: 2,
+      lastModified: 1,
+      arrayBuffer: async () => new TextEncoder().encode("secret bytes").buffer,
+    } as File,
+  ]);
+  model.addVault([
+    { path: "data.csv", name: "data.csv", size: 8, lastModified: 2 },
+  ]);
+  const path = "Files.notebook.md";
+  registerNotebookDomOutput({
+    outputId: "file-persistence",
+    sourcePath: path,
+    cellId: "files",
+    name: "files",
+    role: "input",
+    node,
+  });
+  const setMeta = vi.fn();
+  try {
+    await saveNotebookPersistedState(
+      {
+        appDatabase: { setMeta, getMeta: vi.fn(async () => undefined) },
+      } as any,
+      { path, stat: { mtime: 1 } } as any,
+      {
+        document: {
+          frontmatter: { id: UUID },
+          cells: [{ id: "files", source: "", lang: "js" }],
+        },
+        getCellState: () => ({ state: "success", output: [] }),
+        getCellInputValues: () => ({ files: model.value }),
+      } as any,
+    );
+    const saved = setMeta.mock.lastCall![1];
+    expect(saved.cells.files.inputValues.files.value).toEqual([
+      expect.objectContaining({ source: "upload", needsReselection: true }),
+      expect.objectContaining({ source: "vault", path: "data.csv" }),
+    ]);
+    const serialized = JSON.stringify(saved);
+    expect(serialized).not.toContain("secret bytes");
+    expect(serialized).not.toContain("arrayBuffer");
+  } finally {
+    clearNotebookDomOutputsForSource(path);
+    vi.unstubAllGlobals();
+  }
 });

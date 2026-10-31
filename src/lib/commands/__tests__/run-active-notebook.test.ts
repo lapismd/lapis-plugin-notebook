@@ -68,6 +68,7 @@ function createApp(
     cursor?: { line: number; ch: number };
   },
 ) {
+  const frontmatter = { notebook: { version: 1 } };
   const editorSource = options?.editorSource ?? source;
   const cursor = options?.cursor ?? { line: 0, ch: 0 };
   const editor = {
@@ -101,8 +102,12 @@ function createApp(
     metadataCache: {
       getFileCache: vi.fn(() => null),
     },
+    fileManager: {
+      processFrontMatter: vi.fn(async (_file, mutate) => mutate(frontmatter)),
+    },
     appDatabase: {
-      setNotebookState: vi.fn(async () => {}),
+      getMeta: vi.fn(async () => undefined),
+      setMeta: vi.fn(async () => {}),
     },
     editor,
   };
@@ -146,8 +151,8 @@ describe("runActiveNotebook", () => {
 
     expect(result).toMatchObject({ path: "Notebook.notebook.md" });
     expect(runtime.executeDocument).toHaveBeenCalledTimes(1);
-    expect(app.appDatabase.setNotebookState).toHaveBeenCalledWith(
-      "Notebook.notebook.md",
+    expect(app.appDatabase.setMeta).toHaveBeenCalledWith(
+      expect.stringMatching(/^plugin:lapis-notebook:state:v1:/),
       expect.objectContaining({
         sourcePath: "Notebook.notebook.md",
         cells: {
@@ -158,7 +163,7 @@ describe("runActiveNotebook", () => {
         },
       }),
     );
-    expect(noticeSpy).toHaveBeenCalledWith("Ran notebook");
+    expect(noticeSpy).not.toHaveBeenCalled();
   });
 
   test("blocks notebook execution while safe mode disables notebook runtime", async () => {
@@ -367,7 +372,7 @@ describe("runActiveNotebook", () => {
       expect.anything(),
       { cellIds: ["summary"] },
     );
-    expect(noticeSpy).toHaveBeenCalledWith("Ran current notebook cell");
+    expect(noticeSpy).not.toHaveBeenCalled();
   });
 
   test("runs stale notebook cells with scoped targets", async () => {
@@ -414,7 +419,7 @@ describe("runActiveNotebook", () => {
       expect.anything(),
       { cellIds: ["load", "summary"] },
     );
-    expect(noticeSpy).toHaveBeenCalledWith("Ran stale notebook cells");
+    expect(noticeSpy).not.toHaveBeenCalled();
   });
 
   test("runs stale notebook cells with required dependency closures", async () => {
@@ -471,7 +476,7 @@ describe("runActiveNotebook", () => {
       expect.anything(),
       { cellIds: ["summary"] },
     );
-    expect(noticeSpy).toHaveBeenCalledWith("Ran stale notebook cells");
+    expect(noticeSpy).not.toHaveBeenCalled();
   });
 
   test("does not persist runs from unsaved editor content", async () => {
@@ -505,9 +510,7 @@ describe("runActiveNotebook", () => {
 
     await runActiveNotebook(app as any, runtimeController, runtime as any);
 
-    expect(app.appDatabase.setNotebookState).not.toHaveBeenCalled();
-    expect(noticeSpy).toHaveBeenCalledWith(
-      "Ran notebook from unsaved editor content",
-    );
+    expect(app.appDatabase.setMeta).not.toHaveBeenCalled();
+    expect(noticeSpy).not.toHaveBeenCalled();
   });
 });

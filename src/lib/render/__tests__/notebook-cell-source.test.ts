@@ -3,10 +3,62 @@ import { parseNotebookDocument } from "../../parse/parse-notebook-document";
 import {
   replaceNotebookCellAttributes,
   replaceNotebookCellSource,
+  renameNotebookCellId,
   updateNotebookCellSourceRange,
 } from "../notebook-cell-source";
 
 describe("notebook cell source helpers", () => {
+  test("renames the current cell header without changing bodies or neighbours", () => {
+    const source = [
+      "# Notebook",
+      "",
+      ':::cell{#one lang="js" custom="kept" folded}',
+      "```js",
+      'display("one");',
+      "```",
+      ":::",
+      "",
+      ':::cell{#two lang="js"}',
+      "```js",
+      'display("two");',
+      "```",
+      ":::",
+    ].join("\n");
+    const renamed = renameNotebookCellId(source, "one", "renamed");
+    expect(renamed).toContain("#renamed");
+    expect(renamed).toContain('custom="kept"');
+    expect(renamed).toContain("folded");
+    expect(renamed.slice(renamed.indexOf("\n```js"))).toBe(
+      source.slice(source.indexOf("\n```js")),
+    );
+  });
+
+  test.each(["", "two", "has space", "bad}", "bad#", 'bad"', "bad\\"])(
+    "rejects unsafe or duplicate ID %s",
+    (id) => {
+      const source = [
+        ':::cell{#one lang="js"}',
+        "```js",
+        "1",
+        "```",
+        ":::",
+        ':::cell{#two lang="js"}',
+        "```js",
+        "2",
+        "```",
+        ":::",
+      ].join("\n");
+      expect(() => renameNotebookCellId(source, "one", id)).toThrow();
+    },
+  );
+
+  test("rejects ambiguous and removed cells", () => {
+    const cell = ':::cell{#one lang="js"}\n```js\n1\n```\n:::';
+    expect(() =>
+      renameNotebookCellId(`${cell}\n${cell}`, "one", "new"),
+    ).toThrow();
+    expect(() => renameNotebookCellId(cell, "missing", "new")).toThrow();
+  });
   test("replaces only the fenced source body", () => {
     const source = [
       "# Notebook",

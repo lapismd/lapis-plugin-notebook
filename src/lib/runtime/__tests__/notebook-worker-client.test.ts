@@ -10,7 +10,8 @@ import { NotebookSession } from "../notebook-session";
 import { NotebookWorkerClient } from "../notebook-worker-client";
 import type { NotebookDuckDbRuntime } from "@lapis-notes/notebook-duckdb";
 
-vi.mock("../notebook-execution-host", () => ({
+vi.mock("../notebook-execution-host", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../notebook-execution-host")>()),
   createNotebookExecutionHost: (app: any, options: any = {}) => ({
     getAppTablesSnapshot: async () => ({
       notes: app.vault.getMarkdownFiles?.() ?? [],
@@ -177,6 +178,50 @@ describe("NotebookWorkerClient", () => {
     );
 
     await client.terminate();
+  });
+
+  test("cancels an unresolved in-process promise and rejects its late output", async () => {
+    let release!: () => void;
+    const wait = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    (globalThis as any).__notebookCancellationProbe = wait;
+    const document = parseNotebookDocument(
+      ':::cell{#slow lang="js"}\n```js\nawait 0;\n```\n:::',
+      { sourcePath: "Promise.notebook.md" },
+    );
+    const session = new NotebookSession(document);
+    const client = new NotebookWorkerClient({} as any, {
+      compileProvider: async () => ({
+        code: 'await globalThis.__notebookCancellationProbe; display("late output");',
+      }),
+    });
+    const result = client.executeDocument(document, session).then(
+      () => "completed",
+      () => "cancelled",
+    );
+    try {
+      await vi.waitFor(() =>
+        expect(session.getCellState("slow").state).toBe("running"),
+      );
+      // Wait until the injected compiler has yielded to the promise body.
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      await client.terminate();
+      const outcome = await Promise.race([
+        result,
+        new Promise((resolve) =>
+          setTimeout(() => resolve("still waiting"), 100),
+        ),
+      ]);
+      release();
+      await result;
+      expect(outcome).toBe("cancelled");
+      expect(session.getCellState("slow").state).not.toBe("completed");
+    } finally {
+      release();
+      await result;
+      delete (globalThis as any).__notebookCancellationProbe;
+    }
   });
 
   test("keeps compile-provider notebooks on the in-process path", async () => {
@@ -401,7 +446,7 @@ describe("NotebookWorkerClient", () => {
     expect(workerInstances[1].lastCommandId).toBeTruthy();
 
     await clientA.terminate();
-    await expect(runA).rejects.toThrow("Notebook worker was terminated");
+    await expect(runA).rejects.toMatchObject({ name: "AbortError" });
 
     workerInstances[1].onmessage?.({
       data: {

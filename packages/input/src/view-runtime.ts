@@ -2,7 +2,11 @@ import {
   getNotebookInputMetadata,
   type NotebookInputMetadata,
 } from "./dom-runtime";
-import { bindNotebookInputNode } from "./input-node";
+import {
+  settleNotebookInputState,
+  snapshotNotebookInputState,
+} from "./input-state";
+import { bindNotebookInputNode, getNotebookInputNodeValue } from "./input-node";
 
 export interface NotebookViewInputChange {
   sourcePath?: string;
@@ -24,6 +28,7 @@ export interface NotebookViewDomOutputRegistration {
 export interface CreateNotebookViewRuntimeOptions<TOutput> {
   cellId?: string;
   sourcePath?: string;
+  signal?: AbortSignal;
   getInputValue: (name: string) => unknown;
   setInputValue: (cellId: string, name: string, value: unknown) => void;
   emitInputChange: (event: NotebookViewInputChange) => void;
@@ -58,6 +63,7 @@ export function createNotebookViewRuntime<TOutput>(
     const binding = bindNotebookInputNode(node, {
       initialValue: options.getInputValue(name),
       onChange: (value) => {
+        if (options.signal?.aborted) return;
         options.setInputValue(cellId, name, value);
         options.emitInputChange({
           sourcePath: options.sourcePath,
@@ -67,6 +73,12 @@ export function createNotebookViewRuntime<TOutput>(
         });
       },
     });
+    await settleNotebookInputState(node);
+    if (options.signal?.aborted) {
+      binding.dispose();
+      throw new DOMException("Notebook input cancelled", "AbortError");
+    }
+    binding.currentValue = getNotebookInputNodeValue(node);
     options.setInputValue(cellId, name, binding.currentValue);
 
     options.registerOutput({
@@ -87,7 +99,7 @@ export function createNotebookViewRuntime<TOutput>(
       metadata: metadata
         ? {
             ...metadata,
-            value: binding.currentValue,
+            value: snapshotNotebookInputState(node),
           }
         : undefined,
     });

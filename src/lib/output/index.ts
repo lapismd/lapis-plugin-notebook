@@ -2,6 +2,7 @@ export { lapis } from "@lapis-notes/notebook-stdlib";
 export type {
   NotebookChartLibrary,
   NotebookChartOutput,
+  NotebookCodeOutput,
   NotebookDomOutput,
   NotebookErrorOutput,
   NotebookHtmlOutput,

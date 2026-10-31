@@ -1,6 +1,15 @@
+import {
+  createNotebookExecutionHost,
+  notebookInputHostContext,
+} from "../runtime/notebook-execution-host";
 import type { App, TFile } from "@lapis-notes/api";
 import {
   bindNotebookInputNode,
+  getNotebookInputNodeValue,
+  settleNotebookInputState,
+  setNotebookInputNodeValue,
+  disposeNotebookInput,
+  snapshotNotebookInputState,
   canReconstructNotebookInput,
   reconstructNotebookInputNode,
   transformObservableViewof,
@@ -17,6 +26,7 @@ import type {
 } from "../runtime/notebook-session";
 import type { NotebookSession } from "../runtime/notebook-session";
 import type { NotebookRuntimeController } from "../runtime/notebook-runtime-controller";
+import { awaitNotebookTask } from "../runtime/notebook-cancellation";
 
 const logger = {
   debug: (...a: any[]) => console.debug("[notebook.render]", ...a),
@@ -37,6 +47,7 @@ import {
   claimNotebookDomOutput,
   claimNotebookInputDomOutput,
   registerNotebookDomOutput,
+  subscribeNotebookInputChanges,
 } from "../runtime/notebook-dom-registry";
 
 type NotebookDocumentExecutor = (
@@ -58,7 +69,10 @@ export type RenderedNotebookCell = {
 };
 
 export class NotebookRenderService {
-  private readonly hydratedPersistedSessions = new WeakSet<NotebookSession>();
+  private readonly persistedSessionHydrations = new WeakMap<
+    NotebookSession,
+    Promise<void>
+  >();
   private readonly executionCheckpoints = new Map<
     string,
     NotebookExecutionCheckpoint
@@ -74,7 +88,13 @@ export class NotebookRenderService {
     ) => Promise<void> | void,
     private readonly cancelNotebookExecution?: (
       sourcePath: string,
-    ) => Promise<void> | void,
+    ) => Promise<boolean | void> | boolean | void,
+    private readonly isExecuting?: (sourcePath: string) => boolean,
+    private readonly onInputError?: (
+      sourcePath: string | undefined,
+      cellId: string | undefined,
+      error: unknown,
+    ) => void,
   ) {}
 
   async loadNotebookDocument(
@@ -92,6 +112,7 @@ export class NotebookRenderService {
   async getRenderedCell(
     sourcePath: string,
     cellId: string,
+    options: { recreateInputs?: boolean } = {},
   ): Promise<RenderedNotebookCell | null> {
     const file = this.app.vault.getFileByPath(sourcePath);
     if (!file) {
@@ -112,7 +133,10 @@ export class NotebookRenderService {
     await this.restorePersistedStateOnce(file, sourcePath, document, session);
 
     let cellState = this.runtimeController.getCellState(document, cell.id);
-    if (this.shouldRecreateRestoredInputCell(sourcePath, cell, cellState)) {
+    if (
+      options.recreateInputs !== false &&
+      this.shouldRecreateRestoredInputCell(sourcePath, cell, cellState)
+    ) {
       await this.runCell(sourcePath, cell.id).catch((error) => {
         logger.warn("Failed to recreate restored notebook input DOM", {
           sourcePath,
@@ -137,6 +161,7 @@ export class NotebookRenderService {
   }
 
   async runCell(sourcePath: string, cellId: string): Promise<void> {
+    if (this.isExecuting?.(sourcePath)) return;
     logger.info("runCell start", { sourcePath, cellId });
     const file = this.app.vault.getFileByPath(sourcePath);
     if (!file) {
@@ -192,6 +217,7 @@ export class NotebookRenderService {
     cellIds: string[],
     options: Pick<NotebookExecutionOptions, "skipDependencyClosure"> = {},
   ): Promise<void> {
+    if (this.isExecuting?.(sourcePath)) return;
     const file = this.app.vault.getFileByPath(sourcePath);
     if (!file || cellIds.length === 0) {
       return;
@@ -287,7 +313,16 @@ export class NotebookRenderService {
       return existing;
     }
 
-    const node = await reconstructNotebookInputNode(output);
+    const node = await reconstructNotebookInputNode(
+      output,
+      notebookInputHostContext(
+        createNotebookExecutionHost(this.app, {
+          onInputError: this.onInputError,
+        }),
+        sourcePath,
+        output.cellId,
+      ),
+    );
     if (!node) {
       return null;
     }
@@ -308,6 +343,8 @@ export class NotebookRenderService {
       },
     });
 
+    await settleNotebookInputState(node);
+    binding.currentValue = getNotebookInputNodeValue(node);
     if (currentValue !== binding.currentValue) {
       this.runtimeController.updateInputValue(
         sourcePath,
@@ -330,17 +367,129 @@ export class NotebookRenderService {
     return node;
   }
 
+  /** A separate control per embed, sharing values with the notebook's owner. */
+  async createEmbeddedInputOutput(
+    sourcePath: string,
+    output: NotebookInputOutput,
+    signal?: AbortSignal,
+  ): Promise<{ node: Node; dispose: () => void } | null> {
+    try {
+      const canonical = await awaitNotebookTask(
+        this.getOrCreateInputOutput(sourcePath, output),
+        signal,
+      );
+      if (!canonical || signal?.aborted) return null;
+      const pendingNode = reconstructNotebookInputNode(
+        output,
+        notebookInputHostContext(
+          createNotebookExecutionHost(this.app, {
+            onInputError: this.onInputError,
+          }),
+          sourcePath,
+          output.cellId,
+          undefined,
+          signal,
+        ),
+      );
+      // A reconstruction callback may ignore cancellation. Release our wait
+      // immediately and dispose any eventual node without mounting it.
+      let discarded = false;
+      const discardNode = (node: Node | null) => {
+        if (!node || discarded) return;
+        discarded = true;
+        disposeNotebookInput(node);
+      };
+      void pendingNode.then(
+        (node) => {
+          if (signal?.aborted) discardNode(node);
+        },
+        () => {},
+      );
+      const node = await awaitNotebookTask(pendingNode, signal);
+      if (!node) return null;
+      if (signal?.aborted) {
+        discardNode(node);
+        return null;
+      }
+      let disposed = false;
+      let unsubscribe = () => {};
+      const binding = bindNotebookInputNode(node, {
+        initialValue: snapshotNotebookInputState(canonical, {
+          transient: true,
+        }),
+        onChange: () => {
+          if (disposed) return;
+          // Persistence snapshots the canonical control, so update its state too.
+          const currentOwner =
+            this.claimInputOutput(
+              sourcePath,
+              output.cellId,
+              output.variableName,
+            ) ?? canonical;
+          setNotebookInputNodeValue(
+            currentOwner,
+            snapshotNotebookInputState(node, { transient: true }),
+          );
+          emitNotebookInputChange({
+            sourcePath,
+            cellId: output.cellId,
+            name: output.variableName,
+            value: getNotebookInputNodeValue(currentOwner),
+          });
+        },
+      });
+      const dispose = () => {
+        if (disposed) return;
+        disposed = true;
+        signal?.removeEventListener("abort", dispose);
+        unsubscribe();
+        binding.dispose();
+      };
+      signal?.addEventListener("abort", dispose, { once: true });
+      try {
+        await awaitNotebookTask(settleNotebookInputState(node), signal);
+      } catch (error) {
+        dispose();
+        if (signal?.aborted) return null;
+        throw error;
+      }
+      if (disposed) return null;
+      unsubscribe = subscribeNotebookInputChanges((event) => {
+        if (
+          disposed ||
+          event.sourcePath !== sourcePath ||
+          event.cellId !== output.cellId ||
+          event.name !== output.variableName
+        )
+          return;
+        const currentOwner =
+          this.claimInputOutput(
+            sourcePath,
+            output.cellId,
+            output.variableName,
+          ) ?? canonical;
+        setNotebookInputNodeValue(
+          node,
+          snapshotNotebookInputState(currentOwner, { transient: true }),
+        );
+      });
+      return { node, dispose };
+    } catch (error) {
+      if (!signal?.aborted)
+        this.onInputError?.(sourcePath, output.cellId, error);
+      return null;
+    }
+  }
+
   async cancelExecution(sourcePath: string): Promise<boolean> {
     const pending = this.executionPromises.get(sourcePath);
-    if (!pending) {
-      return false;
-    }
-
-    const checkpoint = this.executionCheckpoints.get(sourcePath);
-    this.runtimeController.restoreExecutionCheckpoint(sourcePath, checkpoint);
-
-    await this.cancelNotebookExecution?.(sourcePath);
+    const cancelled = await this.cancelNotebookExecution?.(sourcePath);
+    if (!pending) return cancelled === true;
     await pending.catch(() => undefined);
+    this.runtimeController.restoreExecutionCheckpoint(
+      sourcePath,
+      this.executionCheckpoints.get(sourcePath),
+    );
     return true;
   }
 
@@ -448,23 +597,24 @@ export class NotebookRenderService {
     document: NotebookDocument,
     session: NotebookSession,
   ): Promise<void> {
-    if (
-      document.frontmatter?.mode !== "lazy" ||
-      this.hydratedPersistedSessions.has(session)
-    ) {
-      return;
-    }
-
-    this.hydratedPersistedSessions.add(session);
-    const persistedState = await loadNotebookPersistedState(
-      this.app,
-      sourcePath,
-    );
-    if (persistedState) {
-      restoreNotebookPersistedState(session, persistedState, {
-        trustFileMtime: isNotebookStateFresh(persistedState, file),
-      });
-    }
+    if (document.frontmatter?.mode !== "lazy") return;
+    const pending = this.persistedSessionHydrations.get(session);
+    if (pending) return pending;
+    const revision = session.getStateRevision();
+    const hydration = (async () => {
+      const persistedState = await loadNotebookPersistedState(
+        this.app,
+        sourcePath,
+        document.frontmatter?.id,
+      );
+      if (persistedState && session.getStateRevision() === revision) {
+        restoreNotebookPersistedState(session, persistedState, {
+          trustFileMtime: isNotebookStateFresh(persistedState, file),
+        });
+      }
+    })();
+    this.persistedSessionHydrations.set(session, hydration);
+    await hydration;
   }
 }
 

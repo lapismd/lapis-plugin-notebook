@@ -43,6 +43,7 @@ export {
 export type {
   NotebookChartLibrary,
   NotebookChartOutput,
+  NotebookCodeOutput,
   NotebookDomOutput,
   NotebookErrorOutput,
   NotebookHtmlOutput,

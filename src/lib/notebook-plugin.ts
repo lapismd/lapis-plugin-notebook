@@ -1,3 +1,11 @@
+import { NotebookRunDiagnostics } from "./runtime/notebook-run-diagnostics";
+import NotebookExecutionStatus from "./execution/NotebookExecutionStatus.svelte";
+import { registerNotebookEmbeds } from "./render/notebook-embed";
+import { NotebookRunCoordinator } from "./runtime/notebook-run-coordinator";
+import {
+  awaitNotebookTask,
+  throwIfNotebookAborted,
+} from "./runtime/notebook-cancellation";
 import {
   addIcon,
   FileView,
@@ -158,24 +166,8 @@ type NotebookRuntime = {
 
 const RUN_ALL_NOTEBOOK_ICON_ID = "lapis-notebook-run-all";
 const AUTO_RUN_STALE_NOTEBOOK_DELAY_MS = 250;
-const NOTEBOOK_STATUS_ACTIVE_WHEN = "plugin.notebook.activeNotebook";
-const NOTEBOOK_STATUS_RUNNING_WHEN =
-  "plugin.notebook.activeNotebook && plugin.notebook.running";
-const NOTEBOOK_STATUS_SAFE_MODE_WHEN =
-  "plugin.notebook.activeNotebook && plugin.notebook.executionDisabled";
-const NOTEBOOK_STATUS_OUTPUT_WHEN =
-  "plugin.notebook.activeNotebook && plugin.notebook.hasOutputStatus";
-const NOTEBOOK_STATUS_CAN_RUN_WHEN =
-  "plugin.notebook.activeNotebook && !plugin.notebook.running && !plugin.notebook.executionDisabled";
-const NOTEBOOK_STATUS_CAN_CLEAR_WHEN =
-  "plugin.notebook.activeNotebook && !plugin.notebook.running && plugin.notebook.hasOutputs";
-const NOTEBOOK_STATUS_RUNTIME_ITEM_ID = "plugin-notebook:runtime";
-const NOTEBOOK_STATUS_OUTPUT_ITEM_ID = "plugin-notebook:output";
+const NOTEBOOK_STATUS_ACTIVE_WHEN = "plugin.lapis-notebook.activeNotebook";
 const NOTEBOOK_STATUS_EXECUTION_ITEM_ID = "plugin-notebook:execution";
-const NOTEBOOK_STATUS_SAFE_MODE_ITEM_ID = "plugin-notebook:safe-mode";
-const NOTEBOOK_STATUS_RUN_ITEM_ID = "plugin-notebook:run";
-const NOTEBOOK_STATUS_RERUN_ITEM_ID = "plugin-notebook:rerun-stale";
-const NOTEBOOK_STATUS_CLEAR_ITEM_ID = "plugin-notebook:clear";
 const RUN_ALL_NOTEBOOK_ICON = `
 <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
   <path d="M3.43934 13.5569C3.72064 13.8382 4.10218 13.9962 4.5 13.9962C4.75753 13.9943 5.01038 13.9272 5.235 13.8012L13.235 9.30123C13.4661 9.17048 13.6583 8.98073 13.7921 8.75136C13.9258 8.522 13.9963 8.26125 13.9963 7.99573C13.9963 7.73022 13.9258 7.46946 13.7921 7.2401C13.6583 7.01074 13.4661 6.82099 13.235 6.69023L5.225 2.18423C4.99595 2.06392 4.73997 2.00411 4.48133 2.01047C4.22269 2.01682 3.96996 2.08914 3.7471 2.22055C3.52423 2.35196 3.33863 2.53812 3.20789 2.76137C3.07714 2.98462 3.00558 3.23757 3 3.49623V12.4962C3 12.8941 3.15804 13.2756 3.43934 13.5569ZM4.14645 3.14268C4.24021 3.04891 4.36739 2.99623 4.5 2.99623C4.58579 2.99723 4.66999 3.01957 4.745 3.06123L12.745 7.56123C12.8219 7.60484 12.886 7.66808 12.9305 7.7445C12.975 7.82092 12.9985 7.90779 12.9985 7.99623C12.9985 8.08468 12.975 8.17154 12.9305 8.24796C12.886 8.32438 12.8219 8.38762 12.745 8.43123L4.755 12.9252C4.67964 12.9729 4.59272 12.9993 4.50355 13.0014C4.41438 13.0035 4.32631 12.9814 4.24876 12.9373C4.17121 12.8932 4.10709 12.8289 4.06328 12.7512C4.01946 12.6735 3.99759 12.5854 4 12.4962V3.49623C4 3.36362 4.05268 3.23645 4.14645 3.14268ZM10.76 11.8362L11.98 11.1562C11.992 11.2391 11.9987 11.3226 12 11.4062C11.9997 11.6721 11.9293 11.9333 11.7958 12.1632C11.6624 12.3932 11.4707 12.584 11.24 12.7162L6.16 15.5762C5.64826 15.8471 5.07898 15.9911 4.5 15.9962C4.19188 15.9987 3.88513 15.9548 3.59 15.8662C2.98312 15.7119 2.43205 15.3895 2 14.9362C1.35803 14.2865 0.99862 13.4096 1 12.4962V6.90624C1.00252 6.59959 1.10003 6.30126 1.27912 6.05233C1.45821 5.80339 1.71006 5.6161 2 5.51624V12.4962C2.00429 12.9285 2.12001 13.3523 2.33598 13.7268C2.55195 14.1013 2.86087 14.4137 3.23287 14.6339C3.60487 14.8541 4.02738 14.9746 4.45957 14.9837C4.89175 14.9929 5.319 14.8904 5.7 14.6862L10.75 11.8462C10.7527 11.8462 10.7552 11.8452 10.7571 11.8433C10.759 11.8414 10.76 11.8389 10.76 11.8362Z"/>
@@ -201,6 +193,8 @@ export class NotebookPlugin extends Plugin {
   private readonly runningExecutions = new Map<string, boolean>();
   private readonly runtimes: NotebookRuntimeRegistry<NotebookRuntime>;
   private readonly renderService: NotebookRenderService;
+  private readonly runs: NotebookRunCoordinator;
+  private runDiagnostics?: NotebookRunDiagnostics;
   private readonly activeNotebookContextKey: ScopedContextKey;
   private readonly runningNotebookContextKey: ScopedContextKey;
   private readonly executionDisabledContextKey: ScopedContextKey;
@@ -209,10 +203,7 @@ export class NotebookPlugin extends Plugin {
   private notebookStatusSyncToken = 0;
   private settings: NotebookPluginSettings = mergeNotebookSettings(null);
 
-  constructor(
-    app: App,
-    manifest: PluginManifest = MANIFEST,
-  ) {
+  constructor(app: App, manifest: PluginManifest = MANIFEST) {
     super(app, manifest);
     this.activeNotebookContextKey = this.registerContextKey(
       "activeNotebook",
@@ -234,6 +225,21 @@ export class NotebookPlugin extends Plugin {
     this.runtimes = new NotebookRuntimeRegistry(() =>
       this.createNotebookRuntime(),
     );
+    this.runs = new NotebookRunCoordinator(
+      async (document, session, options) => {
+        const runtime = await awaitNotebookTask(
+          this.getRuntime(document.sourcePath),
+          options.signal,
+        );
+        throwIfNotebookAborted(options.signal);
+        return runtime.executeDocument(
+          document,
+          session,
+          this.withRuntimeDependencies(options),
+        );
+      },
+      (path) => this.runtimes.terminate(path),
+    );
     this.renderService = new NotebookRenderService(
       app,
       this.runtimeController,
@@ -242,6 +248,9 @@ export class NotebookPlugin extends Plugin {
       this.executionPromises,
       (sourcePath) => this.refreshNotebookActionsForPath(sourcePath),
       (sourcePath) => this.cancelNotebookExecution(sourcePath),
+      (sourcePath) => this.runs.isRunning(sourcePath),
+      (path, cellId, error) =>
+        this.runDiagnostics?.inputError(path, cellId, error),
     );
   }
 
@@ -255,6 +264,8 @@ export class NotebookPlugin extends Plugin {
     // The legacy Electron native-DuckDB sidecar is out of scope; the worker
     // client's duckdbProvider seam stays open for a future native service.
     return new NotebookWorkerClient(this.app, {
+      onInputError: (path, cellId, error) =>
+        this.runDiagnostics?.inputError(path, cellId, error),
       duckdbServiceOptions: createNotebookDuckDbServiceOptions(this.app, this),
       pluginId: this.manifest.id,
       pluginPath: this.basePath,
@@ -264,6 +275,14 @@ export class NotebookPlugin extends Plugin {
 
   async onload(): Promise<void> {
     await this.initializeSettings();
+    this.runDiagnostics = new NotebookRunDiagnostics(
+      this.createDiagnosticCollection("execution", { label: "Notebook" }),
+    );
+    this.register(
+      this.runs.subscribe((summary) => {
+        if (summary) this.runDiagnostics?.update(summary);
+      }),
+    );
 
     addIcon(RUN_ALL_NOTEBOOK_ICON_ID, RUN_ALL_NOTEBOOK_ICON);
     // The workspace header renders icons through Design Core's registry;
@@ -276,6 +295,7 @@ export class NotebookPlugin extends Plugin {
     this.registerNotebookStatusBarItems();
     this.registerEvent(
       this.runtimeController.on("changed", (sourcePath, reason) => {
+        this.runs.update(sourcePath);
         if (reason === "execution") {
           this.maybeIncrementExecutionRevision(sourcePath);
         } else if (this.isAutoRunStaleOnCellChangeEnabledForPath(sourcePath)) {
@@ -367,6 +387,7 @@ export class NotebookPlugin extends Plugin {
       priority: "exclusive",
     });
     this.registerExtensions(["notebook.md"], NotebookViewType);
+    registerNotebookEmbeds(this);
     this.registerEditorSuggest(new NotebookCellSuggest(this.app), "markdown");
     this.registerNotebookCellMarkdownPostProcessor();
     void this.seedNotebookPanelGroupLayout();
@@ -460,21 +481,21 @@ export class NotebookPlugin extends Plugin {
     this.addCommand({
       id: "run-active-notebook",
       name: "Run notebook now",
-      callback: () => this.runCommand(() => this.runActiveNotebookCommand()),
+      callback: () => this.runActiveNotebookCommand().catch(() => undefined),
     });
 
     this.addCommand({
       id: "run-current-notebook-cell",
       name: "Run current notebook cell",
       callback: () =>
-        this.runCommand(() => this.runCurrentNotebookCellCommand()),
+        this.runCurrentNotebookCellCommand().catch(() => undefined),
     });
 
     this.addCommand({
       id: "run-stale-notebook-cells",
       name: "Run stale notebook cells",
       callback: () =>
-        this.runCommand(() => this.runStaleNotebookCellsCommand()),
+        this.runStaleNotebookCellsCommand().catch(() => undefined),
     });
 
     this.addCommand({
@@ -551,6 +572,7 @@ export class NotebookPlugin extends Plugin {
         tagName: "div",
         sourcePath: ctx.sourcePath,
         id: cellId,
+        embedded: ctx.surface?.id === "notebook-embed",
         class: className,
       },
     });
@@ -559,6 +581,7 @@ export class NotebookPlugin extends Plugin {
   }
 
   onunload(): void {
+    this.runs.destroy();
     unregisterNotebookRenderService(this.renderService);
     removeIcon(RUN_ALL_NOTEBOOK_ICON_ID);
     this.inputRerunTimers.forEach((timer) => clearTimeout(timer));
@@ -734,64 +757,19 @@ export class NotebookPlugin extends Plugin {
       );
     }
 
-    const sourcePath = document.sourcePath ?? "Untitled notebook";
-    const cellCount = options?.cellIds?.length ?? document.cells.length;
-    return this.app.notifications.withProgress(
-      {
-        title: "Running notebook",
-        message: sourcePath,
-        source: "Notebook",
-        location: "notification",
-        cancellable: true,
-        persistOnError: true,
-      },
-      async (progress) => {
-        const abortRuntime = () => {
-          this.runningExecutions.set(sourcePath, false);
-          void this.runtimes.terminate(sourcePath).catch(() => undefined);
-        };
-        progress.signal.addEventListener("abort", abortRuntime, {
-          once: true,
-        });
-        try {
-          progress.report({
-            current: 0,
-            total: cellCount,
-            message: sourcePath,
-          });
-          const runtime = await this.getRuntime(sourcePath);
-          progress.throwIfCancellationRequested();
-          const result = await runtime.executeDocument(
-            document,
-            session,
-            this.withRuntimeDependencies(options),
-          );
-          progress.report({
-            current: cellCount,
-            total: cellCount,
-            message: sourcePath,
-          });
-          return result;
-        } finally {
-          progress.signal.removeEventListener("abort", abortRuntime);
-        }
-      },
-    );
+    this.runDiagnostics?.setDocument(document);
+    return this.runs.run(document, session, options);
   }
 
-  private async cancelNotebookExecution(sourcePath: string): Promise<void> {
-    if (!this.executionPromises.has(sourcePath)) {
-      return;
-    }
-
-    logger.warn("cancelNotebookExecution", { sourcePath });
-    this.runningExecutions.set(sourcePath, false);
-    const runtimePromise = this.getExistingRuntime(sourcePath);
-    if (!runtimePromise) {
-      return;
-    }
-
-    await this.runtimes.terminate(sourcePath);
+  private async cancelNotebookExecution(sourcePath: string): Promise<boolean> {
+    const timer = this.staleAutoRunTimers.get(sourcePath);
+    if (timer) clearTimeout(timer);
+    this.staleAutoRunTimers.delete(sourcePath);
+    const inputTimer = this.inputRerunTimers.get(sourcePath);
+    if (inputTimer) clearTimeout(inputTimer);
+    this.inputRerunTimers.delete(sourcePath);
+    this.queuedInputReruns.delete(sourcePath);
+    return this.runs.cancel(sourcePath);
   }
 
   private findAnyNotebookFile(): TFile | null {
@@ -883,13 +861,20 @@ export class NotebookPlugin extends Plugin {
 
     this.runtimeController.clearOutputs(file.path);
     clearNotebookDomOutputsForSource(file.path);
-    await deleteNotebookPersistedState(this.app, file.path);
+    await deleteNotebookPersistedState(
+      this.app,
+      file.path,
+      document.frontmatter?.id,
+    );
     await this.refreshNotebookViews(file.path);
     new Notice("Cleared all notebook outputs");
   }
 
-  private createDeferredRuntime(): Pick<NotebookRuntime, "executeDocument"> {
+  private createDeferredRuntime(): Pick<NotebookRuntime, "executeDocument"> & {
+    isRunning: (path: string) => boolean;
+  } {
     return {
+      isRunning: (path: string) => this.runs.isRunning(path),
       executeDocument: async (document, session, options) => {
         return this.executeNotebookDocument(document, session, options);
       },
@@ -951,6 +936,7 @@ export class NotebookPlugin extends Plugin {
     const persistedState = await loadNotebookPersistedState(
       this.app,
       file.path,
+      document.frontmatter?.id,
     );
     if (!persistedState) {
       return false;
@@ -1049,72 +1035,43 @@ export class NotebookPlugin extends Plugin {
   private registerNotebookStatusBarItems(): void {
     this.register(
       this.app.statusBar.registerItem({
-        id: NOTEBOOK_STATUS_SAFE_MODE_ITEM_ID,
-        text: "Safe Mode",
-        alignment: "left",
-        priority: 90,
-        when: NOTEBOOK_STATUS_SAFE_MODE_WHEN,
-        tooltip: "Notebook execution is disabled in Safe Mode.",
-      }),
-    );
-    this.register(
-      this.app.statusBar.registerItem({
-        id: NOTEBOOK_STATUS_RUNTIME_ITEM_ID,
-        text: "Notebook runtime",
-        alignment: "left",
-        priority: 100,
-        when: NOTEBOOK_STATUS_ACTIVE_WHEN,
-      }),
-    );
-    this.register(
-      this.app.statusBar.registerItem({
-        id: NOTEBOOK_STATUS_OUTPUT_ITEM_ID,
-        text: "Notebook outputs",
-        alignment: "left",
-        priority: 110,
-        when: NOTEBOOK_STATUS_OUTPUT_WHEN,
-      }),
-    );
-    this.register(
-      this.app.statusBar.registerItem({
         id: NOTEBOOK_STATUS_EXECUTION_ITEM_ID,
-        text: "Running notebook",
-        alignment: "left",
-        priority: 120,
-        when: NOTEBOOK_STATUS_RUNNING_WHEN,
-      }),
-    );
-    this.register(
-      this.app.statusBar.registerItem({
-        id: NOTEBOOK_STATUS_RUN_ITEM_ID,
-        icon: RUN_ALL_NOTEBOOK_ICON_ID,
         alignment: "right",
-        priority: 90,
-        when: NOTEBOOK_STATUS_CAN_RUN_WHEN,
-        command: "notebook:run-active-notebook",
-        tooltip: "Run notebook now",
-      }),
-    );
-    this.register(
-      this.app.statusBar.registerItem({
-        id: NOTEBOOK_STATUS_RERUN_ITEM_ID,
-        icon: "rotate-cw",
-        alignment: "right",
-        priority: 100,
-        when: NOTEBOOK_STATUS_CAN_RUN_WHEN,
-        command: "notebook:run-stale-notebook-cells",
-        tooltip: "Run stale notebook cells",
-      }),
-    );
-    this.register(
-      this.app.statusBar.registerItem({
-        id: NOTEBOOK_STATUS_CLEAR_ITEM_ID,
-        icon: "trash-2",
-        alignment: "right",
-        priority: 110,
-        when: NOTEBOOK_STATUS_CAN_CLEAR_WHEN,
-        command: "notebook:clear-active-notebook-outputs",
-        tooltip: "Clear all notebook outputs",
+        priority: 1000,
+        when: NOTEBOOK_STATUS_ACTIVE_WHEN,
+        sourcePlugin: this.manifest.id,
+        mount: (target) => {
+          const component = mount(NotebookExecutionStatus, {
+            target,
+            props: {
+              app: this.app,
+              runs: this.runs,
+              run: () => this.runActiveNotebookCommand(),
+              stop: (path) => this.renderService.cancelExecution(path),
+              revealCell: (path, cellId) =>
+                this.revealNotebookCell(path, cellId),
+              rerunStale: () => this.runStaleNotebookCellsCommand(),
+              clearOutputs: () => this.clearActiveNotebookOutputsCommand(),
+              describeNotebook: async (path) => {
+                const file = this.app.vault.getFileByPath(path);
+                if (!(file instanceof TFile))
+                  throw new Error("Notebook file is unavailable");
+                const document = await this.loadNotebookDocument(file, path);
+                return {
+                  runtime: describeNotebookRuntimeStatus(
+                    this.getNotebookRuntimePolicyInput(document),
+                  ),
+                  outputs: describeNotebookOutputStatus(
+                    this.runtimeController.getSnapshot(path).outputState,
+                  ),
+                };
+              },
+            },
+          });
+          return () => {
+            void unmount(component);
+          };
+        },
       }),
     );
   }
@@ -1155,25 +1112,6 @@ export class NotebookPlugin extends Plugin {
     this.executionDisabledContextKey.set(viewStatus.executionDisabled);
     this.hasNotebookOutputsContextKey.set(hasOutputs);
     this.hasNotebookOutputStatusContextKey.set(Boolean(outputStatus));
-
-    this.app.statusBar.upsertItem({
-      id: NOTEBOOK_STATUS_RUNTIME_ITEM_ID,
-      text: viewStatus.runtime.label,
-      tooltip: viewStatus.runtime.detail,
-    });
-
-    this.app.statusBar.upsertItem({
-      id: NOTEBOOK_STATUS_EXECUTION_ITEM_ID,
-      text: executionState.statusMessage ?? "Running notebook",
-      tooltip:
-        executionState.statusMessage ?? "Notebook execution is in progress.",
-    });
-
-    this.app.statusBar.upsertItem({
-      id: NOTEBOOK_STATUS_OUTPUT_ITEM_ID,
-      text: outputStatus?.label ?? "Notebook outputs",
-      tooltip: outputStatus?.detail,
-    });
   }
 
   private async refreshNotebookViews(sourcePath: string): Promise<void> {
@@ -1793,7 +1731,10 @@ export class NotebookPlugin extends Plugin {
       const count = (rightRecord.children ?? []).length || 1;
       rightRecord.sizes = Array.from({ length: count }, () => 100 / count);
     }
-    tabs.children = [...(tabs.children ?? []), this.buildNotebookPanelGroupJson()];
+    tabs.children = [
+      ...(tabs.children ?? []),
+      this.buildNotebookPanelGroupJson(),
+    ];
     await this.app.vault.modify(layoutFile, JSON.stringify(layout));
   }
 
@@ -1849,7 +1790,6 @@ export class NotebookPlugin extends Plugin {
     await this.app.vault.modify(layoutFile, JSON.stringify(layout));
     await workspace.loadLayout();
   }
-
 
   private async openNotebookInspector(reveal: boolean): Promise<void> {
     const leaves = this.app.workspace.getLeavesOfType(
@@ -2005,4 +1945,3 @@ function nextAnimationFrame(): Promise<void> {
     requestAnimationFrame(() => resolve());
   });
 }
-

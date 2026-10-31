@@ -3,6 +3,7 @@
   import type { Snippet } from "svelte";
   import type { App } from "@lapis-notes/api";
   import NotebookCellView from "./notebook-cell.svelte";
+  import OutputRenderer from "./output-renderer.svelte";
   import {
     getNotebookRenderService,
     type RenderedNotebookCell,
@@ -18,6 +19,7 @@
 
   interface Props {
     app: App;
+    embedded?: boolean;
     children?: Snippet<[]>;
     tagName?: string;
     sourcePath?: string;
@@ -29,6 +31,7 @@
 
   let {
     app,
+    embedded = false,
     children,
     tagName = "div",
     sourcePath = "",
@@ -39,11 +42,12 @@
   }: Props = $props();
 
   let renderedCell = $state<RenderedNotebookCell | null>(null);
+  let renamedCellId = $state<string>();
   let loadVersion = 0;
   const loadingLabel = "Loading notebook cell output";
   let refreshTimer: ReturnType<typeof setTimeout> | null = null;
   const reloadDelayMs = 150;
-  const cellId = $derived(typeof id === "string" ? id : "");
+  const cellId = $derived(renamedCellId ?? (typeof id === "string" ? id : ""));
   const isExecuting = $derived(Boolean(renderedCell?.loading));
 
   function clearRefreshTimer(): void {
@@ -74,7 +78,9 @@
     }
 
     try {
-      const nextCell = await service.getRenderedCell(sourcePath, cellId);
+      const nextCell = await service.getRenderedCell(sourcePath, cellId, {
+        recreateInputs: !embedded,
+      });
       if (version !== loadVersion) {
         return;
       }
@@ -156,11 +162,18 @@
   $effect(() => {
     sourcePath;
     id;
+    renamedCellId = undefined;
+  });
+
+  $effect(() => {
+    sourcePath;
+    id;
     getNotebookCellExecutionRevision(sourcePath, cellId); // re-poll when this cell is queued or starts running
     void loadRenderedCell();
   });
 
   onDestroy(() => {
+    loadVersion += 1;
     clearRefreshTimer();
   });
 </script>
@@ -172,22 +185,44 @@
     data-notebook-cell={cellId || undefined}
     {...restProps}
   >
-    <NotebookCellView
-      {app}
-      cell={renderedCell.cell}
-      {sourcePath}
-      outputs={renderedCell.outputs}
-      executionState={renderedCell.state}
-      error={renderedCell.error}
-      durationMs={renderedCell.durationMs}
-      startedAt={renderedCell.startedAt}
-      statusMessage={renderedCell.statusMessage}
-      setupPhases={renderedCell.setupPhases ?? []}
-      canRun={true}
-      onRun={runCell}
-      onStop={stopCell}
-      onClearOutputs={clearCellOutputs}
-    />
+    {#if embedded}
+      <div class="notebook-embedded-cell">
+        {#if renderedCell.error}
+          <p role="alert">{renderedCell.error}</p>
+        {:else if renderedCell.outputs.length}
+          <OutputRenderer
+            {app}
+            {sourcePath}
+            outputs={renderedCell.outputs}
+            embedded
+          />
+        {:else if renderedCell.loading}
+          <p role="status">Running notebook cell…</p>
+        {:else if renderedCell.state !== "completed"}
+          <p>Open the notebook and run it to display this cell’s output.</p>
+        {/if}
+      </div>
+    {:else}
+      <NotebookCellView
+        {app}
+        cell={renderedCell.cell}
+        {sourcePath}
+        outputs={renderedCell.outputs}
+        executionState={renderedCell.state}
+        error={renderedCell.error}
+        durationMs={renderedCell.durationMs}
+        startedAt={renderedCell.startedAt}
+        statusMessage={renderedCell.statusMessage}
+        setupPhases={renderedCell.setupPhases ?? []}
+        canRun={true}
+        onRun={runCell}
+        onStop={stopCell}
+        onClearOutputs={clearCellOutputs}
+        onRename={(id) => {
+          renamedCellId = id;
+        }}
+      />
+    {/if}
   </div>
 {:else}
   <svelte:element
@@ -200,3 +235,13 @@
     {@render children?.()}
   </svelte:element>
 {/if}
+
+<style>
+  .notebook-embedded-cell {
+    padding-block: 0.5rem;
+  }
+  .notebook-embedded-cell > p {
+    margin: 0;
+    color: var(--muted-foreground);
+  }
+</style>

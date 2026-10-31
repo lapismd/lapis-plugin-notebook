@@ -1,3 +1,7 @@
+import {
+  awaitNotebookTask,
+  throwIfNotebookAborted,
+} from "./notebook-cancellation";
 import type { App } from "@lapis-notes/api";
 
 const logger = {
@@ -43,6 +47,7 @@ import type { NotebookSession } from "./notebook-session";
 export interface NotebookWorkerClientOptions {
   duckdbProvider?: NotebookDuckDbRuntimeProvider;
   duckdbServiceOptions?: NotebookDuckDbServiceOptions;
+  onInputError?: import("./notebook-execution-host").NotebookExecutionHost["reportInputError"];
   fileReaderProvider?: NotebookFileReaderProvider;
   compileProvider?: NotebookJavaScriptLikeCompileProvider;
   pluginId?: string;
@@ -62,6 +67,7 @@ type InspectableNotebookDuckDbRuntime = NotebookDuckDbRuntime & {
 
 export class NotebookWorkerClient {
   private readonly host;
+  private readonly executions = new Map<AbortController, NotebookSession>();
   private fallbackDuckDb: InspectableNotebookDuckDbRuntime | null = null;
   private worker: Worker | null = null;
   private readonly commandBroker = new NotebookWorkerCommandBroker<
@@ -79,6 +85,7 @@ export class NotebookWorkerClient {
   ) {
     this.host = createNotebookExecutionHost(app, {
       fileReaderProvider: options.fileReaderProvider,
+      onInputError: options.onInputError,
     });
   }
 
@@ -86,6 +93,32 @@ export class NotebookWorkerClient {
     document: NotebookDocument,
     session: NotebookSession,
     options: NotebookExecutionOptions = {},
+  ): Promise<NotebookExecutionResult> {
+    const controller = new AbortController();
+    this.executions.set(controller, session);
+    const abort = () => {
+      void this.terminate();
+    };
+    options.signal?.addEventListener("abort", abort, { once: true });
+    try {
+      throwIfNotebookAborted(options.signal);
+      return await awaitNotebookTask(
+        this.execute(document, session, {
+          ...options,
+          signal: controller.signal,
+        }),
+        controller.signal,
+      );
+    } finally {
+      this.executions.delete(controller);
+      options.signal?.removeEventListener("abort", abort);
+    }
+  }
+
+  private async execute(
+    document: NotebookDocument,
+    session: NotebookSession,
+    options: NotebookExecutionOptions,
   ): Promise<NotebookExecutionResult> {
     const workerOptions = serializeNotebookWorkerExecutionOptions(options);
     const useWorker = this.shouldUseWorker(document, options);
@@ -118,6 +151,11 @@ export class NotebookWorkerClient {
   }
 
   async terminate(): Promise<void> {
+    for (const [controller, session] of this.executions) {
+      controller.abort();
+      session.invalidateAllCells();
+    }
+    this.executions.clear();
     this.worker?.terminate();
     this.worker = null;
     this.commandBroker.rejectAll(new Error("Notebook worker was terminated"));
@@ -161,6 +199,7 @@ export class NotebookWorkerClient {
   ): Promise<NotebookExecutionResult> {
     const { executeNotebookDocument } = await import("./notebook-worker");
     const duckdb = await this.resolveDuckDbRuntime();
+    throwIfNotebookAborted(options.signal);
     return executeNotebookDocument(this.host, document, session, duckdb, {
       ...options,
       compileProvider: options.compileProvider ?? this.options.compileProvider,
@@ -357,6 +396,7 @@ function serializeNotebookWorkerExecutionOptions(
   options: NotebookExecutionOptions,
 ): NotebookExecutionOptions {
   const {
+    signal,
     runtimeDependencyLoader,
     moduleImportLoader,
     fileReaderProvider,

@@ -26,6 +26,7 @@ export type {
 } from "./bootstrap";
 export {
   chart,
+  code,
   dom,
   error,
   html,
@@ -81,6 +82,7 @@ export type {
 } from "./dependencies";
 export {
   createNotebookFileAttachment,
+  createNotebookFileAttachmentFromReader,
   createNotebookVaultRuntime,
   resolveNotebookFilePath,
 } from "./files";

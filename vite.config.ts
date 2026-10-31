@@ -48,7 +48,7 @@ export default defineConfig({
   },
   worker: {
     format: "es",
-    plugins: () => [notebookPackagesPlugin()],
+    plugins: () => [notebookPackagesPlugin(), svelte({ emitCss: false })],
     rollupOptions: {
       external: [/^@lapismd\/design-core/, /^svelte(?:$|\/)/],
     },
@@ -59,7 +59,10 @@ export default defineConfig({
   test: {
     projects: [
       {
-        plugins: [notebookPackagesPlugin(), svelte({ preprocess: vitePreprocess() })],
+        plugins: [
+          notebookPackagesPlugin(),
+          svelte({ preprocess: vitePreprocess() }),
+        ],
         resolve: {
           alias: {
             $lib: path.resolve(packageDir, "src/lib"),

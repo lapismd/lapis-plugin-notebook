@@ -7,6 +7,7 @@ import type { NotebookRuntimeController } from "../runtime/notebook-runtime-cont
 import type { NotebookSession } from "../runtime/notebook-session";
 
 type NotebookRuntime = {
+  isRunning?: (path: string) => boolean;
   executeDocument: (
     document: ActiveNotebookContext["document"],
     session: NotebookSession,
@@ -64,6 +65,8 @@ async function executeActiveNotebook(
     return null;
   }
 
+  if (runtime.isRunning?.(context.document.sourcePath ?? context.file.path))
+    return null;
   const cellIds = resolveCellIds(scope, context, runtimeController);
   if (scope !== "all" && (!cellIds || cellIds.length === 0)) {
     return null;
@@ -94,7 +97,6 @@ async function executeActiveNotebook(
     );
   }
 
-  new Notice(successMessage(scope, context.persistState));
   return context.file;
 }
 
@@ -188,16 +190,6 @@ function findCellAtCursor(
         offset >= cell.range.startOffset && offset <= cell.range.endOffset,
     ) ?? null
   );
-}
-
-function successMessage(scope: NotebookRunScope, persisted: boolean): string {
-  const base =
-    scope === "all"
-      ? "Ran notebook"
-      : scope === "current"
-        ? "Ran current notebook cell"
-        : "Ran stale notebook cells";
-  return persisted ? base : `${base} from unsaved editor content`;
 }
 
 function normalizeComparableSource(source: string): string {

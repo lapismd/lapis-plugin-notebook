@@ -15,6 +15,7 @@ describe("aggregate Docker validation", () => {
       "test",
       "build",
       "publint",
+      "packages:pack",
       "build-storybook",
       "test:storybook",
       "spec:check",
@@ -46,7 +47,9 @@ describe("aggregate Docker validation", () => {
     const execute = vi.fn();
     const native = vi.fn();
     const nestedDocker = vi.fn();
-    const lanes = Object.fromEntries(aggregateLanes.map((lane) => [lane, lane]));
+    const lanes = Object.fromEntries(
+      aggregateLanes.map((lane) => [lane, lane]),
+    );
     const docker = vi.fn(async () => {
       await runAll(async (lane) => {
         const invocation = nativeInvocation(lanes, lane, [], "/worker", {});

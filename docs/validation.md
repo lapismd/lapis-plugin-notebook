@@ -33,6 +33,12 @@ complete catalog and specification lanes sequentially in one worker, snapshot
 and installation. It stops at the original first failure; individual commands
 and exact selectors remain available. It accepts no selectors of its own.
 
+The aggregate also runs `pnpm packages:pack`: a clean npm installation checks
+the public declaration usage and starts fresh development and production
+browser consumers of the packed runtime and stylesheet. It uses the locked
+Playwright version and fails on browser errors or warnings through teardown.
+CI executes it in the parallel package job after restoring the audited build.
+
 Image identity covers the actual recipe, tool installer, selected pnpm,
 Playwright, Rust toolchain and architecture. Unrelated script/dependency changes
 do not rebuild it. The pnpm cache separately keys the lockfile and verified

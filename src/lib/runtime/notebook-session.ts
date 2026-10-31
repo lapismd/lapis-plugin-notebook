@@ -1,3 +1,4 @@
+import { hasTemporaryNotebookFiles } from "@lapis-notes/notebook-input";
 import type { NotebookDocument } from "../model/notebook-document";
 import type { NotebookCell } from "../model/notebook-cell";
 import type {
@@ -51,6 +52,7 @@ export class NotebookSession {
   private executionState: NotebookExecutionRunState =
     createIdleExecutionState();
   private persistedStateHydrated = false;
+  private stateRevision = 0;
   private outputStateSummary: NotebookOutputStateSummary = {
     kind: "none",
     cellCount: 0,
@@ -135,6 +137,10 @@ export class NotebookSession {
 
   getCellState(cellId: string): NotebookCellRuntimeState {
     return this.cellState.get(cellId) ?? { state: "idle" };
+  }
+
+  getStateRevision(): number {
+    return this.stateRevision;
   }
 
   getExecutionState(): NotebookExecutionRunState {
@@ -267,6 +273,9 @@ export class NotebookSession {
       case "cell-running":
         this.markRunning(event.cellId, event.statusMessage);
         return;
+      case "cell-output":
+        this.setCellPartialOutput(event.cellId, event.outputs);
+        return;
       case "cell-completed":
         this.setCellOutput(event.cellId, event.outputs);
         return;
@@ -310,6 +319,13 @@ export class NotebookSession {
       });
     }
 
+    this.notifyChange("execution");
+  }
+
+  setCellPartialOutput(cellId: string, output: NotebookOutput[]): void {
+    const previous = this.getCellState(cellId);
+    if (previous.state !== "running") return;
+    this.cellState.set(cellId, { ...previous, output: [...output] });
     this.notifyChange("execution");
   }
 
@@ -378,7 +394,17 @@ export class NotebookSession {
       }
     }
 
+    const unavailableInputIds = new Set(
+      this.document.cells
+        .filter((cell) => {
+          const saved = state[cell.id];
+          return saved && hasTemporaryNotebookFiles(saved.inputValues);
+        })
+        .map((cell) => cell.id),
+    );
     const staleCellIds = new Set([
+      ...unavailableInputIds,
+      ...collectStaleDescendants(this.graph, unavailableInputIds),
       ...changedCellIds,
       ...collectStaleDescendants(this.graph, changedCellIds),
     ]);
@@ -406,7 +432,7 @@ export class NotebookSession {
           ? "stale"
           : (cellState.state as NotebookCellExecutionState),
         output: cellState.outputs as NotebookOutput[],
-        inputValues: staleCellIds.has(cell.id)
+        inputValues: changedCellIds.has(cell.id)
           ? undefined
           : cellState.inputValues,
         error: cellState.error,
@@ -431,7 +457,7 @@ export class NotebookSession {
       }
 
       this.cellState.set(cell.id, nextState);
-      if (!staleCellIds.has(cell.id)) {
+      if (!changedCellIds.has(cell.id)) {
         this.restoreInputValues(cell.id, cellState.inputValues);
       }
     }
@@ -618,6 +644,7 @@ export class NotebookSession {
   }
 
   private notifyChange(reason: NotebookSessionChangeReason): void {
+    this.stateRevision += 1;
     this.onChange?.(reason);
   }
 

@@ -47,19 +47,26 @@ export function claimNotebookInputDomOutput(
   cellId: string,
   name: string,
 ): Node | null {
-  let claimedNode: Node | null = null;
+  const id = notebookInputDomOutputId(sourcePath, cellId, name);
+  return id ? (domOutputs.get(id)?.node ?? null) : null;
+}
+
+export function notebookInputDomOutputId(
+  sourcePath: string | undefined,
+  cellId: string,
+  name: string,
+): string | undefined {
+  let id: string | undefined;
   for (const registration of domOutputs.values()) {
     if (
-      registration.sourcePath !== sourcePath ||
-      registration.cellId !== cellId ||
-      registration.name !== name ||
-      registration.role !== "input"
-    ) {
-      continue;
-    }
-    claimedNode = registration.node;
+      registration.sourcePath === sourcePath &&
+      registration.cellId === cellId &&
+      registration.name === name &&
+      registration.role === "input"
+    )
+      id = registration.outputId;
   }
-  return claimedNode;
+  return id;
 }
 
 export function clearNotebookDomOutputsForCell(

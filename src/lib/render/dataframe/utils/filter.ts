@@ -13,6 +13,14 @@ export function clientFilter(
   );
 }
 
+function orderedValue(value: unknown): number {
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}(?:$|[T ])/.test(value)) {
+    return Date.parse(value);
+  }
+  return Number(value);
+}
+
 export function matchesFilter(value: unknown, filter: FilterState): boolean {
   if (filter.operator === "is_null") {
     return value == null;
@@ -41,17 +49,17 @@ export function matchesFilter(value: unknown, filter: FilterState): boolean {
     case "regex":
       return new RegExp(String(filterValue ?? ""), "i").test(raw);
     case "gt":
-      return Number(value) > Number(filterValue);
+      return orderedValue(value) > orderedValue(filterValue);
     case "gte":
-      return Number(value) >= Number(filterValue);
+      return orderedValue(value) >= orderedValue(filterValue);
     case "lt":
-      return Number(value) < Number(filterValue);
+      return orderedValue(value) < orderedValue(filterValue);
     case "lte":
-      return Number(value) <= Number(filterValue);
+      return orderedValue(value) <= orderedValue(filterValue);
     case "between":
       return (
-        Number(value) >= Number(filterValue) &&
-        Number(value) <= Number(filter.valueTo)
+        orderedValue(value) >= orderedValue(filterValue) &&
+        orderedValue(value) <= orderedValue(filter.valueTo)
       );
     default:
       return true;

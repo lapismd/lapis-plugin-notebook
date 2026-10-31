@@ -120,9 +120,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/ci-setup
+        with:
+          browsers: "true"
       - name: Restore the audited package build
         run: node scripts/run-turbo.mjs build
       - run: pnpm exec publint
+      - name: Validate the public npm package in cold browser consumers
+        run: pnpm packages:pack -- --already-built
       - name: Report package cache restoration
         run: node scripts/report-turbo-cache.mjs --github-summary
 
