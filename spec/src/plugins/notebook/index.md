@@ -45,7 +45,8 @@ Notebook execution feedback is owned by the active-notebook status item and its
 run-details popover, with session-local outcomes and no completion toast.
 Live cell refreshes reuse immutable parsed documents and their dependency
 graphs through the owned render service. Source, normalized metadata, path
-and file-identity changes invalidate the parsed snapshot (LN-NB-042); live
+and file-creation changes invalidate the parsed snapshot (LN-NB-042). Public
+vault wrapper copies share a bounded path cache; live
 progress and partial-output polling stay enabled.
 
 Cell chrome retains legacy gutter alignment and delegates source-language
