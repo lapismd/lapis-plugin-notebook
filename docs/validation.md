@@ -87,6 +87,8 @@ with a writable temporary Corepack/browser cache. Local commands keep their
 Docker default. The image/build stage is followed by parallel quality, unit,
 package lint, static Storybook and three browser-shard jobs, then the stable
 `Validation lanes` aggregate. All jobs must succeed, including every shard.
+Containers use four CPUs from the standard public Ubuntu runner, bounded to
+7 GiB memory and 2 GiB shared memory.
 
 The shared CI setup installs once per job with frozen registry resolution and
 caches the container pnpm store. Turbo caches root build/check/test tasks and
@@ -156,6 +158,6 @@ and visual approval remain separate; this tooling does not approve baselines.
 
 The browser setup installs a fatal Svelte diagnostic guard before story hooks.
 It forwards console warnings/errors and fails Svelte runtime diagnostics during
-mount, interaction and teardown. The wrapper records origin stacks without
+mount, interaction and teardown, plus caught runtime story-extraction errors. The wrapper records origin stacks without
 throwing through framework cleanup; post-test and post-file assertions make
 every retained diagnostic fatal. No suppression or allowlist is permitted.

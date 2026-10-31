@@ -18,6 +18,15 @@ describe("Notebook CI gates", () => {
     expect(pin.digest).toMatch(/^sha256:[a-f0-9]{64}$/);
     expect(recipe).toContain(`FROM ${pin.image}@${pin.digest}\n`);
   });
+  it("uses the standard public runner CPUs within bounded containers", () => {
+    for (const job of Object.values(workflow.jobs)) {
+      if (!job.container) continue;
+      expect(job["runs-on"]).toBe("ubuntu-latest");
+      expect(job.container.options).toContain("--cpus=4");
+      expect(job.container.options).toContain("--memory=7g");
+      expect(job.container.options).toContain("--shm-size=2g");
+    }
+  });
   it("aggregates every lane, even when prerequisites fail or cancel", () => {
     expect(workflow.jobs.validate.if).toBe("always()");
     expect([...workflow.jobs.validate.needs].sort()).toEqual(

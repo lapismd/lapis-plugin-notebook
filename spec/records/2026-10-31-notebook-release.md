@@ -87,3 +87,94 @@ Core 0.7.2 and Mira 0.1.3 retain their successful protected signature receipts.
 All functional and accessibility failures are resolved; visual status remains
 pending and baselines are unchanged. Hosted Notebook CI and initial publication
 remain separate gates.
+
+## Hosted resource regressions
+
+PR #5 run `41176512435` passes image/build, quality, unit, static Storybook
+and both panel shards. Its exact `pnpm packages:pack -- --already-built` job
+fails once after the cold development consumer passes: the production Vite
+child reaches the default 2 GiB V8 heap limit inside the bounded 7 GiB job.
+A real Node subprocess regression under inherited `NODE_OPTIONS` reproduces
+the insufficient heap (one failure). The production child alone now requests
+4 GiB old space; the test retains an unrelated Node condition and checks the
+parent's options and heap limit are unchanged.
+
+The full-shell shard also reports two 60-second timeouts, Input Types and
+Input Types Mobile (27 other shell cases pass). Exact reproduction now uses
+two CPUs and 7 GiB, matching hosted CI. Those assertions and timeout remain
+unchanged while the slow work is diagnosed. Local qualification under the
+earlier four-CPU / 12 GiB budget does not waive these hosted failures.
+
+The two exact input stories pass locally at the original two-CPU / 7 GiB cap
+(35.8 and 28.7 seconds; report
+`lapis-notebook-run-d08874d7-aa7d-4150-bdde-8ccd989eaf06`). GitHub documents
+four CPUs and 16 GB for public `ubuntu-latest`; this public repository now
+uses those four standard CPUs while retaining its 7 GiB memory / 2 GiB shared
+memory bounds. No paid runner is selected. A workflow regression first records
+one failure / three passes for the old cap; the final configuration must pass
+the same target plus the unchanged input plays and full browser lane.
+
+The resource targets now pass all five cases (`scripts/ci.test.mjs` and
+`scripts/package-consumer-build.test.mjs`). The unchanged exact input plays
+pass at four CPUs / 7 GiB in a fresh worker: desktop 33.1 seconds, mobile
+27.4 seconds, report
+`lapis-notebook-run-89f83d38-cefa-48d6-9433-0fd31d1fd1cd`. QMD indexing,
+search and doctor pass; the documented portable script aliases remain intact.
+
+## Runtime story extraction
+
+The bounded full run exposes caught `Meta is not a function` mount errors
+in the three panel families. The installed CSF 5 `defineMeta` returns only
+`Story`; their obsolete `<Meta />` aborts runtime story extraction before
+collecting play functions. The earlier reported 18 passing panel cases are
+therefore invalid evidence. A new guard regression records one failure / six
+passes before caught extraction errors join fatal diagnostics. Ordinary
+expected notebook diagnostics continue to be forwarded unchanged.
+
+The panel sources must use the documented CSF 5 declaration, and the exact
+browser target must fail with the obsolete source before passing its actual
+placement interactions. Complete interaction/axe and qualification lanes must
+then rerun with the stricter guard. Baselines and assertions remain unchanged.
+
+With the stricter guard and unchanged Dependencies panel source,
+`LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native pnpm test:storybook --
+src/stories/panels/DependenciesPanels.stories.svelte` records one failure /
+five empty passes. The caught extraction error retains its original stack.
+All three panel families now destructure only `Story` from `defineMeta` and
+omit the obsolete component, matching the installed addon's public API.
+
+The repaired Dependencies extraction runs real interactions: five placements
+pass and Right Sidebar fails once because the production graph's Horizontal
+Tree and Vertical Tree labels are reversed relative to their handlers. Correct
+those labels in the owning panel; preserve the settings assertion and timeout.
+
+The exact Dependencies file now passes all six actual placement interactions,
+including graph switching and persisted horizontal orientation (16.4 seconds,
+4.95 seconds in plays), with the stricter console guard and unchanged settings
+assertion. The prior extraction-error case took only 0.48 seconds in empty
+cases. The guard unit regression now passes all seven cases.
+
+All three panel families now pass all 18 actual placement interactions and
+accessibility checks in one fresh native browser process (30.0 seconds,
+12.92 seconds in plays), with no extraction errors. The exact Dependencies
+regression moves from one failure / five passes to six passes; the stricter
+guard regression moves from one failure / six passes to seven passes.
+A final bounded Docker aggregate now replaces earlier panel qualification.
+
+## Final bounded qualification
+
+`pnpm validation:all` passes all eight lanes at four CPUs / 7 GiB memory /
+2 GiB shared memory in a fresh Docker checkout. Report:
+`lapis-notebook-run-0aa15130-495d-4a05-929e-c0d8b749ebca`. Quality reports
+zero Svelte errors/warnings; all 436 unit cases pass; builds, publint and
+private-import audits pass; both cold public npm consumers and public types
+pass; static Storybook and all 47 actual interaction/accessibility stories
+pass; final specification and App ownership checks pass. There are zero caught
+story-extraction errors. Input Types completes in 32.2 seconds and mobile in
+31.1 seconds under their unchanged 60-second limit.
+
+The retained request has an empty archive inventory and the structurally parsed
+installed lock has zero file dependency resolutions. The final runtime tarball
+SHA-256 is `0202c384718bec6f96a607b6d3a89c20f714ff85641c98d02d361eefaff9e67e`.
+Visual status stays pending and no baselines changed. Hosted PR checks and npm
+publication remain separate gates.

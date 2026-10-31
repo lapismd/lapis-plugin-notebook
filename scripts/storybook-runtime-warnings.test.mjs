@@ -24,6 +24,22 @@ describe("fatal Storybook runtime diagnostics", () => {
     },
   );
 
+  it("retains failed story extraction instead of reporting empty stories as passing", () => {
+    const target = { warn: vi.fn(), error: vi.fn() };
+    const original = target.error;
+    const guard = installFatalStorybookRuntimeWarningGuard(target);
+    const error = new TypeError("Meta is not a function");
+    expect(() =>
+      target.error(`Error in mounting stories ${error}`, error),
+    ).not.toThrow();
+    expect(original).toHaveBeenCalledWith(
+      `Error in mounting stories ${error}`,
+      error,
+    );
+    expect(() => guard.assertClean()).toThrow("Meta is not a function");
+    guard.dispose();
+  });
+
   it("forwards ordinary diagnostics and restores its own wrappers", () => {
     const warn = vi.fn(),
       error = vi.fn();

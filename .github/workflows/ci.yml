@@ -52,7 +52,7 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-      options: --user=1001:1001 --init --cap-drop=ALL --cpus=2 --memory=7g --shm-size=2g
+      options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/ci-setup
@@ -70,7 +70,7 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-      options: --user=1001:1001 --init --cap-drop=ALL --cpus=2 --memory=7g --shm-size=2g
+      options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
       - uses: actions/checkout@v7
         with:
@@ -98,7 +98,7 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-      options: --user=1001:1001 --init --cap-drop=ALL --cpus=2 --memory=7g --shm-size=2g
+      options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/ci-setup
@@ -116,7 +116,7 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-      options: --user=1001:1001 --init --cap-drop=ALL --cpus=2 --memory=7g --shm-size=2g
+      options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/ci-setup
@@ -139,7 +139,7 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-      options: --user=1001:1001 --init --cap-drop=ALL --cpus=2 --memory=7g --shm-size=2g
+      options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/ci-setup
@@ -162,7 +162,7 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-      options: --user=1001:1001 --init --cap-drop=ALL --cpus=2 --memory=7g --shm-size=2g
+      options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/ci-setup

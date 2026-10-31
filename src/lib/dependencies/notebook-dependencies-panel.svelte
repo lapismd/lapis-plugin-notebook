@@ -930,7 +930,7 @@
                 });
               }}
             >
-              Vertical Tree
+              Horizontal Tree
             </button>
             <button
               type="button"
@@ -942,7 +942,7 @@
                 });
               }}
             >
-              Horizontal Tree
+              Vertical Tree
             </button>
           </div>
         </div>

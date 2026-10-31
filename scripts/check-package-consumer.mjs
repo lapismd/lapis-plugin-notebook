@@ -7,6 +7,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { checkNpmPackage } from "./check-npm-package.mjs";
+import { productionBuildArguments } from "./package-consumer-build.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2).filter((arg) => arg !== "--");
@@ -130,7 +131,7 @@ export default { plugins: [svelte(), tursoBundleBuildPlugin()], resolve: { dedup
   const vite = join(directory, "node_modules/vite/bin/vite.js");
   for (const mode of ["development", "production"]) {
     if (mode === "production")
-      run(process.execPath, [vite, "build"], directory);
+      run(process.execPath, productionBuildArguments(vite), directory);
     const reservation = createServer();
     await new Promise((accept) => reservation.listen(0, "127.0.0.1", accept));
     const port = reservation.address().port;
