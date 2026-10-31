@@ -4420,3 +4420,5 @@
 .notebook-output__dom-mount {
   min-width: 0;
 }
+
+.notebook-dataframe__expand-button { border: 0; background: transparent; color: var(--muted-foreground); cursor: pointer; margin-inline-end: .25rem; }

@@ -64,6 +64,7 @@ export class NotebookInspectorView
     this.overlay = mountLocalComponent(NotebookInspectorPanel, {
       target: this.contentEl,
       props: {
+        app: this.plugin.app,
         snapshot: null as NotebookInspectorSnapshot | null,
         loading: true,
         onNavigateToCell: (cellId: string) => {

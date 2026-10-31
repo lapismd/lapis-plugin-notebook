@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "package": "bits-ui",
+  "version": "2.20.2",
+  "patchFile": "bits-ui@2.20.2.patch",
+  "patchSha256": "debd3bc7d43917f0967f0cc1e212fc5c7721c751d3b92bf8f31030d1c96289ad",
+  "registryIntegrity": "sha512-cb1eQD1wZEhJWb1dTLiAdYWqeUI5v7f+7EAHmetxBuELI9lo4cpAIfGEjald/PR4wTR80Fu5DFH+IaY1OKn+tg==",
+  "ownerCommits": {
+    "linkPreview": "bf492db552702fd310dcc6439152d42d472de068",
+    "slider": "201b1feb60fe97ee383ea30b061e453e1ad5e853",
+    "focusScope": "692fbdf5095941464561189fd81ffc2cb4b81c6c"
+  },
+  "files": [
+    {
+      "path": "dist/bits/link-preview/link-preview.svelte.js",
+      "sha256": "d1003472761d056c70c5dc06651473bdbcbfad4f53fea224021da65747135cc3",
+      "gitBlob": "784fcc162d9f92c0fdb5f898f6b4cf6e6f0b1474",
+      "afterSha256": "84ceb64f136ffd57c08973ffa70cdcbe8875000d10262244f2fc5dd36b626d14",
+      "afterGitBlob": "1ab543c5310bbe1bcce1b9dbb3aaa2dd7010c602"
+    },
+    {
+      "path": "dist/bits/slider/slider.svelte.js",
+      "sha256": "8f78d5045adaf4cde3e8c051c50b5e50ce3715bcc2ffab2c3f529211f57c7515",
+      "gitBlob": "eb30e0b45a03d014d58d9d30f63aed4630c26dd1",
+      "afterSha256": "99da433f4cc360138c73c4ba5d2a11083c4dc95720a09bbc8b7ec61e78d2f201",
+      "afterGitBlob": "76a550a0f8fe3cc14e7236ac35b2acfccd6484e3"
+    },
+    {
+      "path": "dist/bits/utilities/focus-scope/focus-scope.svelte.js",
+      "sha256": "1ce5e39a89c8359778712f996193c65375287a0eceb9fde45186c7988c83dd1f",
+      "gitBlob": "938a4e0a9fab6a8042f5c88cb9cd5959b487200c",
+      "afterSha256": "62c6ee5f7352531f61e465b38ae901bb9b3c2d1c3fb3d5bd7dc445e491a1e0f1",
+      "afterGitBlob": "5d0c80f27382408a8599e9c4132c47d47c4b27fa"
+    }
+  ]
+}

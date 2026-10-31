@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import Columns3 from "@lucide/svelte/icons/columns-3";
   import Download from "@lucide/svelte/icons/download";
   import Funnel from "@lucide/svelte/icons/funnel";
@@ -28,7 +29,9 @@
     options = {},
     onExport,
     searchInputId,
+    filterControl,
   }: {
+    filterControl?: Snippet;
     schema: DataFrameSchema;
     columns: Column[];
     state: {
@@ -93,33 +96,7 @@
 
     <Tooltip.Provider>
       <div class="notebook-dataframe__toolbar-actions">
-        <Tooltip.Root>
-          <Tooltip.Trigger>
-            {#snippet child({ props })}
-              <button
-                {...props}
-                type="button"
-                data-ui-component="button"
-                data-slot="button"
-                data-variant={activeFilterCount > 0 ? "secondary" : "ghost"}
-                data-size="icon-sm"
-                class="notebook-dataframe__toolbar-button"
-                aria-label={activeFilterCount > 0
-                  ? `Filters (${activeFilterCount} active)`
-                  : "Filters"}
-                onclick={() => tableState.setFilterBarOpen(!tableState.filterBarOpen)}
-              >
-                <Funnel class="notebook-dataframe__toolbar-icon" />
-                {#if activeFilterCount > 0}
-                  <Badge class="notebook-dataframe__toolbar-count"
-                    >{activeFilterCount}</Badge
-                  >
-                {/if}
-              </button>
-            {/snippet}
-          </Tooltip.Trigger>
-          <Tooltip.Content>Filters</Tooltip.Content>
-        </Tooltip.Root>
+        {#if options.filterable !== false && filterControl}{@render filterControl()}{/if}
 
         <Popover.Root>
           <Tooltip.Root>

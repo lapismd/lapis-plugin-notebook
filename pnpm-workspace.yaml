@@ -25,3 +25,7 @@ overrides:
   "@lezer/markdown": "1.7.2"
   "@lezer/lr": "1.4.10"
   svelte: "5.56.10"
+
+# Exact published Design Core consumer requirement; see patches/README.md.
+patchedDependencies:
+  bits-ui@2.20.2: patches/bits-ui@2.20.2.patch

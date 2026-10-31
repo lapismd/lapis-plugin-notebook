@@ -65,7 +65,9 @@
             "svelte/internal/flags/legacy",
             "svelte/reactivity",
             "svelte/store",
-            "svelte/transition"
+            "svelte/transition",
+            "@lapismd/design-core/shadcn/canvas-table",
+            "@lapismd/design-core/shadcn/filter-builder"
           ],
           "requiresReloadOnUpdate": false
         }

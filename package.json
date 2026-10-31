@@ -46,7 +46,10 @@
     "validation:doctor": "node scripts/validation.mjs doctor",
     "validation:images": "node scripts/validation.mjs images",
     "validation:clean": "node scripts/validation.mjs clean",
-    "build:bundle": "node scripts/validation.mjs run build:bundle"
+    "build:bundle": "node scripts/validation.mjs run build:bundle",
+    "storybook:review": "node scripts/validation.mjs run storybook:review",
+    "test:canvas-tables": "node scripts/validation.mjs run test:canvas-tables",
+    "check:canvas-table-types": "node scripts/validation.mjs run check:canvas-table-types"
   },
   "files": [
     "dist",

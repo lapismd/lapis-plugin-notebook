@@ -72,6 +72,8 @@ try {
   const archives = validateArchives(source.archives);
   const packagePath = join(root, "package.json"),
     lockPath = join(root, "pnpm-lock.yaml");
+  const workspacePath = join(root, "pnpm-workspace.yaml");
+  const originalWorkspace = await readFile(workspacePath, "utf8");
   const originalPackage = await readFile(packagePath),
     originalLock = await readFile(lockPath);
   if (archives.length) {
@@ -97,6 +99,8 @@ try {
       overrides: { ...pkg.pnpm?.overrides, ...overrides },
     };
     try {
+      const { projectArchiveWorkspace } = await import(join(root, "scripts/validation/archive-projection.mjs"));
+      await writeFile(workspacePath, projectArchiveWorkspace(originalWorkspace, archives));
       await writeFile(packagePath, JSON.stringify(pkg));
       await execute(
         "pnpm",
@@ -111,6 +115,7 @@ try {
     } finally {
       await writeFile(packagePath, originalPackage);
       await writeFile(lockPath, originalLock);
+      await writeFile(workspacePath, originalWorkspace);
     }
   } else
     await execute(
@@ -137,7 +142,10 @@ try {
     ]),
   );
   const { runNative } = await import(join(root, "scripts/validation.mjs"));
-  await runNative(request.lane, request.args, root);
+  if (request.lane === "storybook:review") {
+    const { serveReview } = await import(join(root, "scripts/validation/review-server.mjs"));
+    await serveReview(root);
+  } else await runNative(request.lane, request.args, root);
   result.status = "passed";
   result.exitCode = 0;
 } catch (error) {

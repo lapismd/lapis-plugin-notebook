@@ -1,3 +1,4 @@
+import { createFilterState } from "@lapismd/design-core/shadcn/filter-builder";
 import type { FilterState, SortDirection, SortState } from "./dataframe-types";
 
 function nextSortDirection(
@@ -20,6 +21,7 @@ function withUpdatedPriorities(sorts: SortState[]): SortState[] {
 }
 
 export function createViewerState(initialPageSize = 100) {
+  let structured = $state(createFilterState());
   let sortColumns = $state<SortState[]>([]);
   let filters = $state<FilterState[]>([]);
   let hiddenCols = $state<Set<string>>(new Set());
@@ -36,6 +38,13 @@ export function createViewerState(initialPageSize = 100) {
   let pageSize = $state(initialPageSize);
 
   return {
+    get structured() {
+      return structured;
+    },
+    setStructured(next: typeof structured) {
+      structured = next;
+      page = 0;
+    },
     get sortColumns() {
       return sortColumns;
     },
@@ -120,6 +129,7 @@ export function createViewerState(initialPageSize = 100) {
     },
 
     clearFilters() {
+      structured = createFilterState();
       filters = [];
       page = 0;
     },
@@ -168,6 +178,9 @@ export function createViewerState(initialPageSize = 100) {
       selectedRows = new Set(rows);
     },
 
+    setExpandedRows(rows: Iterable<number>) {
+      expandedRows = new Set(rows);
+    },
     clearSelectedRows() {
       selectedRows = new Set();
     },

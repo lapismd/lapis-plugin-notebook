@@ -10,5 +10,14 @@
   },
   "src/stories/panels/PackagesPanels.stories.svelte": {
     "kind": "application"
+  },
+  "src/stories/tables/NotebookTables.stories.svelte": {
+    "kind": "component",
+    "subject": "src/lib/render/table/NotebookCanvasTable.svelte#default"
+  },
+  "src/stories/tables/NotebookInputTables.stories.svelte": {
+    "kind": "integration",
+    "requirement": "LN-NB-055",
+    "reason": "Exercises the actual lazy Inputs.table runtime, typed host .value, event protocol and retained Svelte control rather than a replacement fixture."
   }
 }
