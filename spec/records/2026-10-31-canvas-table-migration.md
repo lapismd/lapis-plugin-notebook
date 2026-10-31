@@ -192,3 +192,36 @@ temporary review intake, not a release or completed packed-consumer qualificatio
 
 Keep the shared and Notebook reviews running. Resume remaining migration checks
 from the records; full qualification and publication are still gated by UI approval.
+
+## Combined shared gutter/detail feedback intake (31 October)
+
+The Design Core gutter fix (`7f67b926`) and compact, horizontally sticky,
+sans-serif detail fix (`7c01ec09`) were accepted into a fresh isolated review
+worker without changing Notebook runtime source, tracked manifests or lockfiles.
+The intermediate gutter archive was prepared but not installed while further UI
+feedback was being incorporated. Final Design Core 0.8.0 archive SHA256:
+`ea3afda3a06d35e527e71ab3382f0040ca45de4cf2f746e798d2480f9816fcff`.
+
+Owned worker: `lapis-notebook-run-45b70569-4d11-4711-985c-015e81f55fdb`;
+source snapshot `31e34541`; installed graph and provenance remain in its review
+receipt. Review is running on loopback 10529; shared review remains on 10429,
+and the original 10329 listener was preserved.
+
+- `pnpm validation -- review-stop`, then
+  `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm storybook:review`:
+  owned fresh Docker review started, verifying archive identity/checksum.
+- `pnpm view @lapismd/spec-validator version`: latest 0.2.0, already installed.
+  `pnpm exec spec-validator doctor`: 10 passed, 1 alias warning, 0 failures.
+  `pnpm spec:search "expanded"`: QMD returned the canonical Notebook requirements;
+  the native ABI loads under Node 24, so no fallback was needed.
+- `docker --context omarchy exec -e LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native -e LAPIS_NOTEBOOK_VALIDATION_WORKER=1 -w /work/lapis-plugin-notebook lapis-notebook-run-45b70569-4d11-4711-985c-015e81f55fdb pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte src/stories/tables/NotebookInputTables.stories.svelte src/stories/PluginWorkspace.stories.svelte -t 'ResultsAndStructuredFilters|RichCellsAndExpandedRows|LargeTypedResults|InspectorSample|IndependentTables|TypedMultipleSelection|OptionalSingleSelection|RequiredSingleSelection|DisabledSelection|TableFilters'`:
+  11 passed, 0 failed; 27 unrelated shell stories skipped. Includes all table and
+  input scenarios plus desktop/mobile WorkspaceShell filters, with interaction,
+  accessibility and fatal runtime/teardown checks retained.
+- Same Docker exec prefix + `pnpm spec:check`: 3 specification lanes passed,
+  routing 25/0 findings, parity 6/0 findings, ownership 1 passed.
+
+This is focused archive acceptance for UI review. UI-approved and fully-qualified
+states remain pending; the recorded filter-trigger type gate and original
+migration's remaining checks are not waived. No full suites, screenshot comparison,
+baseline updates, publication, push, merge or workspace cleanup were performed.
