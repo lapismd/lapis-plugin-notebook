@@ -21,21 +21,7 @@
   import { NOTEBOOK_FIXTURE_PATHS } from "./notebook-fixtures";
   import { PluginWorkspaceExample } from "./PluginWorkspace.example-sources";
 
-  const workspaceA11y = {
-    test: "error",
-    // Mira's numbered code-block highlight palette fails color-contrast
-    // upstream (flagged to the Mira owner and recorded); exclude that
-    // upstream chrome while everything else in the shell stays scanned.
-    context: { exclude: [".mira-code-block"] },
-    config: {
-      rules: [
-        // Full-shell rows intentionally compose nested workspace controls.
-        { id: "nested-interactive", enabled: false },
-        // CodeMirror owns its aria-hidden gutter focus behavior upstream.
-        { id: "aria-hidden-focus", enabled: false },
-      ],
-    },
-  } as const;
+  import { workspaceA11y } from "./workspace-a11y";
 
   const { Story } = defineMeta({
     title: "Plugins/Notebook/Shell",

@@ -282,3 +282,7 @@ authoritative. Row selection changes emit one bubbling input; filter/sort, repea
 unchanged selection and interactive cell actions emit none.
 
 On a new resultIdentity generation the adapter MUST recreate only its shared grid to reset local row focus/anchors; same-generation updates, sorting, filtering and Input value replacement MUST retain the existing grid. Focus MUST return to the owning Filters trigger before a focused grid is removed. Shell assertions MUST exercise the shared grid semantics, borders and scrolling rather than removed private DOM-table selectors.
+
+Registry distribution is governed by LPN-SPEC-023. Root `registry.json` owns immutable source media references. The registry receiver opens a one-file submission PR; maintainers merge it into the queue and review the combined publication PR. Installable archives externalize only declared public host modules and bundle other dependencies. Existing npm releases without source metadata are not retrofitted; the next patch release onboards this plugin.
+
+The prepared registry-onboarding patch is `0.2.1`; package and runtime manifest versions remain synchronized. Its publication still requires explicit release approval.

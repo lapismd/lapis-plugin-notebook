@@ -36,6 +36,10 @@ CommonJS modules receive Vite interop before the System Guide executes. This
 catalog setup preserves lazy runtime imports and registry-only lock resolution;
 it does not add a new runtime library or change a published host contract.
 
+| ID | Requirement |
+| --- | --- |
+| LPN-SPEC-023 | registry distribution MUST prepare deterministic ESM installable archives from the exact admitted stable release commit, retain the source runtime ID, and sign only inside the protected `registry-production` environment with the app's pinned Ed25519 release key. It MUST verify the actual published archive, checksum, coordinates and resolved tag before dispatching `plugin_release`; retained assets MUST supply their original signed source commit. Publishing MUST preserve immutable versions and every existing npm approval/provenance gate. A manual dry run MUST prepare and verify without signing, upload or dispatch. Workflow code MUST come from current main, and tagged source MUST be merged into main with successful aggregate CI. registry source metadata MUST live at the repository root and declare fixed real WorkspaceShell stories under `Plugins/Notebook/Registry Screenshots`. Captures MUST preserve declared order, alt text and public App ownership, use 1200x800 at 2x in light/dark, and generate preview/full/light/dark cards using the pinned shared compositor and bundled Inter. Capture MUST NOT create or approve Visual Delta baselines. Vendored distribution modules MUST remain byte-identical to their recorded upstream commit and SHA-256; generic fixes belong upstream first. Signing/publication are reviewed native CI exceptions so private keys never enter Docker or source builds. |
+
 ## Requirements
 
 The complete input catalog consumes registry `mrmime@^2.0.1` in the private
@@ -174,3 +178,12 @@ archive input MUST use registry packages. When input is explicitly supplied, a
 missing or malformed inventory, invalid path, identity mismatch or checksum
 mismatch MUST remain fatal; absence of a requested inventory is not a registry
 fallback. Tracked manifests and locks remain unchanged in both modes.
+
+Registry onboarding updates Storybook to 10.6.5, Vitest to 4.1.12, Vite to 6.4.5,
+Sharp to 0.35.5, and transitive KaTeX to >=0.18.2 to repair the executed audit.
+On 1 November 2026 the user approved the same narrow Tasks exception for
+`deepmerge@4.3.1` / GHSA-gcqx-w48m-w2h4, which has no patched release and is
+consumed by the development Vite Svelte plugin. Its inputs are repository-owned
+configuration rather than untrusted application data. Remove the exception when
+a patched upstream version exists; every other full/production audit finding
+remains fatal. No runtime or browser diagnostic is suppressed.

@@ -23,5 +23,9 @@
   "build:bundle": "node scripts/build-plugin-bundle.mjs && node scripts/check-bundle-exclusions.mjs",
   "storybook:review": "node scripts/validation/review-server.mjs",
   "test:canvas-tables": "vitest run --project unit src/lib/render/table packages/input/src/__tests__/table-model.test.ts scripts/validation/review.test.mjs scripts/validation.test.mjs src/lib/application-ownership.test.ts --maxWorkers=1 --no-file-parallelism",
-  "check:canvas-table-types": "svelte-check --tsconfig ./tsconfig.canvas-review.json --fail-on-warnings"
+  "check:canvas-table-types": "svelte-check --tsconfig ./tsconfig.canvas-review.json --fail-on-warnings",
+  "registry:prepare": "pnpm build:bundle && node scripts/registry-release.mjs prepare",
+  "registry:media:capture": "node scripts/registry-media.mjs",
+  "registry:media:check": "node scripts/registry-media.mjs --check",
+  "registry:check": "vitest run --project unit scripts/registry-*.test.mjs --maxWorkers=1 --no-file-parallelism"
 }

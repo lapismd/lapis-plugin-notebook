@@ -11,6 +11,9 @@ export const aggregateLanes = Object.freeze([
   "build-storybook",
   "test:storybook",
   "spec:check",
+  "registry:check",
+  "registry:media:check",
+  "registry:prepare",
 ]);
 
 /** The outer Docker runner owns the one snapshot, lease and installation. */

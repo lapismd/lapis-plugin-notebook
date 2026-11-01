@@ -1,0 +1,15 @@
+{
+  "repository": "https://github.com/lapismd/lapis-plugins",
+  "commit": "5c3c7e4c5fb6ee6ebbad6e12c55f3e23f1c0749e",
+  "sha256": {
+    "scripts/plugin-release.mjs": "4bfe2dee1ae41e25b65de14f2c13d6be79ab5f44e272e01de37a218573671e13",
+    "scripts/plugin-release-file-graph.mjs": "e3314ea9f110b7b283890ea2bd67c16892fb2184a4bfc72782a734cfcff66e6c",
+    "scripts/release-utils.mjs": "8b7aee901bb4fe14e4162add2f666f57500f9c5e2036821f119f9e17c99c3432",
+    "scripts/lib/plugin-bundle.mjs": "383c3f256aad0d6049566e61572861dd133b41e587786e402b8b0c17fdac7802",
+    "scripts/lib/verify-plugin-release.mjs": "3d00ee9f5fcebcf876dff2cb293c879775f084666f1d8e5ad724ddb61011dd02",
+    "scripts/lib/published-static-release.mjs": "7d2c8aa660503dacec28d5cdf7fdb41f4315868d589b85a3fe8d4601c0bc99ae",
+    "scripts/lib/static-release-trust.mjs": "f31b7f51043e8930c184c6ed6d479e1b1997041cab4de73def7a8f75de9ad49a",
+    "scripts/registry-media-compositor.mjs": "adb5e891846522f8cc916bd2a774e3ee922f2712cf7c50dceaf22d4452dff5b9",
+    "LICENSE.md": "29e4009c5bc38208055dcc65a9a2bc7a2af8b8c4b4bf141b6598139980b2b371"
+  }
+}
