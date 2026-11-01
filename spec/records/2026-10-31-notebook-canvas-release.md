@@ -188,3 +188,20 @@ passed strict checking/build/publint, 154 units, package metadata/boundaries,
 App/native CSS/story parity and audit (only its unchanged two ignored lows).
 Specifications and formatting passed; refreshed PR #49 goes through full CI
 before merge. No CSV or other plugin runtime file changed.
+
+### Plugins strict compatibility regression repaired
+
+CI `41263868277` failed quality with one History settings-page type error;
+all other applicable lanes passed. History still declared Core 0.7.4 while
+the refreshed API used 0.9, producing incompatible nominal controller types.
+Exact Docker `pnpm check -- --filter=@lapis-notes/history` reproduced 1 error,
+then passed 0 errors/0 warnings after a portable History dependency-range repair.
+The owning build/check/test lane passed 23 Vitest + 96 repository tests = 119,
+0 failures. Specifications, audit and formatting passed. History runtime source,
+native services, CSV and other plugin behavior remain unchanged.
+
+The repair has an independent History patch Changeset; its publication remains
+separate from the selected Markdown release. Updated PR #49 describes the final
+scope and is pushed at `bb3a6a4526a7eb5826b2b8763d18c61142248ea5`; full CI
+`41265025659` must pass before merge. Retain the original failure receipt and
+the exact before/after Docker receipts in the Plugins compatibility record.
