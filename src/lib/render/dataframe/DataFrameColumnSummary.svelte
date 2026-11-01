@@ -5,9 +5,9 @@
   const CONCAT_CHART_WIDTH = 70;
   const CONCAT_NULL_BAR_WIDTH = 5;
   const MAX_BAR_HEIGHT = 20;
-  const BAR_COLOR = "var(--color-green)";
-  const NULL_BAR_COLOR = "var(--color-orange)";
-  const MUTED_TEXT_COLOR = "var(--text-muted)";
+  const BAR_COLOR = "var(--chart-1, var(--primary))";
+  const NULL_BAR_COLOR = "var(--chart-2, var(--primary))";
+  const MUTED_TEXT_COLOR = "var(--muted-foreground)";
   const UNHOVERED_BAR_OPACITY = 0.6;
   const BOOLEAN_BAR_HEIGHT = 11;
 
@@ -196,7 +196,9 @@
         {/if}
       </div>
     {:else if summary.type === "string"}
-      <div class="notebook-dataframe__summary-range notebook-dataframe__summary-range--start">
+      <div
+        class="notebook-dataframe__summary-range notebook-dataframe__summary-range--start"
+      >
         <span>unique: {formatCount(summary.distinctCount)}</span>
       </div>
     {:else if summary.type === "boolean" && previewBars.length}
@@ -215,14 +217,13 @@
             >
               <div
                 class="notebook-dataframe__summary-boolean-fill"
-                style={`width: ${segmentWidth(bucket.count)}%; background-color: ${bucket.isNull ? NULL_BAR_COLOR : BAR_COLOR}; color: ${MUTED_TEXT_COLOR}; min-width: ${bucket.count > 0 ? 18 : 0}px; opacity: ${UNHOVERED_BAR_OPACITY};`}
+                style={`width: ${segmentWidth(bucket.count)}%; background-color: ${bucket.isNull ? NULL_BAR_COLOR : BAR_COLOR}; opacity: ${UNHOVERED_BAR_OPACITY};`}
                 title={`${bucket.label}: ${formatCount(bucket.count)}`}
-              >
-                {#if segmentWidth(bucket.count) >= 20}
-                  {formatCount(bucket.count)}
-                {/if}
-              </div>
+              ></div>
             </div>
+            <span class="notebook-dataframe__summary-boolean-count"
+              >{formatCount(bucket.count)}</span
+            >
           </div>
         {/each}
       </div>
@@ -248,9 +249,7 @@
     {/if}
   </div>
 {:else}
-  <div
-    class="notebook-dataframe__column-summary"
-  >
+  <div class="notebook-dataframe__column-summary">
     <div class="notebook-dataframe__summary-heading">
       <div class="notebook-dataframe__summary-label">{summary.label}</div>
       <div class="notebook-dataframe__summary-kind">
@@ -328,23 +327,25 @@
         </div>
       </dl>
     {:else if summary.type === "date"}
-      <dl class="notebook-dataframe__summary-grid notebook-dataframe__summary-grid--single">
+      <dl
+        class="notebook-dataframe__summary-grid notebook-dataframe__summary-grid--single"
+      >
         <div>
           <dt class="notebook-dataframe__summary-term">Min date</dt>
-          <dd class="notebook-dataframe__summary-value">{formatDate(summary.min)}</dd>
+          <dd class="notebook-dataframe__summary-value">
+            {formatDate(summary.min)}
+          </dd>
         </div>
         <div>
           <dt class="notebook-dataframe__summary-term">Max date</dt>
-          <dd class="notebook-dataframe__summary-value">{formatDate(summary.max)}</dd>
+          <dd class="notebook-dataframe__summary-value">
+            {formatDate(summary.max)}
+          </dd>
         </div>
       </dl>
     {:else if summary.type === "string"}
       <div class="notebook-dataframe__summary-section">
-        <div
-          class="notebook-dataframe__summary-section-title"
-        >
-          Top values
-        </div>
+        <div class="notebook-dataframe__summary-section-title">Top values</div>
         <ul class="notebook-dataframe__summary-top-list">
           {#each summary.topValues as item}
             <li class="notebook-dataframe__summary-top-row">
@@ -363,14 +364,10 @@
 
     {#if previewBars.length}
       <div class="notebook-dataframe__summary-section">
-        <div
-          class="notebook-dataframe__summary-section-title"
-        >
+        <div class="notebook-dataframe__summary-section-title">
           Distribution
         </div>
-        <div
-          class="notebook-dataframe__distribution"
-        >
+        <div class="notebook-dataframe__distribution">
           {#each previewBars as bucket}
             <div
               class="notebook-dataframe__distribution-bar"

@@ -1,10 +1,11 @@
 <script lang="ts">
+  import PreviewTable from "../render/table/NotebookPreviewTable.svelte";
   import NotebookIcon from "../render/notebook-icon.svelte";
   import ChevronDown from "@lucide/svelte/icons/chevron-down";
   import Database from "@lucide/svelte/icons/database";
   import FunctionSquare from "@lucide/svelte/icons/function-square";
   import Search from "@lucide/svelte/icons/search";
-  import type { MetadataType } from "@lapis-notes/api";
+  import type { App, MetadataType } from "@lapis-notes/api";
   import type {
     NotebookInspectorSchema,
     NotebookInspectorSnapshot,
@@ -14,11 +15,13 @@
   } from "./notebook-inspector-data";
 
   let {
+    app = undefined,
     snapshot = null,
     loading = false,
     onNavigateToCell = undefined,
     onLoadTablePreview = undefined,
   }: {
+    app?: App;
     snapshot?: NotebookInspectorSnapshot | null;
     loading?: boolean;
     onNavigateToCell?: ((cellId: string) => void | Promise<void>) | undefined;
@@ -177,16 +180,6 @@
   }
 
   function metadataTypeIconName(type: MetadataType): string {
-    const app = (
-      globalThis as {
-        app?: {
-          metadataTypeManager?: {
-            registeredTypeWidgets?: Record<string, { icon?: string }>;
-          };
-        };
-      }
-    ).app;
-
     return (
       app?.metadataTypeManager?.registeredTypeWidgets?.[type]?.icon ??
       "lucide-file"
@@ -215,24 +208,20 @@
     </div>
   {:else}
     <div class="notebook-inspector__gcda219e0">
-      <section class="notebook-inspector__section notebook-inspector__g50b7a829">
+      <section
+        class="notebook-inspector__section notebook-inspector__g50b7a829"
+      >
         <details open>
-          <summary
-            class="notebook-inspector__gd430d0d4"
-          >
+          <summary class="notebook-inspector__gd430d0d4">
             <span class="notebook-inspector__g557bb361">
               <Database class="notebook-inspector__g93809e27" />
               Data Sources
             </span>
-            <span class="notebook-inspector__g455c6595"
-              >{dataSourceCount}</span
-            >
+            <span class="notebook-inspector__g455c6595">{dataSourceCount}</span>
           </summary>
 
           <div class="notebook-inspector__gd827a466">
-            <label
-              class="notebook-inspector__ge27ba36c"
-            >
+            <label class="notebook-inspector__ge27ba36c">
               <Search class="notebook-inspector__g1a559052" />
               <input
                 bind:value={dataSourceSearch}
@@ -242,9 +231,7 @@
             </label>
 
             {#if filteredSchemas.length === 0}
-              <div
-                class="notebook-inspector__gba40a405"
-              >
+              <div class="notebook-inspector__gba40a405">
                 {#if snapshot?.usesDuckDb}
                   Run a DuckDB-backed cell to populate live tables and schemas.
                 {:else}
@@ -254,14 +241,11 @@
             {:else}
               <div class="notebook-inspector__g6f7e013d">
                 {#each filteredSchemas as schema}
-                  <details
-                    open
-                    class="notebook-inspector__g77f19bae"
-                  >
-                    <summary
-                      class="notebook-inspector__g0e24483d"
-                    >
-                      <span class="notebook-inspector__gacadca05">{schema.name}</span>
+                  <details open class="notebook-inspector__g77f19bae">
+                    <summary class="notebook-inspector__g0e24483d">
+                      <span class="notebook-inspector__gacadca05"
+                        >{schema.name}</span
+                      >
                       <span class="notebook-inspector__g455c6595"
                         >{schema.tables.length} tables</span
                       >
@@ -271,14 +255,14 @@
                         <details
                           class="inspector-table-row notebook-inspector__g22dc590a"
                         >
-                          <summary
-                            class="notebook-inspector__g30127975"
-                          >
+                          <summary class="notebook-inspector__g30127975">
                             <div class="notebook-inspector__gc7ffdf05">
                               <span
                                 class="table-row-toggle notebook-inspector__g41a8ac32"
                               >
-                                <ChevronDown class="notebook-inspector__g783b0d9d" />
+                                <ChevronDown
+                                  class="notebook-inspector__g783b0d9d"
+                                />
                               </span>
                               <span class="notebook-inspector__g39a618a7">
                                 <NotebookIcon
@@ -290,21 +274,15 @@
                                 {table.name}
                               </div>
                             </div>
-                            <span
-                              class="notebook-inspector__gfef55325"
-                            >
+                            <span class="notebook-inspector__gfef55325">
                               {table.columns.length} columns · {formatRowCount(
                                 table.rowCount,
                               )}
                             </span>
                           </summary>
-                          <div
-                            class="notebook-inspector__ge15e93f6"
-                          >
+                          <div class="notebook-inspector__ge15e93f6">
                             <div class="notebook-inspector__g1fe9d0e9">
-                              <span
-                                class="notebook-inspector__gcfae30a0"
-                              >
+                              <span class="notebook-inspector__gcfae30a0">
                                 {formatRowCount(table.rowCount)}
                               </span>
                               <button
@@ -319,9 +297,7 @@
                             </div>
 
                             {#if previewVisibility[tableKey(table)]}
-                              <div
-                                class="notebook-inspector__gd138d1da"
-                              >
+                              <div class="notebook-inspector__gd138d1da">
                                 {#if previewLoading[tableKey(table)]}
                                   <div class="notebook-inspector__g455c6595">
                                     Loading preview...
@@ -336,34 +312,9 @@
                                   </div>
                                 {:else if tablePreviews[tableKey(table)]}
                                   <div class="notebook-inspector__gdbc4b4af">
-                                    <table
-                                      class="notebook-inspector__g85df5054"
-                                    >
-                                      <thead>
-                                        <tr>
-                                          {#each tablePreviews[tableKey(table)]?.columns ?? [] as columnName}
-                                            <th
-                                              class="notebook-inspector__gec9b93f0"
-                                              >{columnName}</th
-                                            >
-                                          {/each}
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {#each tablePreviews[tableKey(table)]?.rows ?? [] as row}
-                                          <tr>
-                                            {#each row as value}
-                                              <td
-                                                class="notebook-inspector__ge2ba2d4f"
-                                                >{value === null
-                                                  ? "null"
-                                                  : String(value)}</td
-                                              >
-                                            {/each}
-                                          </tr>
-                                        {/each}
-                                      </tbody>
-                                    </table>
+                                    <PreviewTable
+                                      preview={tablePreviews[tableKey(table)]!}
+                                    />
                                     {#if tablePreviews[tableKey(table)]?.truncated}
                                       <div
                                         class="notebook-inspector__g4ef2daec"
@@ -377,21 +328,16 @@
                             {/if}
 
                             <div class="notebook-inspector__g73fc3fb1">
-                              <table
-                                class="notebook-inspector__gb856e76c"
-                              >
+                              <table class="notebook-inspector__gb856e76c">
                                 <thead>
                                   <tr>
-                                    <th
-                                      class="notebook-inspector__g65721338"
+                                    <th class="notebook-inspector__g65721338"
                                       >Column</th
                                     >
-                                    <th
-                                      class="notebook-inspector__g65721338"
+                                    <th class="notebook-inspector__g65721338"
                                       >Type</th
                                     >
-                                    <th
-                                      class="notebook-inspector__gcc2fb45b"
+                                    <th class="notebook-inspector__gcc2fb45b"
                                       >Null</th
                                     >
                                   </tr>
@@ -399,9 +345,7 @@
                                 <tbody>
                                   {#each table.columns as column}
                                     <tr>
-                                      <td
-                                        class="notebook-inspector__g0411ba99"
-                                      >
+                                      <td class="notebook-inspector__g0411ba99">
                                         <div
                                           class="notebook-inspector__g8e84a8ec"
                                         >
@@ -418,12 +362,10 @@
                                           <span>{column.name}</span>
                                         </div>
                                       </td>
-                                      <td
-                                        class="notebook-inspector__g4c8db350"
+                                      <td class="notebook-inspector__g4c8db350"
                                         >{column.dataType}</td
                                       >
-                                      <td
-                                        class="notebook-inspector__g7cdd39dc"
+                                      <td class="notebook-inspector__g7cdd39dc"
                                         >{column.nullable ? "yes" : "no"}</td
                                       >
                                     </tr>
@@ -445,9 +387,7 @@
 
       <section class="notebook-inspector__g0e9cd2e4">
         <details open>
-          <summary
-            class="notebook-inspector__gd430d0d4"
-          >
+          <summary class="notebook-inspector__gd430d0d4">
             <span class="notebook-inspector__g557bb361">
               <FunctionSquare class="notebook-inspector__g93809e27" />
               Variables
@@ -458,9 +398,7 @@
           </summary>
 
           <div class="notebook-inspector__gd827a466">
-            <label
-              class="notebook-inspector__ge27ba36c"
-            >
+            <label class="notebook-inspector__ge27ba36c">
               <Search class="notebook-inspector__g1a559052" />
               <input
                 bind:value={variableSearch}
@@ -470,38 +408,23 @@
             </label>
 
             {#if filteredVariables.length === 0}
-              <div
-                class="notebook-inspector__gba40a405"
-              >
+              <div class="notebook-inspector__gba40a405">
                 No notebook variables were found in this note.
               </div>
             {:else}
-              <div
-                class="notebook-inspector__gcbdc8e1b"
-              >
+              <div class="notebook-inspector__gcbdc8e1b">
                 <table class="notebook-inspector__gb856e76c">
                   <thead>
                     <tr>
-                      <th
-                        class="notebook-inspector__g90db77c2"
-                        >Name</th
-                      >
-                      <th
-                        class="notebook-inspector__g90db77c2"
-                        >Declared By</th
-                      >
-                      <th
-                        class="notebook-inspector__g90db77c2"
-                        >Used By</th
-                      >
+                      <th class="notebook-inspector__g90db77c2">Name</th>
+                      <th class="notebook-inspector__g90db77c2">Declared By</th>
+                      <th class="notebook-inspector__g90db77c2">Used By</th>
                     </tr>
                   </thead>
                   <tbody>
                     {#each filteredVariables as variable}
                       <tr class:duplicate-row={variable.duplicate}>
-                        <td
-                          class="notebook-inspector__gc8683f9f"
-                        >
+                        <td class="notebook-inspector__gc8683f9f">
                           <div class="notebook-inspector__ge3039363">
                             {variable.name}
                           </div>
@@ -511,9 +434,7 @@
                             </div>
                           {/if}
                         </td>
-                        <td
-                          class="notebook-inspector__gc8683f9f"
-                        >
+                        <td class="notebook-inspector__gc8683f9f">
                           <div class="notebook-inspector__g52aaeda0">
                             {#each variable.declaredBy as cellId}
                               <button
@@ -526,9 +447,7 @@
                             {/each}
                           </div>
                         </td>
-                        <td
-                          class="notebook-inspector__gc8683f9f"
-                        >
+                        <td class="notebook-inspector__gc8683f9f">
                           {#if variable.usedBy.length === 0}
                             <span class="notebook-inspector__g455c6595"
                               >unused</span

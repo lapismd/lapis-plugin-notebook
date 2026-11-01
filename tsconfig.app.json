@@ -63,6 +63,7 @@
     "src/**/*.ts",
     "src/**/*.js",
     "src/**/*.svelte",
+    "packages/*/src/**/*.svelte",
     "packages/*/src/**/*.d.ts",
     "packages/*/src/**/*.ts"
   ],

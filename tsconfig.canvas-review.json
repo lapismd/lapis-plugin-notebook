@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "exactOptionalPropertyTypes": false
+  },
+  "include": [
+    "src/lib/render/table/**/*.svelte",
+    "src/lib/render/dataframe/DataFrameViewer.svelte",
+    "src/lib/inspector/notebook-inspector-panel.svelte",
+    "packages/input/src/ui-runtime.ts",
+    "src/stories/tables/**/*.svelte"
+  ]
+}

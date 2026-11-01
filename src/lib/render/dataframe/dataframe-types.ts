@@ -1,3 +1,4 @@
+import type { StructuredFilterState } from "@lapismd/design-core/shadcn/filter-builder";
 export type DataFrameValue = unknown;
 
 export type DataFrameRow = Record<string, DataFrameValue>;
@@ -90,10 +91,12 @@ export type DataFrameOptions = {
 export type DataFrameProps = {
   schema: DataFrameSchema;
   rows: DataFrameRow[];
+  /** Transient source generation; defaults to the rows array identity. */
+  resultIdentity?: unknown;
   title?: string;
   options?: DataFrameOptions;
   onSort?: (sorts: SortState[]) => void;
-  onFilter?: (filters: FilterState[]) => void;
+  onFilter?: (filters: StructuredFilterState) => void;
   onExport?: (format: "csv" | "json" | "parquet") => void;
   onColumnClick?: (column: Column) => void;
   pageSize?: number;

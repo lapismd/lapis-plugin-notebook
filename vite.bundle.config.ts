@@ -1,3 +1,5 @@
+import { createRequire } from "node:module";
+import { rendererHostModulePlugin } from "@lapis-notes/api/build/vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { defineConfig } from "vite";
 import type { Plugin } from "vite";
@@ -11,8 +13,13 @@ import { notebookPackagesPlugin } from "./scripts/vite-notebook-packages";
 // lazily loaded TypeScript compiler, DuckDB-WASM, vega-embed, d3, Plot, htl,
 // date-fns, TanStack, lucide, and the CodeMirror language packs the host does
 // not ship — is inlined per LN-NB-006.
+const renderer = () =>
+  rendererHostModulePlugin({
+    mode: "plugin",
+    svelteVersion: createRequire(import.meta.url)("svelte/package.json")
+      .version,
+  });
 const external = [
-  /^svelte(?:$|\/)/,
   /^@lapis-notes\/api(?:$|\/)/,
   /^@lapis-notes\/markdown(?:$|\/)/,
   /^@lapis-notes\/ui(?:$|\/)/,
@@ -51,7 +58,12 @@ function auditSharedImports(): Plugin {
 export default defineConfig({
   base: "./",
   define: { "process.env.NODE_ENV": JSON.stringify("production") },
-  plugins: [notebookPackagesPlugin(), svelte(), auditSharedImports()],
+  plugins: [
+    notebookPackagesPlugin(),
+    renderer(),
+    svelte(),
+    auditSharedImports(),
+  ],
   build: {
     target: "esnext",
     outDir: "dist",
@@ -70,13 +82,14 @@ export default defineConfig({
     format: "es",
     plugins: () => [
       notebookPackagesPlugin(),
+      renderer(),
       svelte({ emitCss: false }),
       auditSharedImports(),
     ],
     rollupOptions: {
       // Local controls compile into lazy chunks; the DOM-less worker never
       // executes them. Host-shared Svelte and Design Core stay external.
-      external: [/^@lapismd\/design-core(?:$|\/)/, /^svelte(?:$|\/)/],
+      external: [/^@lapismd\/design-core(?:$|\/)/],
     },
   },
 });

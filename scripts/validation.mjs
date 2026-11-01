@@ -56,6 +56,10 @@ export async function main(argv = process.argv.slice(2)) {
       () => remoteRun(config, root, lane, rest),
     );
   }
+  if (command === "review-stop") {
+    const { stopReview } = await import("./validation/review-stop.mjs");
+    return stopReview(config, root);
+  }
   if (command === "images")
     return console.log(
       await image(config, root, undefined, args.includes("--rebuild")),

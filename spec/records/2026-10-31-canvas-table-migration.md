@@ -1,0 +1,420 @@
+# Notebook canvas-table migration progress
+
+## Delivery state
+
+- Specified: complete contract written before runtime changes.
+- Implemented: result/input/preview UI candidate and subsequent feedback slices;
+  host compatibility and final migration cleanup remain in progress.
+- Focused-tested: review stories and feedback regressions as recorded below;
+  remaining migration gates stay open; the filter-trigger type issue is now fixed.
+- UI-approved: approved by the user on 31 October 2026.
+- Fully-qualified: in progress; full lanes authorized after UI approval.
+
+## Source and ownership
+
+Isolated workspaces: design-core-notebook-tables, lapis-plugin-notebook-canvas-tables,
+lapis-notes-notebook-canvas-host and lapis-plugins-notebook-canvas-compat.
+Bases: Design Core f16631c7; Notebook 04c858d7; Notes 6ffa9caf; Plugins be302f37.
+Existing workspaces and Storybook 10329 are preserved. No push/merge/publication.
+
+## Implementation slices
+
+1. Specification and exact-command evidence, committed before runtime.
+2. Generic column snippets, measured details, density/chrome and selection scope;
+   custom operator validation; focused shared regression checks.
+3. Notebook typed adapter/evaluator, result/dataframe/input/preview integration,
+   focused stories, public types and lifecycle checks.
+4. Host explicit module exposure and minimal package compatibility preparation.
+5. Docker review server with verified archived dependencies; integrated UI review.
+6. Only after approval: full shared/host/package qualification, authorized releases,
+   registry refresh and final Notebook Docker validation:all and packed host intake.
+
+## Verification matrix
+
+| Boundary           | Before UI approval                                                       | After UI approval                                 |
+| ------------------ | ------------------------------------------------------------------------ | ------------------------------------------------- |
+| Geometry/selection | Exact units, scrolled/resized overlays, scoped select-all                | Full Design Core checks                           |
+| Rich content       | Headers, histograms, custom cells, measured details, a11y                | Full interaction/accessibility and static catalog |
+| Typed filters      | Null/blank, regex/errors, range, dates, precise numbers, nested groups   | Full units and package consumers                  |
+| Inputs             | Values/defaults/required/disabled, no sort/filter input, repeated embeds | Full Notebook validation:all                      |
+| Lifecycle          | Fresh Docker browser, focus, portal, teardown, large bounded dataset     | Cold packed plugin in supported hosts             |
+| Public contracts   | Strict focused types, exports, size/native-CSS audits                    | Packed-consumer and release checks                |
+| Governance         | spec:first/spec:check, formatter, doctor/search                          | Complete evidence and release disposition         |
+
+## Commands and observations
+
+- `jj git fetch --remote codex-https --branch main`: four owners succeeded.
+- `pnpm view @lapismd/spec-validator version --json`: latest Deno-free 0.2.0.
+- Initial searches under unintended Node 26 ABI 147: QMD native mismatch;
+  supported fallback is rg. Repeat doctor/search under explicit Node 24 PATH.
+- Notebook `pnpm install --frozen-lockfile`: one configuration failure because
+  the local hook checksum was active. `pnpm install --frozen-lockfile --ignore-pnpmfile`
+  succeeds with registry resolution; no tracked lock mutation.
+- Initial specification-stage runtime counts were pending; executed feedback
+  evidence follows below, without screenshot comparisons or baseline updates.
+
+## Resume
+
+Read the owning canonical requirements and this record, inspect each workspace
+with jj st, run focused exact targets and append their failure counts. Archive
+provenance and actual installed lock belong to the Docker receipt. Do not run
+broad suites, static catalog or publication until the user approves both UIs.
+After approval run Design Core spec:first/spec:check/checks and packed acceptance;
+complete affected host/package lanes; obtain release authorization; consume
+published registry versions; run Notebook validation:all and real plugin loading.
+
+Baseline `pnpm test -- src/lib/render/dataframe/__tests__/filter.test.ts packages/input/src/__tests__/dom-runtime.test.ts`: 12 passed, 0 failed in Docker. Initial spec:check had 8 authoring findings (6 verification rows, duplicate governance ID); exact rerun passed after correction. Node 24 doctor/search pass; full lanes remain deferred.
+
+## UI feedback: Lucide row disclosure (31 October)
+
+This follow-up is implemented and focused-tested; UI approval and full qualification
+remain pending. The broader migration is still in progress. Replace text triangles
+with decorative Lucide ChevronRight/ChevronDown, retain native button interaction,
+and expose matching Expand/Collapse labels and aria-expanded states. The rich-row
+story now checks both icons, visible details, pointer expansion and Enter collapse.
+No screenshot comparison or baseline update was performed.
+
+The follow-up is isolated above the preserved migration change `tulslpqn`.
+Fresh review snapshot: `da04b313`, worker
+`lapis-notebook-run-d9e6d053-fdfb-4e64-b2a2-a601efffebb0`, loopback port 10529.
+Design Core review on 10429 and original Storybook on 10329 were not restarted.
+The Design Core archive SHA256 remains
+`bc8f04bd129a0cf4dbb2d392d7cecfa2175b8a86bfa40239858fc89442c58bb4`.
+
+Exact commands and results (Node 24 PATH for local tools):
+
+- `pnpm view @lapismd/spec-validator version`: 0.2.0, already installed.
+- `pnpm exec spec-validator doctor`: 10 passed, 1 alias warning, 0 failures.
+- `pnpm spec:search -- "expanded rows"`: argument parsing failed once; corrected
+  to `pnpm spec:search "expanded"`, which returned canonical QMD results.
+- Baseline worker: `docker --context omarchy exec -e LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native -e LAPIS_NOTEBOOK_VALIDATION_WORKER=1 -w /work/lapis-plugin-notebook lapis-notebook-run-6cf2c315-d1ee-40d5-b348-81e1a8f9d9ce pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte`:
+  5 passed, 0 failures. Earlier spaced-name selector matched nothing (5 skipped),
+  so that invocation is not counted as verification.
+- `pnpm validation -- review-stop`, then
+  `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm storybook:review`:
+  owned fresh Docker review started successfully.
+- Fresh worker: `docker --context omarchy exec -e LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native -e LAPIS_NOTEBOOK_VALIDATION_WORKER=1 -w /work/lapis-plugin-notebook lapis-notebook-run-d9e6d053-fdfb-4e64-b2a2-a601efffebb0 pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte`:
+  5 passed, 0 failures, including RichCellsAndExpandedRows interaction and a11y.
+- Same Docker exec prefix with `pnpm spec:check`: 3 specification lanes passed;
+  routing 25 lanes/0 findings, parity 6 families/0 findings, ownership 1 passed.
+- Same prefix with `pnpm check:canvas-table-types`: 1 error, 0 warnings, on
+  `TableFilters.svelte:27` (`aria-description` unsupported by Popover.Trigger).
+  That source is unchanged from pre-feedback `ba83f9e8`; the migration type gate
+  remains open. No type gate or assertion was weakened for this icon follow-up.
+- `/Users/stevejuma/code/lapismd/design-core-notebook-tables/node_modules/.bin/prettier --plugin /Users/stevejuma/code/lapismd/design-core-notebook-tables/node_modules/prettier-plugin-svelte/plugin.js --check src/lib/render/dataframe/DataFrameViewer.svelte src/stories/tables/NotebookTables.stories.svelte`:
+  both files passed. New story remains 84 physical lines (limit 300).
+
+Resume broader focused migration qualification and the outstanding filter-trigger
+type correction separately. Do not begin full suites, push, merge or publish from
+this review feedback. The running Docker review remains available for user review.
+
+## UI feedback: clipped column summaries (31 October)
+
+Implemented and focused-tested; UI approval and full qualification remain pending.
+The Notebook adapter reserved 112px for a title/type row plus a histogram and
+range, clipping the summary below the shared header. Notebook's chart component
+also referenced unavailable legacy colour tokens. This fix belongs to Notebook:
+use the existing public header-height contract at 144px (64 without summaries),
+prevent flex shrinking, contain summary padding with border-box sizing, restore
+sans header typography, and use Design Core chart/muted tokens. No shared-package
+CSS override, package patch, screenshot comparison or baseline update was added.
+
+The new `table-header.story-play.ts` regression checks summary geometry and
+resolved nontransparent histogram/boolean bar paint through the actual viewer.
+Cold source snapshot `486f73a4` is available in the owned review worker
+`lapis-notebook-run-e08a3745-2d0a-4186-908f-eef5a68caf26` on loopback port 10529.
+The Design Core archive checksum is unchanged from the preceding feedback slice.
+
+Commands and failure counts:
+
+- `pnpm view @lapismd/spec-validator version`: latest 0.2.0, already installed.
+  `pnpm exec spec-validator doctor`: 10 passed, 1 script-alias warning, 0 failures.
+  `pnpm spec:search "column summaries"`: QMD returned LN-NB-050.
+- `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte -t RichCellsAndExpandedRows`:
+  baseline 1 failed, 4 skipped. The summary bottom was 280px against a maximum
+  header bottom of 269px (including the assertion's 1px rounding tolerance).
+  Receipt: `.local/validation/runs/lapis-notebook-run-2afe3f3a-d91d-4034-bc6c-05b09977a033`.
+- `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm storybook:review`:
+  restarted only the owned Notebook review after the fix, from a fresh snapshot.
+- Post-fix Docker prefix for the following commands:
+  `docker --context omarchy exec -e LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native -e LAPIS_NOTEBOOK_VALIDATION_WORKER=1 -w /work/lapis-plugin-notebook lapis-notebook-run-e08a3745-2d0a-4186-908f-eef5a68caf26`.
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte -t RichCellsAndExpandedRows`:
+  exact regression 1 passed, 0 failed, 4 skipped.
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte src/stories/PluginWorkspace.stories.svelte -t 'ResultsAndStructuredFilters|RichCellsAndExpandedRows|LargeTypedResults|InspectorSample|IndependentTables|TableFilters'`:
+  7 passed, 0 failed, 27 unrelated shell stories skipped. Includes both real
+  desktop/mobile TableFilters stories and all five table scenarios, with the
+  fatal runtime guard and existing accessibility checks retained.
+- Prefix + `pnpm test -- src/lib/render/table/table-files.test.ts`: 24 passed,
+  0 failed; the new helper is 34 physical lines.
+- Prefix + `pnpm spec:check`: 3 specification lanes passed, routing 25 lanes/0
+  findings, parity 6 families/0 findings, ownership 1 passed.
+- `/Users/stevejuma/code/lapismd/design-core-notebook-tables/node_modules/.bin/prettier --plugin /Users/stevejuma/code/lapismd/design-core-notebook-tables/node_modules/prettier-plugin-svelte/plugin.js --check src/stories/tables/table-header.story-play.ts src/stories/tables/NotebookTables.stories.svelte src/lib/render/dataframe/DataFrameViewer.svelte src/lib/render/dataframe/DataFrameColumnSummary.svelte`:
+  all four files passed.
+
+Full qualification remains deferred. The previously recorded filter-trigger type
+error and the broader migration's remaining focused gates are still outstanding.
+
+## UI feedback: toolbar count, boolean contrast and ScrollArea (31 October)
+
+Implemented and focused-tested; UI approval and full qualification remain pending.
+Remove the duplicate total from Toolbar while retaining optional query timing
+and pagination counts. Place boolean counts beside decorative, translucent bars
+at full opacity on the header surface. CanvasTable now uses Design Core's public
+ScrollArea viewport; Notebook adds no outer scroller or private shared CSS override.
+
+Review source `fd7f4e61`, owned worker
+`lapis-notebook-run-f606e779-3a8d-44a4-a256-f30a5630abf2`, loopback port 10529.
+Updated Design Core 0.8.0 review archive SHA256:
+`a54f27c6f604910e9a003638f409b286733576bc23dd5823754fc0bc6359d354`.
+Tracked dependency manifests/locks remain registry-portable. The archive is
+temporary review intake, not a release or completed packed-consumer qualification.
+
+- Baseline `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte -t RichCellsAndExpandedRows`:
+  1 failed, 4 skipped; expected no duplicate toolbar count, received `Filters 45 rows`.
+  Receipt `.local/validation/runs/lapis-notebook-run-14d15645-275f-4092-856e-107611b49291`.
+- Restarted the owned review with
+  `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm storybook:review`.
+- Post-fix command prefix:
+  `docker --context omarchy exec -e LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native -e LAPIS_NOTEBOOK_VALIDATION_WORKER=1 -w /work/lapis-plugin-notebook lapis-notebook-run-f606e779-3a8d-44a4-a256-f30a5630abf2`.
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte -t RichCellsAndExpandedRows`:
+  1 passed, 0 failed, 4 skipped; checks no duplicated count, real ScrollArea grid,
+  summary containment, coloured bars, and separate full-opacity boolean counts.
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte src/stories/PluginWorkspace.stories.svelte -t 'ResultsAndStructuredFilters|RichCellsAndExpandedRows|LargeTypedResults|InspectorSample|IndependentTables|TableFilters'`:
+  7 passed, 0 failed, 27 unrelated shell stories skipped, retaining runtime/a11y guards.
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookInputTables.stories.svelte`:
+  4 passed, 0 failed (typed multiple, optional/required single, disabled), including
+  filtering, focus return, event suppression and reactive selection replacement.
+- Prefix + `pnpm test -- src/lib/render/table/table-files.test.ts`: 24 passed, 0 failed.
+- Prefix + `pnpm spec:check`: all 3 specification lanes passed; routing 25/0 findings,
+  parity 6/0 findings, ownership 1 passed.
+- `/Users/stevejuma/code/lapismd/design-core-notebook-tables/node_modules/.bin/prettier --plugin /Users/stevejuma/code/lapismd/design-core-notebook-tables/node_modules/prettier-plugin-svelte/plugin.js --check src/lib/render/dataframe/Toolbar.svelte src/lib/render/dataframe/DataFrameColumnSummary.svelte src/stories/tables/table-header.story-play.ts`:
+  all 3 files passed.
+
+Keep the shared and Notebook reviews running. Resume remaining migration checks
+from the records; full qualification and publication are still gated by UI approval.
+
+## Combined shared gutter/detail feedback intake (31 October)
+
+The Design Core gutter fix (`7f67b926`) and compact, horizontally sticky,
+sans-serif detail fix (`7c01ec09`) were accepted into a fresh isolated review
+worker without changing Notebook runtime source, tracked manifests or lockfiles.
+The intermediate gutter archive was prepared but not installed while further UI
+feedback was being incorporated. Final Design Core 0.8.0 archive SHA256:
+`ea3afda3a06d35e527e71ab3382f0040ca45de4cf2f746e798d2480f9816fcff`.
+
+Owned worker: `lapis-notebook-run-45b70569-4d11-4711-985c-015e81f55fdb`;
+source snapshot `31e34541`; installed graph and provenance remain in its review
+receipt. Review is running on loopback 10529; shared review remains on 10429,
+and the original 10329 listener was preserved.
+
+- `pnpm validation -- review-stop`, then
+  `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm storybook:review`:
+  owned fresh Docker review started, verifying archive identity/checksum.
+- `pnpm view @lapismd/spec-validator version`: latest 0.2.0, already installed.
+  `pnpm exec spec-validator doctor`: 10 passed, 1 alias warning, 0 failures.
+  `pnpm spec:search "expanded"`: QMD returned the canonical Notebook requirements;
+  the native ABI loads under Node 24, so no fallback was needed.
+- `docker --context omarchy exec -e LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native -e LAPIS_NOTEBOOK_VALIDATION_WORKER=1 -w /work/lapis-plugin-notebook lapis-notebook-run-45b70569-4d11-4711-985c-015e81f55fdb pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte src/stories/tables/NotebookInputTables.stories.svelte src/stories/PluginWorkspace.stories.svelte -t 'ResultsAndStructuredFilters|RichCellsAndExpandedRows|LargeTypedResults|InspectorSample|IndependentTables|TypedMultipleSelection|OptionalSingleSelection|RequiredSingleSelection|DisabledSelection|TableFilters'`:
+  11 passed, 0 failed; 27 unrelated shell stories skipped. Includes all table and
+  input scenarios plus desktop/mobile WorkspaceShell filters, with interaction,
+  accessibility and fatal runtime/teardown checks retained.
+- Same Docker exec prefix + `pnpm spec:check`: 3 specification lanes passed,
+  routing 25/0 findings, parity 6/0 findings, ownership 1 passed.
+
+This is focused archive acceptance for UI review. UI-approved and fully-qualified
+states remain pending; the recorded filter-trigger type gate and original
+migration's remaining checks are not waived. No full suites, screenshot comparison,
+baseline updates, publication, push, merge or workspace cleanup were performed.
+
+## UI feedback: table surfaces, controls and header consistency
+
+Specified, implemented and focused-tested. UI-approved: pending. Fully-qualified:
+deferred. Tables/Input Tables use the document background (white in light mode),
+rounded bordered adapter surfaces and a toolbar divider. Wrap text/Column colours
+controls sit beside Filters and use shared controlled presentation/geometry.
+Basic headers reuse dataframe icons and its sort-state implementation, including
+Shift multi-sort and priority. Header hover is visible on the summary surface.
+Density uses a required three-segment ToggleGroup. The column picker adapts Bases'
+search/checkbox/type-icon presentation without plugin imports. Filter popovers
+retain 12px viewport clearance, an accessible dialog role and focus return.
+The prior unsupported aria-description type issue is fixed with aria-describedby.
+
+Shared owner commits: `121fab10` (nested Command checkbox foreground and controlled
+display), `24d11233` (custom header text colour/tint). Final Design Core 0.8.0
+review archive SHA256: `302c454246d97b355b8f2556eab7af9d797de4b18f78fa1f85437d5b160f207b`.
+Host follow-up `513970d0` adds the public ToggleGroup module and keeps earlier
+cohort work in its existing parent. Tracked manifests/locks remain registry-portable.
+
+Fresh final review worker: `lapis-notebook-run-a1c34e01-a83a-4483-b091-31035e3efbf7`;
+review on loopback 10529. The original 10329 and shared 10429 processes remain.
+Review supervisor log: `.local/table-feedback-review.log`. Exact installed graph
+and checksum provenance are retained in the owned worker's validation receipt.
+
+All commands use Node 24.10.0 on PATH. `pnpm view @lapismd/spec-validator version`
+returned 0.2.0 (already installed). Doctor passed 10 checks/1 alias warning;
+`pnpm spec:search "table review"` succeeded with QMD; no ABI fallback was needed.
+
+Before/after and exact targets:
+
+- Baseline `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte -t ColumnControls`: 1 failed/5 skipped (old dropdown has no density group), receipt `lapis-notebook-run-ab4acf7f-9bbe-4e6e-af0c-00d887c6d33c`.
+- Exact target against first new review: 1 failed/5 skipped (new test expected button/aria-pressed, actual single-choice segments correctly expose radio/aria-checked); corrected test semantics.
+- New-target selector `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte src/stories/tables/NotebookInputTables.stories.svelte -t 'ColumnControls|IndependentTables|DisplayControls|SortState'`: first 4 failed/1 passed (required density could deselect, filter needed explicit dialog semantics, two new input tests awaited async mount for only one second). Next 3 failed/2 passed (test measured unpositioned row wrappers and did not retain Shift across separate user-event instances); corrected to actual cell geometry and a shared interaction instance. Next 3 failed/2 passed, with functional assertions passing and accessibility finding two duplicate priority-label failures plus an unnamed sparkbar switch. Added complete sort names/descriptions and switch label. Final exact selector: 5 passed/0 failed/8 unrelated skipped. No assertions or accessibility/runtime guards were removed.
+
+Final command prefix for all focused Docker acceptance:
+`docker --context omarchy exec -e LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native -e LAPIS_NOTEBOOK_VALIDATION_WORKER=1 -w /work/lapis-plugin-notebook lapis-notebook-run-a1c34e01-a83a-4483-b091-31035e3efbf7`
+
+- Prefix + `pnpm test:storybook -- src/stories/tables/NotebookTables.stories.svelte src/stories/tables/NotebookInputTables.stories.svelte src/stories/PluginWorkspace.stories.svelte -t 'ResultsAndStructuredFilters|RichCellsAndExpandedRows|LargeTypedResults|InspectorSample|IndependentTables|ColumnControls|DisplayControls|SortState|TypedMultipleSelection|OptionalSingleSelection|RequiredSingleSelection|DisabledSelection|TableFilters'`: 15 passed/0 failed/27 unrelated shell skipped. Includes both real desktop/mobile WorkspaceShell filter stories and the full two table families, retaining axe and fatal teardown checks.
+- Prefix + `pnpm check:canvas-table-types`: 0 errors/0 warnings; prior 1-error filter-trigger gate resolved.
+- Prefix + `pnpm test -- src/lib/render/table packages/input/src/__tests__/table-model.test.ts`: 52 passed/0 failed, including the 30-file physical-line audit.
+- Prefix + `pnpm spec:check`: all 3 spec lanes passed; routing 25/0 findings, parity 6/0 findings, ownership 1 passed.
+- Focused Prettier initially found 2 new helper files; formatted them and final changed-source check passed.
+
+Manual browser review confirms white document surfaces, rounded frames, toolbar
+dividers, independent coloured headers, native hover feedback and the fixed
+checkbox foreground. Screenshot: `.local/review/table-review-feedback.png`.
+No screenshot comparison or baseline update. The UI review remains open; full
+Notebook/Design Core/host qualification and packed-plugin ABI acceptance remain
+pending. No push, merge, release or workspace cleanup.
+
+Final evidence-only canonical status update: explicitly native documentation
+diagnosis `LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native pnpm spec:validate` passed
+10 validators/6 chapters/72 requirements. Runtime acceptance remains the fresh
+isolated Docker evidence above; this does not replace it or widen qualification.
+Final focused changed-source Prettier check: 0 findings.
+
+## UI approved — full qualification resumed (31 October 2026)
+
+The user approved the integrated UI and requested the remaining plan work. Full
+qualification, remaining migration cleanup and release preparation are authorized.
+Keep stories visual-pending; no screenshot comparisons or baseline updates.
+Publication, pushing and merging still require separate authorization. Historical
+UI-pending statements above describe their original checkpoints. The current
+fully-qualified state remains incomplete until all required evidence passes.
+
+## Post-approval lifecycle and consumer qualification
+
+- `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/canvas-archives.json" pnpm
+test:storybook -- src/stories/tables/NotebookTableLifecycle.stories.svelte`:
+  2 failed before implementation, then exact rerun 2 passed/0 failed. Sorting
+  disabled, same-generation mode/filter preservation, reset and focus are covered.
+- `LAPIS_NOTEBOOK_VALIDATION_RUNTIME=native pnpm exec vitest run --project unit
+scripts/consumer-archives.test.mjs src/lib/render/table/table-files.test.ts`:
+  42 passed/0 failed. This explicit native run diagnoses pure tooling only.
+- Native `pnpm exec prettier` is unavailable in this package (1 invocation
+  failure); the installed Design Core formatter formatted the focused paths.
+- `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/cohort-archives.json" pnpm
+validation:all`: check passed, 506 units/88 files passed, build/bundle audit
+  and publint passed. Cold development packed consumer passed. Production
+  consumer failed once because its pnpm harness did not explicitly provide
+  Notebook's declared CodeMirror peers. The harness now installs public peer
+  ranges explicitly; final exact packed consumer and aggregate reruns pending.
+  Receipt: lapis-notebook-run-06deb7f5-1aa1-496e-b94d-0455c18ad23a.
+- Worker-only consumer archive projection validates SHA256, package identity,
+  safe inventory paths and the published Design Core Bits patch manifest;
+  normal registry acceptance stays unchanged outside workers.
+- Superseded private DataFrameTable, TableContainer, TableHead, DataRow and
+  FilterBar renderers were unused and removed after lifecycle coverage.
+- Selected-row flicker reproduced against the old Core archive:
+  `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/cohort-archives.json" pnpm
+test:storybook -- src/stories/tables/NotebookTables.stories.svelte -t LargeTypedResults`:
+  1 failed/6 unselected. Shared fix belongs to Design Core. Refreshed archive
+  acceptance and full final qualification remain pending.
+
+All source archives are confined to isolated Docker installations. Canonical
+tracked manifests and lockfiles retain registry resolution. The archive inventory
+and actual installed graph are stored in ignored receipts. No publication.
+
+## Read-only row selection and final qualification follow-up
+
+User approval remains recorded; the later read-only selection request is
+implemented upstream in Design Core. Plain clicks replace row selection,
+Ctrl/Meta-click toggles rows and Shift-click selects the displayed-order range.
+Interactive cell controls remain isolated. Editable tables retain cell selection.
+The selected-row scrolling regression passed against the refreshed Core archive.
+
+- `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/cohort-archives.json" pnpm
+test:storybook -- src/stories/tables/NotebookTableSelection.stories.svelte`:
+  old Core archive 4 failed/1 passed; refreshed Core 1 failed/4 passed. The one
+  remaining assertion assumed source order, contrary to the existing
+  `normalizeTableSelectionFromIndexes` insertion-order contract. The corrected
+  assertion verifies exact selection order and original row object identity.
+  Exact rerun: 5 passed/0 failed, including required/single/disabled modes,
+  independent checkbox-free row selection, repeated clicks without events and
+  sorting without remounting or selection events. Receipt:
+  lapis-notebook-run-456fabef-1eb9-4a91-9a6c-7c77220b474e.
+- Native formatter diagnostics: two invocations could not infer the Svelte
+  parser outside the owning formatter configuration. Explicit
+  `prettier --plugin=prettier-plugin-svelte --parser=svelte` succeeded. No
+  assertion, accessibility rule or runtime diagnostic was suppressed.
+- Real packed App/plugin admission exposed a missing CodeMirror Markdown
+  catalog entry and bare Svelte producer imports. Notes owns the public build
+  adapter; Notebook now consumes it and declares versioned renderer imports.
+  Exact packed consumer and final aggregate qualification remain in progress.
+
+Current states: specified yes; implemented yes; focused-tested yes for the
+selection and lifecycle follow-ups; UI-approved yes for the migration;
+fully-qualified no. Candidate archives stay confined to isolated Docker workers.
+Final released-registry acceptance awaits separately authorized upstream
+publication. No push, merge, publication or visual-baseline update.
+
+## Final candidate qualification checkpoint
+
+- `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/cohort-archives.json" pnpm
+packages:pack`: passed strict public types and cold development/production
+  consumers with real App/plugin boot and complete teardown. Receipt:
+  lapis-notebook-run-0cd10da5-d2e1-45de-a585-4a2f030b93f5.
+- The earlier exact package target exposed 9 Vite renderer-resolution errors;
+  the API-owned optimizer fix removed them. The next target exposed App creation
+  outside an effect owner. Preserved error stacks identified WorkspaceSidedock;
+  the generated consumer now boots from an owned mounted Svelte component and
+  unmounts after App disposal. No product runtime warning was suppressed.
+- First final `pnpm validation:all`: check, 510 units, build/publint, both packed
+  consumers, static Storybook and all 67 interaction/axe cases passed. The final
+  spec-first lane reported 1 missing mapped governance chapter. Added the
+  worker-only public-consumer lifecycle contract to spec-governance.md.
+- Exact `pnpm spec:check` rerun passed (receipt
+  lapis-notebook-run-556b1481-5d57-4d7f-ba9b-b48a008fdd30).
+- Exact full `LAPIS_NOTEBOOK_VALIDATION_ARCHIVES="$PWD/.local/cohort-archives.json"
+pnpm validation:all` rerun passed every lane, with 510 units and 18 + 18 + 31 =
+  67 interaction/accessibility stories, strict checks, build/publint, cold packed
+  development/production consumers, static Storybook, routing, parity, ownership
+  and all specification gates. Zero failures. Receipt:
+  lapis-notebook-run-7df6f350-1454-4f29-8ea1-8f93d9eeb6f9.
+- Changed-source formatting initially found 1 existing changed WorkspaceShell
+  story formatting finding; exact formatter rerun passed. The final aggregate
+  snapshot includes the formatting correction. New source guard remains <=300
+  physical lines. No visual comparisons or baseline updates.
+
+Source checkpoints: Design Core a1f8f433; Notes aa723cf7; Markdown compatibility
+3518932a. Verified candidate archive SHA256s are in the ignored inventory and
+copied into the worker receipts. All candidate installs remain isolated from
+tracked registry manifests and locks. Proposed released dependency ranges must
+be refreshed after upstream releases; current candidate peer warnings do not
+qualify the future registry cohort.
+
+States: specified yes; implemented yes; focused-tested yes; UI-approved yes;
+complete local candidate qualification yes; fully-qualified released cohort no.
+Resume with spec/records/2026-10-31-notebook-canvas-release.md. Publication,
+registry refresh/registry-only acceptance, pushing and merging remain separately
+authorized gates. The registered Docker review worker restores loopback port
+10529; original Storybooks 10329/10429 and default workspaces are preserved.
+
+### Released host cohort refresh — 1 November
+
+Core 0.9.0, API 0.2.4, UI 0.1.6, Workspace 0.3.2, File Explorer 0.2.1 and
+Markdown 0.2.1 are verified releases. Notebook 0.2.0 now consumes those registry
+packages in its runtime peer minimums/development graph. The previously approved
+UI and typed selection/lifecycle implementation are retained. Historical
+510-unit/67-story candidate evidence does not replace final registry-only
+Docker qualification, cold packed-plugin supported-host acceptance and exact-head
+CI. Those final gates are now in progress; visual baselines remain unapproved.
+See the release record for exact coordinates and receipts.
+
+Final registry-only `pnpm validation:all` passed on 1 November at 03:51 UTC:
+510 units, 67 interaction/axe stories, strict checks, build/publint, static
+Storybook, specification checks and cold development/production public consumers.
+Report: `lapis-notebook-run-e1b6953b-6e19-477e-bafa-c83ecfa6e11f` in the
+nested qualification checkout. No candidate archives were used. GitHub exact-head
+CI, merge and publication remain separate gates. Existing development-tool
+audit findings reproduce unchanged in the prior dependency graph; see the release
+record for their IDs and owner follow-up. Visual baselines remain unapproved.

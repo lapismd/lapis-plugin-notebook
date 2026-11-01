@@ -3,6 +3,13 @@
   import { defineMeta } from "@storybook/addon-svelte-csf";
   import { expect, waitFor, within } from "storybook/test";
 
+  import {
+    assertInputTableFrame,
+    assertInputTableViewport,
+    assertInputSelectedRow,
+    assertGuideTables,
+  } from "./tables/table-shell.story-play";
+  import { checkStructuredTableFilters } from "./tables/table-filter.story-play";
   import PluginWorkspaceDemo from "./PluginWorkspaceDemo.svelte";
   import {
     NotebookPlugin,
@@ -101,59 +108,106 @@
   async function checkNotebookEmbed(canvasElement: HTMLElement) {
     const canvas = await waitForReady(canvasElement);
     const app = storyApp(canvasElement);
-    await app.commands.executeCommand(`${NOTEBOOK_PLUGIN_ID}:run-active-notebook`);
-    const sourceFile = app.vault.getFileByPath(NOTEBOOK_FIXTURE_PATHS.gettingStarted)!;
+    await app.commands.executeCommand(
+      `${NOTEBOOK_PLUGIN_ID}:run-active-notebook`,
+    );
+    const sourceFile = app.vault.getFileByPath(
+      NOTEBOOK_FIXTURE_PATHS.gettingStarted,
+    )!;
     const savedSource = await app.vault.read(sourceFile);
     const notices = app.notifications.list().length;
     app.safeMode.disableNotebookExecution = true;
     app.contextKeys.set("safeMode.notebookExecutionDisabled", true);
     await app.vault.createFolder("Reports");
-    const report = await app.vault.create("Reports/Notebook report.md", [
-      "# Notebook report",
-      "Saved notebook results, rendered in this note.",
-      "![[../Getting Started.notebook.md]]",
-      "## Second reference",
-      "![[Getting Started.notebook.md]]",
-    ].join("\n\n"));
-    const openReport = () => app.workspace.getUnpinnedLeaf().setViewState({
-      type: "markdown", state: { file: report.path, mode: "preview" },
-    });
+    const report = await app.vault.create(
+      "Reports/Notebook report.md",
+      [
+        "# Notebook report",
+        "Saved notebook results, rendered in this note.",
+        "![[../Getting Started.notebook.md]]",
+        "## Second reference",
+        "![[Getting Started.notebook.md]]",
+      ].join("\n\n"),
+    );
+    const openReport = () =>
+      app.workspace.getUnpinnedLeaf().setViewState({
+        type: "markdown",
+        state: { file: report.path, mode: "preview" },
+      });
     await openReport();
-    await waitFor(() => {
-      const embeds = canvasElement.querySelectorAll<HTMLElement>("[data-notebook-embed]");
-      expect(embeds).toHaveLength(2);
-      for (const embed of embeds) {
-        expect(embed).toHaveTextContent("The answer is 42.");
-        expect(embed.querySelector("[data-notebook-source]")).toBeNull();
-        expect(within(embed).queryByRole("button", { name: "Run notebook cell" })).toBeNull();
-        expect(within(embed).queryByRole("heading", { name: "Getting Started" })).toBeVisible();
-      }
-    }, { timeout: 15_000 });
+    await waitFor(
+      () => {
+        const embeds = canvasElement.querySelectorAll<HTMLElement>(
+          "[data-notebook-embed]",
+        );
+        expect(embeds).toHaveLength(2);
+        for (const embed of embeds) {
+          expect(embed).toHaveTextContent("The answer is 42.");
+          expect(embed.querySelector("[data-notebook-source]")).toBeNull();
+          expect(
+            within(embed).queryByRole("button", { name: "Run notebook cell" }),
+          ).toBeNull();
+          expect(
+            within(embed).queryByRole("heading", { name: "Getting Started" }),
+          ).toBeVisible();
+        }
+      },
+      { timeout: 15_000 },
+    );
     expect(await app.vault.read(sourceFile)).toBe(savedSource);
-    expect(canvasElement.querySelector('[data-testid="notebook-execution-status"]')).toBeNull();
-    const linked = await app.vault.create("linked.md", "# Correct relative target");
+    expect(
+      canvasElement.querySelector('[data-testid="notebook-execution-status"]'),
+    ).toBeNull();
+    const linked = await app.vault.create(
+      "linked.md",
+      "# Correct relative target",
+    );
     await app.vault.create("Reports/linked.md", "# Wrong relative target");
     const updated = savedSource + "\n**Updated conclusion.**\n\n[[linked]]\n";
     await app.vault.modify(sourceFile, updated);
     await waitFor(() => {
-      for (const embed of canvasElement.querySelectorAll<HTMLElement>("[data-notebook-embed]")) {
+      for (const embed of canvasElement.querySelectorAll<HTMLElement>(
+        "[data-notebook-embed]",
+      )) {
         expect(embed).toHaveTextContent("Updated conclusion.");
       }
     });
-    const relativeLink = within(canvasElement.querySelector<HTMLElement>("[data-notebook-embed]")!).getByRole("button", { name: "linked" });
+    const relativeLink = within(
+      canvasElement.querySelector<HTMLElement>("[data-notebook-embed]")!,
+    ).getByRole("button", { name: "linked" });
     relativeLink.focus();
     await userEvent.keyboard("{Enter}");
-    await waitFor(() => expect(app.workspace.getActiveFile()?.path).toBe(linked.path));
+    await waitFor(() =>
+      expect(app.workspace.getActiveFile()?.path).toBe(linked.path),
+    );
     await openReport();
-    await waitFor(() => expect(canvasElement.querySelectorAll("[data-notebook-embed]")).toHaveLength(2));
-    const open = canvas.getAllByRole("button", { name: "Open notebook Getting Started.notebook.md" })[0];
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelectorAll("[data-notebook-embed]"),
+      ).toHaveLength(2),
+    );
+    const open = canvas.getAllByRole("button", {
+      name: "Open notebook Getting Started.notebook.md",
+    })[0];
     open.focus();
     await userEvent.keyboard("{Enter}");
-    await waitFor(() => expect(app.workspace.getActiveFile()?.path).toBe(sourceFile.path));
-    await waitFor(() => expect(canvasElement.querySelector("[data-notebook-embed]")).toBeNull());
+    await waitFor(() =>
+      expect(app.workspace.getActiveFile()?.path).toBe(sourceFile.path),
+    );
+    await waitFor(() =>
+      expect(canvasElement.querySelector("[data-notebook-embed]")).toBeNull(),
+    );
     await openReport();
-    await waitFor(() => expect(canvasElement.querySelectorAll("[data-notebook-embed]")).toHaveLength(2));
-    await waitFor(() => expect(canvasElement.querySelector("[data-notebook-embed]")).toHaveTextContent("The answer is 42."));
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelectorAll("[data-notebook-embed]"),
+      ).toHaveLength(2),
+    );
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelector("[data-notebook-embed]"),
+      ).toHaveTextContent("The answer is 42."),
+    );
     expect(app.notifications.list()).toHaveLength(notices);
   }
 
@@ -232,13 +286,7 @@
     expect(getComputedStyle(valueOutput).backgroundColor).not.toBe(
       "rgba(0, 0, 0, 0)",
     );
-    expect(
-      parseFloat(
-        getComputedStyle(
-          canvasElement.querySelector(".lapis-notebook-input__table")!,
-        ).borderTopWidth,
-      ),
-    ).toBeGreaterThan(0);
+    assertInputTableFrame(canvasElement);
     const textLabel = canvasElement
       .querySelector(
         '[data-notebook-cell="text-input"] .notebook-output__dom-label',
@@ -345,15 +393,10 @@
     expect(sweet).toHaveAttribute("aria-checked", "true");
     expect(sweet.querySelector("svg")).toBeTruthy();
     expect(getComputedStyle(sweet).color).toBe("rgb(255, 255, 255)");
-    const selectedRow = canvasElement.querySelector(
-      '[data-notebook-cell="table-input"] tbody tr',
-    )!;
-    await userEvent.click(
-      within(selectedRow as HTMLElement).getByRole("radio"),
-    );
-    expect(selectedRow).toHaveAttribute("data-selected", "true");
-    expect(getComputedStyle(selectedRow).backgroundColor).not.toBe(
-      getComputedStyle(selectedRow.querySelector("td")!).borderBottomColor,
+    await assertInputSelectedRow(
+      canvasElement.querySelector<HTMLElement>(
+        '[data-notebook-cell="table-input"]',
+      )!,
     );
     await userEvent.click(sweet);
     await expect(sweet).toHaveAttribute("aria-checked", "false");
@@ -364,8 +407,11 @@
         NOTEBOOK_FIXTURE_PATHS.inputTypes,
         "checkbox-input-value",
       );
-      return rendered?.state === "completed" && rendered.outputs.some(
-        (output) => output.kind === "code" && output.code === "[]",
+      return (
+        rendered?.state === "completed" &&
+        rendered.outputs.some(
+          (output) => output.kind === "code" && output.code === "[]",
+        )
       );
     });
     await waitFor(() =>
@@ -539,13 +585,7 @@
       // Tables intentionally scroll when their data is wider than the cell.
       // The viewport stays contained; its offscreen column controls may extend.
       if (host.classList.contains("lapis-notebook-input--table")) {
-        const viewport = host.querySelector<HTMLElement>(
-          ".lapis-notebook-input__table",
-        )!;
-        expect(getComputedStyle(viewport).overflowX).toBe("auto");
-        expect(viewport.getBoundingClientRect().right).toBeLessThanOrEqual(
-          bounds.right + 1,
-        );
+        await assertInputTableViewport(host);
         continue;
       }
       for (const control of host.querySelectorAll<HTMLElement>(
@@ -575,182 +615,7 @@
         expect(canvasElement.querySelector(".notebook-dataframe")).toBeTruthy(),
       { timeout: 60_000 },
     );
-    const viewer = canvasElement.querySelector<HTMLElement>(
-      ".notebook-dataframe",
-    )!;
-    const table = within(viewer);
-    await userEvent.click(
-      table.getByRole("button", { name: "Filters", exact: true }),
-    );
-    await waitFor(() => {
-      const panel = viewer.querySelector<HTMLElement>(
-        ".notebook-dataframe__filters",
-      )!;
-      const rows = Array.from(
-        panel.querySelectorAll(".notebook-dataframe__filter"),
-      );
-      expect(rows).toHaveLength(4);
-      const bounds = rows.map((row) => row.getBoundingClientRect());
-      for (const [index, row] of bounds.entries()) {
-        expect(row.width).toBeGreaterThan(panel.clientWidth - 40);
-        if (index)
-          expect(row.top).toBeGreaterThanOrEqual(bounds[index - 1]!.bottom - 1);
-      }
-      const panelRight = panel.getBoundingClientRect().right;
-      for (const control of panel.querySelectorAll(
-        'input, [role="combobox"]',
-      )) {
-        const box = control.getBoundingClientRect();
-        expect(box.width).toBeGreaterThan(0);
-        expect(box.right).toBeLessThanOrEqual(panelRight);
-      }
-    });
-    expect(
-      viewer.querySelectorAll(".notebook-dataframe__filters select"),
-    ).toHaveLength(0);
-    const operator = table.getByRole("combobox", {
-      name: "name filter operator",
-    });
-    const page = within(canvasElement.ownerDocument.body);
-    const waitForSelectOpen = async (trigger: HTMLElement) => {
-      await waitFor(() => {
-        const listbox = page.getByRole("listbox");
-        expect(listbox).toBeVisible();
-        expect(
-          canvasElement.ownerDocument.activeElement === trigger ||
-            listbox.contains(canvasElement.ownerDocument.activeElement),
-        ).toBe(true);
-      });
-    };
-    const waitForSelectClosed = async (trigger: HTMLElement) => {
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute("aria-expanded", "false");
-        expect(page.queryByRole("listbox")).toBeNull();
-        expect(getComputedStyle(viewer).pointerEvents).not.toBe("none");
-        expect(trigger).toHaveFocus();
-      });
-    };
-    const openSelectWithKeyboard = async (trigger: HTMLElement) => {
-      trigger.focus();
-      await waitFor(() => expect(trigger).toHaveFocus());
-      await userEvent.keyboard("{Enter}");
-      await waitForSelectOpen(trigger);
-    };
-    const clearFilters = async () => {
-      await userEvent.click(
-        table.getByRole("button", { name: "Clear filters", exact: true }),
-      );
-      await waitFor(() => {
-        expect(
-          table.getByRole("spinbutton", { name: "score minimum" }),
-        ).toHaveValue(null);
-        expect(
-          table.getByRole("spinbutton", { name: "score maximum" }),
-        ).toHaveValue(null);
-        expect(
-          table.getByRole("textbox", { name: "name filter value" }),
-        ).toHaveValue("");
-        expect(table.queryByText(/^[1-9]\d* active$/)).toBeNull();
-        expect(
-          table.getByRole("button", { name: "Clear filters", exact: true }),
-        ).toBeDisabled();
-        const rows = viewer.querySelector(
-          ".notebook-dataframe__rows",
-        )?.textContent;
-        for (const name of ["Ada", "Grace", "Katherine"])
-          expect(rows).toContain(name);
-      });
-    };
-    await openSelectWithKeyboard(operator);
-    await userEvent.keyboard("{Home}{ArrowDown}{Enter}");
-    await waitFor(() => expect(operator).toHaveTextContent("Starts with"));
-    await waitForSelectClosed(operator);
-    const nameValue = table.getByRole("textbox", { name: "name filter value" });
-    await userEvent.type(nameValue, "Ad");
-    await waitFor(() => {
-      expect(
-        viewer.querySelector(".notebook-dataframe__rows")?.textContent,
-      ).toContain("Ada");
-      expect(
-        viewer.querySelector(".notebook-dataframe__rows")?.textContent,
-      ).not.toContain("Grace");
-    });
-    await openSelectWithKeyboard(operator);
-    await userEvent.keyboard("{Escape}");
-    await waitForSelectClosed(operator);
-    await waitFor(() => expect(operator).toHaveFocus());
-    await clearFilters();
-    await waitFor(() =>
-      expect(
-        viewer.querySelector(".notebook-dataframe__rows")?.textContent,
-      ).toContain("Grace"),
-    );
-    await openSelectWithKeyboard(operator);
-    await userEvent.keyboard("{End}{Enter}");
-    await waitFor(() => expect(operator).toHaveTextContent("Is not null"));
-    await waitForSelectClosed(operator);
-    await expect(nameValue).toBeDisabled();
-    await expect(table.getByText("1 active", { exact: true })).toBeVisible();
-    await userEvent.click(
-      table.getByRole("button", { name: "Clear name filter", exact: true }),
-    );
-    await expect(nameValue).toBeEnabled();
-    await userEvent.type(
-      table.getByRole("spinbutton", { name: "score minimum" }),
-      "8",
-    );
-    await waitFor(() => {
-      expect(
-        viewer.querySelector(".notebook-dataframe__rows")?.textContent,
-      ).toContain("Katherine");
-      expect(
-        viewer.querySelector(".notebook-dataframe__rows")?.textContent,
-      ).not.toContain("Ada");
-    });
-    await clearFilters();
-    await userEvent.type(
-      table.getByRole("spinbutton", { name: "score maximum" }),
-      "8",
-    );
-    expect(
-      table.getByRole("spinbutton", { name: "score maximum" }),
-    ).toHaveValue(8);
-    await waitFor(() => {
-      expect(
-        viewer.querySelector(".notebook-dataframe__rows")?.textContent,
-      ).toContain("Ada");
-      expect(
-        viewer.querySelector(".notebook-dataframe__rows")?.textContent,
-      ).not.toContain("Grace");
-    });
-    await clearFilters();
-    const booleanValue = table.getByRole("combobox", {
-      name: "enabled filter value",
-    });
-    await openSelectWithKeyboard(booleanValue);
-    await userEvent.keyboard("{End}{Enter}");
-    await waitFor(() => expect(booleanValue).toHaveTextContent("False"));
-    await waitForSelectClosed(booleanValue);
-    await waitFor(() => {
-      expect(
-        viewer.querySelector(".notebook-dataframe__rows")?.textContent,
-      ).toContain("Grace");
-      expect(
-        viewer.querySelector(".notebook-dataframe__rows")?.textContent,
-      ).not.toContain("Katherine");
-    });
-    await clearFilters();
-    const date = table.getByLabelText("created minimum");
-    fireEvent.input(date, { target: { value: "2026-03-01" } });
-    await waitFor(() => {
-      expect(
-        viewer.querySelector(".notebook-dataframe__rows")?.textContent,
-      ).toContain("Katherine");
-      expect(
-        viewer.querySelector(".notebook-dataframe__rows")?.textContent,
-      ).not.toContain("Ada");
-    });
-    await clearFilters();
+    await checkStructuredTableFilters(canvasElement);
   }
 
   async function checkCellEditorLayout(canvasElement: HTMLElement) {
@@ -1368,8 +1233,9 @@
       { timeout: 15_000 },
     );
 
-    const { getNotebookRenderService } =
-      await import("../lib/render/notebook-render-service");
+    const { getNotebookRenderService } = await import(
+      "../lib/render/notebook-render-service"
+    );
     const service = getNotebookRenderService();
     expect(service).toBeTruthy();
 
@@ -1464,8 +1330,9 @@
     await app.vault.process(file!, (source) =>
       source.replace("const n = 7;", "const n = 9;"),
     );
-    const { getNotebookRenderService } =
-      await import("../lib/render/notebook-render-service");
+    const { getNotebookRenderService } = await import(
+      "../lib/render/notebook-render-service"
+    );
     const service = getNotebookRenderService();
 
     // The view re-poll after the file change reloads the document, marks the
@@ -1574,17 +1441,7 @@
       },
       { timeout: 20_000 },
     );
-    const catalogTable = canvasElement.querySelector<HTMLElement>(
-      '[data-notebook-cell="sample-catalog"] .lapis-notebook-input__table-grid',
-    )!;
-    const catalogContainer = catalogTable.parentElement!;
-    expect(catalogTable.getBoundingClientRect().width).toBeGreaterThanOrEqual(
-      catalogContainer.clientWidth - 2,
-    );
-    const wideTable = canvasElement.querySelector<HTMLElement>(
-      '[data-notebook-cell="sample-preview"] .lapis-notebook-input__table',
-    )!;
-    expect(getComputedStyle(wideTable).overflowX).toBe("auto");
+    await assertGuideTables(canvasElement);
     for (const heading of ["JavaScript", "Markdown", "HTML"]) {
       expect(
         within(canvasElement).getByRole("heading", { name: heading, level: 2 }),
@@ -1810,41 +1667,95 @@
 
 <Story
   name="Notebook embed"
-  parameters={{ docs: { description: { story: "A Markdown report embeds saved Notebook results using relative links, without executing cells or showing source-editing chrome. Both references update when the notebook changes." } } }}
+  parameters={{
+    docs: {
+      description: {
+        story:
+          "A Markdown report embeds saved Notebook results using relative links, without executing cells or showing source-editing chrome. Both references update when the notebook changes.",
+      },
+    },
+  }}
   args={{ notebookMode: "preview" }}
   play={async ({ canvasElement }) => checkNotebookEmbed(canvasElement)}
 />
 
 <Story
   name="Notebook embed mobile"
-  parameters={{ docs: { description: { story: "The rendered Notebook report at mobile width, including keyboard navigation to the source notebook and remounting saved outputs in Safe Mode." } } }}
+  parameters={{
+    docs: {
+      description: {
+        story:
+          "The rendered Notebook report at mobile width, including keyboard navigation to the source notebook and remounting saved outputs in Safe Mode.",
+      },
+    },
+  }}
   args={{ notebookMode: "preview", displayMode: "mobile" }}
   play={async ({ canvasElement }) => checkNotebookEmbed(canvasElement)}
 />
 
 <Story
   name="Notebook embed lifecycle"
-  parameters={{ docs: { description: { story: "Unrun cells remain manual, deleted content is removed and recovers on recreation, and a self-reference terminates without executing cells." } } }}
+  parameters={{
+    docs: {
+      description: {
+        story:
+          "Unrun cells remain manual, deleted content is removed and recovers on recreation, and a self-reference terminates without executing cells.",
+      },
+    },
+  }}
   args={{ notebookMode: "preview" }}
   play={async ({ canvasElement }) => {
     await waitForReady(canvasElement);
     const app = storyApp(canvasElement);
-    const original = app.vault.getFileByPath(NOTEBOOK_FIXTURE_PATHS.gettingStarted)!;
+    const original = app.vault.getFileByPath(
+      NOTEBOOK_FIXTURE_PATHS.gettingStarted,
+    )!;
     const source = await app.vault.read(original);
     const notices = app.notifications.list().length;
-    const recursive = await app.vault.create("Recursive.notebook.md", "# Recursive notebook\n\n![[Recursive.notebook.md]]");
-    const report = await app.vault.create("Notebook lifecycle.md", `# Embedded notebooks\n\n![[${original.path}]]\n\n![[${recursive.path}]]`);
-    await app.workspace.getUnpinnedLeaf().setViewState({ type: "markdown", state: { file: report.path, mode: "preview" } });
-    await waitFor(() => expect(canvasElement).toHaveTextContent("This notebook is already embedded above."));
-    expect(canvasElement.querySelectorAll("[data-notebook-embed]")).toHaveLength(3);
-    await waitFor(() => expect(canvasElement).toHaveTextContent("Open the notebook and run it to display this cell’s output."));
+    const recursive = await app.vault.create(
+      "Recursive.notebook.md",
+      "# Recursive notebook\n\n![[Recursive.notebook.md]]",
+    );
+    const report = await app.vault.create(
+      "Notebook lifecycle.md",
+      `# Embedded notebooks\n\n![[${original.path}]]\n\n![[${recursive.path}]]`,
+    );
+    await app.workspace.getUnpinnedLeaf().setViewState({
+      type: "markdown",
+      state: { file: report.path, mode: "preview" },
+    });
+    await waitFor(() =>
+      expect(canvasElement).toHaveTextContent(
+        "This notebook is already embedded above.",
+      ),
+    );
+    expect(
+      canvasElement.querySelectorAll("[data-notebook-embed]"),
+    ).toHaveLength(3);
+    await waitFor(() =>
+      expect(canvasElement).toHaveTextContent(
+        "Open the notebook and run it to display this cell’s output.",
+      ),
+    );
     expect(await app.vault.read(original)).toBe(source);
     expect(await readSavedNotebookState(app, original.path)).toBeUndefined();
     await app.vault.delete(original);
     // The host removes a custom embed when its target no longer resolves.
-    await waitFor(() => expect(canvasElement.querySelector('[data-notebook-embed="Getting Started.notebook.md"]')).toBeNull());
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelector(
+          '[data-notebook-embed="Getting Started.notebook.md"]',
+        ),
+      ).toBeNull(),
+    );
     await app.vault.create(original.path, source);
-    await waitFor(() => expect(canvasElement.querySelector('[data-notebook-embed="Getting Started.notebook.md"]')).toHaveTextContent("Getting Started"));
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelector(
+          '[data-notebook-embed="Getting Started.notebook.md"]',
+        ),
+      ).toHaveTextContent("Getting Started"),
+    );
     expect(await readSavedNotebookState(app, original.path)).toBeUndefined();
     expect(app.notifications.list()).toHaveLength(notices);
   }}
@@ -1852,25 +1763,61 @@
 
 <Story
   name="Notebook embed inputs"
-  parameters={{ docs: { description: { story: "Two embeds retain separate mounted controls for one notebook. A keyboard input change updates both copies and their reactive outputs, and survives reopening the notebook." } } }}
-  args={{ notebookMode: "preview", notebookPath: NOTEBOOK_FIXTURE_PATHS.interactiveInputs }}
+  parameters={{
+    docs: {
+      description: {
+        story:
+          "Two embeds retain separate mounted controls for one notebook. A keyboard input change updates both copies and their reactive outputs, and survives reopening the notebook.",
+      },
+    },
+  }}
+  args={{
+    notebookMode: "preview",
+    notebookPath: NOTEBOOK_FIXTURE_PATHS.interactiveInputs,
+  }}
   play={async ({ canvasElement }) => {
     const canvas = await waitForReady(canvasElement);
     const app = storyApp(canvasElement);
-    await app.commands.executeCommand(`${NOTEBOOK_PLUGIN_ID}:run-active-notebook`);
-    const report = await app.vault.create("Input report.md", "# Interactive notebook results\n\n![[Interactive Inputs.notebook.md]]\n\n![[Interactive Inputs.notebook.md]]");
-    await app.workspace.getUnpinnedLeaf().setViewState({ type: "markdown", state: { file: report.path, mode: "preview" } });
-    await waitFor(() => expect(canvas.getAllByRole("slider", { name: "Count" })).toHaveLength(2));
+    await app.commands.executeCommand(
+      `${NOTEBOOK_PLUGIN_ID}:run-active-notebook`,
+    );
+    const report = await app.vault.create(
+      "Input report.md",
+      "# Interactive notebook results\n\n![[Interactive Inputs.notebook.md]]\n\n![[Interactive Inputs.notebook.md]]",
+    );
+    await app.workspace.getUnpinnedLeaf().setViewState({
+      type: "markdown",
+      state: { file: report.path, mode: "preview" },
+    });
+    await waitFor(() =>
+      expect(canvas.getAllByRole("slider", { name: "Count" })).toHaveLength(2),
+    );
     const controls = canvas.getAllByRole("slider", { name: "Count" });
     controls[0].focus();
     await userEvent.keyboard("{End}");
     await waitFor(() => {
-      for (const control of controls) expect(control).toHaveAttribute("aria-valuenow", "10");
-      for (const embed of canvasElement.querySelectorAll<HTMLElement>("[data-notebook-embed]")) expect(embed).toHaveTextContent("Count is 10.");
+      for (const control of controls)
+        expect(control).toHaveAttribute("aria-valuenow", "10");
+      for (const embed of canvasElement.querySelectorAll<HTMLElement>(
+        "[data-notebook-embed]",
+      ))
+        expect(embed).toHaveTextContent("Count is 10.");
     });
-    await pollUntil(async () => (await readSavedNotebookState(app, NOTEBOOK_FIXTURE_PATHS.interactiveInputs))?.cells.controls.inputValues?.count === 10);
-    expect(canvas.getAllByRole("slider", { name: "Count" })[0]).toBe(controls[0]);
-    expect(canvas.getAllByRole("slider", { name: "Count" })[1]).toBe(controls[1]);
+    await pollUntil(
+      async () =>
+        (
+          await readSavedNotebookState(
+            app,
+            NOTEBOOK_FIXTURE_PATHS.interactiveInputs,
+          )
+        )?.cells.controls.inputValues?.count === 10,
+    );
+    expect(canvas.getAllByRole("slider", { name: "Count" })[0]).toBe(
+      controls[0],
+    );
+    expect(canvas.getAllByRole("slider", { name: "Count" })[1]).toBe(
+      controls[1],
+    );
   }}
 />
 
@@ -1897,33 +1844,65 @@
     const originalPath = NOTEBOOK_FIXTURE_PATHS.interactiveInputs;
     const renamedPath = "Renamed Inputs.notebook.md";
     const file = app.vault.getFileByPath(originalPath)!;
-    await app.commands.executeCommand(`${NOTEBOOK_PLUGIN_ID}:run-active-notebook`);
+    await app.commands.executeCommand(
+      `${NOTEBOOK_PLUGIN_ID}:run-active-notebook`,
+    );
     const slider = await canvas.findByRole("slider", { name: "Count" });
     slider.focus();
     await userEvent.keyboard("{End}");
     await pollUntil(async () => {
       const saved = await readSavedNotebookState(app, originalPath);
-      return saved?.cells.controls?.inputValues?.count === 10 &&
+      return (
+        saved?.cells.controls?.inputValues?.count === 10 &&
         saved.cells.echo?.state === "completed" &&
-        saved.cells.echo.outputs?.some((output) => output.kind === "markdown" && output.markdown === "Count is 10.");
+        saved.cells.echo.outputs?.some(
+          (output) =>
+            output.kind === "markdown" && output.markdown === "Count is 10.",
+        )
+      );
     });
-    const { getNotebookRenderService } = await import("../lib/render/notebook-render-service");
+    const { getNotebookRenderService } = await import(
+      "../lib/render/notebook-render-service"
+    );
     const service = getNotebookRenderService()!;
-    const id = (await service.loadNotebookDocument(file, originalPath)).frontmatter?.id;
-    expect(id).toMatch(/^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/);
-    await app.workspace.getUnpinnedLeaf().openFile(app.vault.getFileByPath(NOTEBOOK_FIXTURE_PATHS.welcome)!);
+    const id = (await service.loadNotebookDocument(file, originalPath))
+      .frontmatter?.id;
+    expect(id).toMatch(
+      /^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/,
+    );
+    await app.workspace
+      .getUnpinnedLeaf()
+      .openFile(app.vault.getFileByPath(NOTEBOOK_FIXTURE_PATHS.welcome)!);
     await app.fileManager.renameFile(file, renamedPath);
     app.safeMode.disableNotebookExecution = true;
     app.contextKeys.set("safeMode.notebookExecutionDisabled", true);
-    await app.workspace.getUnpinnedLeaf().setViewState({ type: NotebookViewType, state: { file: renamedPath, mode: "preview" } });
+    await app.workspace.getUnpinnedLeaf().setViewState({
+      type: NotebookViewType,
+      state: { file: renamedPath, mode: "preview" },
+    });
     const restored = await canvas.findByRole("slider", { name: "Count" });
     expect(restored).not.toBe(slider);
-    await waitFor(() => expect(restored).toHaveAttribute("aria-valuenow", "10"));
-    await waitFor(() => expect(canvasElement.querySelector('[data-notebook-cell="echo"]')).toHaveTextContent("Count is 10."));
+    await waitFor(() =>
+      expect(restored).toHaveAttribute("aria-valuenow", "10"),
+    );
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelector('[data-notebook-cell="echo"]'),
+      ).toHaveTextContent("Count is 10."),
+    );
     const renamedFile = app.vault.getFileByPath(renamedPath)!;
-    expect((await service.loadNotebookDocument(renamedFile, renamedPath)).frontmatter?.id).toBe(id);
-    expect(await app.appDatabase.getMeta(`plugin:lapis-notebook:state:v1:${id}`)).toMatchObject({ cells: { controls: { inputValues: { count: 10 } } } });
-    expect(canvas.getByTestId("notebook-execution-status").querySelector('button[aria-label="Run notebook"]')).toBeDisabled();
+    expect(
+      (await service.loadNotebookDocument(renamedFile, renamedPath)).frontmatter
+        ?.id,
+    ).toBe(id);
+    expect(
+      await app.appDatabase.getMeta(`plugin:lapis-notebook:state:v1:${id}`),
+    ).toMatchObject({ cells: { controls: { inputValues: { count: 10 } } } });
+    expect(
+      canvas
+        .getByTestId("notebook-execution-status")
+        .querySelector('button[aria-label="Run notebook"]'),
+    ).toBeDisabled();
     expect(app.notifications.list()).toHaveLength(notices);
   }}
 />
@@ -2148,7 +2127,7 @@
     await expectInput("date-input", 'input[type="date"]');
     await expectInput("datetime-input", 'input[type="datetime-local"]');
     await expectInput("color-input", 'input[type="color"]');
-    await expectInput("table-input", 'input[type="radio"]');
+    await expectInput("table-input", '[role="radio"]');
     await expectInput("button-input", "button");
     await expectInput("checkbox-input", '[role="checkbox"]');
     await expectInput("radio-input", '[role="radiogroup"]');

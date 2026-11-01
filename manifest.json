@@ -1,7 +1,7 @@
 {
   "id": "lapis-notebook",
   "name": "Notebook",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "minAppVersion": "0.0.1",
   "description": "Executable .notebook.md notebooks with reactive cells and rich outputs.",
   "author": "Lapis Notes",
@@ -41,6 +41,7 @@
             "@lapismd/design-core/shadcn/slider",
             "@lapismd/design-core/shadcn/switch",
             "@lapismd/design-core/shadcn/textarea",
+            "@lapismd/design-core/shadcn/toggle-group",
             "@lapismd/design-core/shadcn/tooltip",
             "@lapismd/design-core/workspace/icon",
             "@codemirror/autocomplete",
@@ -58,14 +59,16 @@
             "@lapis-notes/ui",
             "@lapis-notes/ui/search",
             "@lezer/highlight",
-            "svelte",
-            "svelte/internal/client",
-            "svelte/internal/disclose-version",
-            "svelte/internal/flags/async",
-            "svelte/internal/flags/legacy",
-            "svelte/reactivity",
-            "svelte/store",
-            "svelte/transition"
+            "svelte/renderer/5.56.10",
+            "svelte/renderer/5.56.10/internal/client",
+            "svelte/renderer/5.56.10/internal/disclose-version",
+            "svelte/renderer/5.56.10/internal/flags/async",
+            "svelte/renderer/5.56.10/internal/flags/legacy",
+            "svelte/renderer/5.56.10/reactivity",
+            "svelte/renderer/5.56.10/store",
+            "svelte/renderer/5.56.10/transition",
+            "@lapismd/design-core/shadcn/canvas-table",
+            "@lapismd/design-core/shadcn/filter-builder"
           ],
           "requiresReloadOnUpdate": false
         }

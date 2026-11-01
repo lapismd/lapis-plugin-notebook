@@ -179,3 +179,24 @@ reload the active review notebook.
 | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | LN-NB-048 | Mounting a notebook embed MUST restore available saved results without executing cells, including callback-dependent inputs. Source changes, renames and deletion MUST refresh its content. Teardown MUST release listeners and ignore late reads. Repeated embeds MUST remain independently mounted; recursive notebook references MUST terminate with inline feedback. Read failures MUST use Problems without execution toasts. |
 | LN-NB-049 | Repeated notebook embeds MUST own separate reconstructable input controls while sharing notebook values and persistence state. Updates MUST preserve focus and control identity, retain typed choice identity through factory snapshots, and synchronize other mounted copies. Teardown MUST cancel pending reconstruction, dispose its listeners and ignore late callbacks without clearing the notebook-owned input.             |
+
+## Canvas input tables
+
+| ID        | Requirement                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LN-NB-055 | Inputs.table MUST reuse its typed row/selection normalization and mount a reactive CanvasTable adapter once. Single/multiple, required, disabled, initial value, dimensions and original row-object identity MUST remain compatible. Only logical selection changes MUST emit bubbling input. Sort/filter MUST not emit value changes; repeated embeds MUST synchronize without remounting and dispose all listeners. |
+
+The table adapter passes every loaded row to shared geometry and uses stable
+source IDs for display, selection and details. Inferred modes are cached per
+source/schema generation. Explicit types stay fixed; unknown fields permit
+Auto and type overrides. No formatted cell string participates in typed
+filtering or export. Regex is a structured predicate, not a query language.
+
+The LN-NB-055 UI slice extracts existing table normalization and host lifecycle into owned modules; selected IDs map back to original objects and nested control input events do not escape as input-value changes. Full lifecycle qualification remains deferred.
+
+LN-NB-006 producer builds MUST use the API-owned rendererHostModulePlugin with
+the exact locked Svelte version. Runtime manifests MUST declare its versioned
+renderer namespace, and clean npm host acceptance MUST resolve it through the
+same public adapter. Bare private compiler aliases MUST NOT be newly admitted in
+the host. Compiler/runtime versions MUST match; existing registry manifests stay
+portable while candidate source qualification uses isolated verified archives.

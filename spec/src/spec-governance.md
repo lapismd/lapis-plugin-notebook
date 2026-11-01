@@ -18,10 +18,10 @@ LPN-SPEC-021. Containers use four standard public-runner CPUs, bounded to
 timeouts remain unchanged. Both open action updates are consolidated into
 one dependency PR.
 
-Tracked dependencies use registry Design Core `0.7.2` and Mira `0.1.3`, with
-the published Lapis host cohort at `@lapis-notes/api@0.2.2`,
-`@lapis-notes/ui@0.1.5`, `@lapis-notes/workspace@0.3.1`,
-`@lapis-notes/file-explorer@0.2.0`, `@lapis-notes/markdown@0.2.0`, and
+Tracked dependencies use registry Design Core `0.9.0` and Mira `0.1.3`, with
+the published Lapis host cohort at `@lapis-notes/api@0.2.4`,
+`@lapis-notes/ui@0.1.6`, `@lapis-notes/workspace@0.3.2`,
+`@lapis-notes/file-explorer@0.2.1`, `@lapis-notes/markdown@0.2.1`, and
 `@lapis-notes/search@0.1.4`. Explicit temporary source acceptance follows
 LPN-SPEC-014 with verified sibling archives in isolated worker installations;
 publication and consumer adoption remain separate gates. Source ownership and
@@ -156,3 +156,21 @@ and matches the Docker workers' frozen `--ignore-pnpmfile` installation;
 local development then relinks sibling sources with
 `pnpm install --lockfile=false`. A lockfile carrying pnpmfile checksums or
 sibling `file:` specifiers fails the worker install fail-closed.
+
+## Shared-table review worker
+
+| ID           | Requirement                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LPN-SPEC-022 | Registered focused table and Docker Storybook review lanes MUST reuse fingerprinted tools, exact Jujutsu source snapshots, verified archives, bounded resources and owned leases/reports. The review endpoint MUST bind loopback, support remote forwarding and terminate owned workers safely. No host fallback, source/node_modules/secret/socket mounts or diagnostic suppression is permitted. |
+
+LPN-SPEC-022 review workers now project verified archive overrides over existing worker-only pins, restore tracked package/workspace/lock inputs, retain actual installed graphs, and expose only a checkout-owned loopback endpoint. Exact focused receipts remain separate from full qualification.
+
+LPN-SPEC-022 packed-consumer qualification MUST revalidate candidate archive identities and checksums inside the isolated worker, retain registry-portable tracked inputs, and verify strict public types plus cold development/production App boot and teardown. The generated consumer MUST own App creation in a mounted Svelte lifecycle and retain fatal runtime diagnostics through unmount.
+
+LPN-SPEC-022 the isolated-worker marker alone MUST NOT request candidate archive
+projection. A local snapshot worker MUST explicitly supply its verified inventory
+directory through `LAPIS_NOTEBOOK_VALIDATION_INPUT`. A hosted CI job with no
+archive input MUST use registry packages. When input is explicitly supplied, a
+missing or malformed inventory, invalid path, identity mismatch or checksum
+mismatch MUST remain fatal; absence of a requested inventory is not a registry
+fallback. Tracked manifests and locks remain unchanged in both modes.

@@ -30,7 +30,7 @@ if (!existsSync(path.join(dist, "main.mjs"))) {
   const files = bundleFiles();
   const forbidden = ["@stevejuma/ui", "@lapis-server/", "workspace:*"];
   const inlinedMarkers = [".notebook.md", "notebook-dataframe"];
-  const externalMarkers = ['"@lapis-notes/api"', '"svelte"'];
+  const externalMarkers = ['"@lapis-notes/api"', '"svelte/renderer/5.56.10'];
   let sawInlined = false;
   let sawExternal = false;
   for (const file of files) {
@@ -75,7 +75,10 @@ if (!existsSync(path.join(dist, "main.mjs"))) {
     if (entry?.path !== "main.mjs" || entry?.format !== "esm") {
       findings.push("dist manifest lacks the workspace runtime entry");
     }
-    if (!Array.isArray(entry?.sharedDependencies) || entry.sharedDependencies.length === 0) {
+    if (
+      !Array.isArray(entry?.sharedDependencies) ||
+      entry.sharedDependencies.length === 0
+    ) {
       findings.push("dist manifest lacks sharedDependencies");
     }
     const permissions = manifest?.lapis?.permissions ?? [];

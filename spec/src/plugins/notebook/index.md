@@ -20,10 +20,10 @@ its six private support packages from `legacy-lapis-notes`. Ported behavior
 keeps its legacy regression evidence; presentation remaps onto public
 `@lapismd/design-core` exports instead of re-creating primitives. The tracked
 dependency cohort resolves published registry versions — peers
-`@lapismd/design-core@^0.7.2`, `@lapis-notes/api@^0.2.2`, and
-`@lapis-notes/markdown@^0.2.0` and `@lapis-notes/ui@^0.1.5`, with the Storybook host cohort pinned in
-development at `@lapis-notes/ui@0.1.5`, `@lapis-notes/workspace@0.3.1`,
-`@lapis-notes/file-explorer@0.2.0`, `@lapis-notes/search@0.1.4`, and
+`@lapismd/design-core@^0.9.0`, `@lapis-notes/api@^0.2.4`, and
+`@lapis-notes/markdown@^0.2.1` and `@lapis-notes/ui@^0.1.6`, with the Storybook host cohort pinned in
+development at `@lapis-notes/ui@0.1.6`, `@lapis-notes/workspace@0.3.2`,
+`@lapis-notes/file-explorer@0.2.1`, `@lapis-notes/search@0.1.4`, and
 `@lapismd/mira@0.1.3`; local sibling source snapshots MAY replace matching
 installs through `.pnpmfile.cjs` per LPN-SPEC-005. The runtime
 plugin id `lapis-notebook` is preserved from the legacy plugin so persisted
@@ -31,6 +31,12 @@ plugin data keys remain compatible. The DuckDB-WASM engine dependency is
 pinned exactly at `1.33.1-dev45.0` in root dependencies per LPN-SPEC-004 so
 query behavior cannot drift independently from the ported compatibility
 tests.
+
+Notebook 0.2.0 requires the released CanvasTable/FilterBuilder host cohort above.
+Package and runtime manifest versions MUST both be 0.2.0. Typed rows, selection,
+execution, persistence and renderer ABI 5.56.10 retain their existing contracts.
+Final publication requires registry-only qualification and cold packed-plugin
+acceptance against the supported hosts.
 
 Development tooling includes registry Turbo for the container CI build, quality
 and unit task cache; it adds no runtime dependency or published export.
@@ -164,10 +170,9 @@ versions already used by the private stdlib. Vite prepares their import IDs,
 including Plot's transitive CommonJS modules; runtime library loading remains
 lazy. Registry manifests and lockfiles remain portable.
 
-Dataframe filters use one full-width row per column, with aligned labels and
-controls and a stacked control area in narrow containers. Operators and boolean
-values use the public Design Core Select family; all controls have names tied
-to their columns. Choosing an operator before entering a value remains possible,
+Dataframe filters compose the public standalone Design Core FilterBuilder, with
+segmented condition rows and nested All/Any/None groups. Controls have names tied
+to stable fields and remain usable in narrow containers. Choosing an operator before entering a value remains possible,
 and null checks do not require a value. Clear actions reset the affected filter
 or the full set. Governed desktop/mobile stories exercise real filtering,
 keyboard selection, Escape/focus return and reset.
@@ -184,7 +189,7 @@ keyboard selection, Escape/focus return and reset.
 | LN-NB-007 | The inspector, dependencies, and packages surfaces MUST register as movable side-panel views with `ViewAccess.command` classification and concise open commands, mounting their Svelte panels through the owned local-component mount helper. Each panel MUST have the six-placement story coverage required by the family Storybook contract before its verification row advances.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | LN-NB-009 | The dependencies panel MUST render the derived per-note cell DAG through the in-repo layout engine, honoring the persisted orientation and wheel-zoom settings, and MUST keep cycle and duplicate-definition errors visible as document errors. Visible orientation labels MUST match the applied and persisted orientation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | LN-NB-036 | The System Guide MUST organize runnable examples with JavaScript, Markdown and HTML headings, render charts and a network graph from bundled sample datasets, and show the available data with a row preview. Input Types MUST demonstrate every supported input factory, state unsupported factories explicitly, and retain an audit against the actual input runtime. Chart and graph examples MUST remain finite and preserve bundled source data.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| LN-NB-037 | Dataframe filters MUST show one column filter per row, use public Design Core Select controls, remain usable in narrow containers, and support named keyboard-accessible text, numeric, boolean and date controls with reset actions. Input tables MUST span their container when data is narrower, with row separators covering the available width and horizontal scrolling for wider data.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| LN-NB-037 | Notebook data tables MUST compose public Design Core CanvasTable and structured FilterBuilder controls. Filters MUST retain typed operators, accessible drafts and resets. Input tables MUST span their container, preserve selection/value semantics and scroll horizontally for wide data.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | LN-NB-038 | The twenty Observable-compatible notebook input factories MUST be available with matching values, defaults and events, using public Design Core controls. Inputs.markdown MUST additionally expose a live Markdown string through public Design Core MarkdownComposer without a submit step. Choices MUST preserve typed values, search MUST honor token/column/custom filtering, and forms MUST aggregate children once per logical change. Value updates MUST preserve control identity and focus.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | LN-NB-039 | File inputs MUST accept vault files and temporary browser uploads, support mixed ordered multiple selections, expose shared attachment reading methods and honor accept/required/disabled options. Vault references MAY persist; uploaded bytes, live files, callbacks and DOM nodes MUST NOT persist. Reopening MUST restore available vault files, identify temporary selections needing reselection and mark affected results stale.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | LN-NB-040 | Notebook code outputs MUST retain literal source, language and optional title, and render through public Design Core CodeBlock with syntax highlighting and copy controls. Input examples MUST demonstrate code output. File choosers MUST use Design Core Command and FileTypeIcon, selected files MUST use file icons and distinct filled source badges, and search MUST show a leading search icon.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -228,3 +233,52 @@ original values, including Map values and object choices. Search returns rows
 and exposes query; forms aggregate live array/object child values without a
 submit step. Input Types demonstrates all twenty Observable-compatible factories plus the Lapis Markdown extension with executable
 Observable-style examples and a runtime-backed coverage audit.
+
+## Shared canvas tables
+
+| ID        | Requirement                                                                                                                                                                                                                                                                                                                                                                            |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LN-NB-050 | Result and dataframe tables MUST share one Notebook-owned CanvasTable adapter, preserving column summaries/histograms, profiles, rich cell details, expanded rows, widths/order/visibility, density, multi-sort, pagination and loading/error/truncation states. Original typed rows and existing CSV/JSON export scope MUST remain authoritative.                                     |
+| LN-NB-051 | Structured filtering MUST evaluate nested All/Any/None conditions against raw typed rows, preserving text/regex/range/boolean/date/null predicates and bigint/decimal precision. Invalid drafts MUST keep the last applied state. Declared schema types MUST win; unknown types MUST sample at most 100 source rows and retain modes across search, sort, filter and ordinary updates. |
+| LN-NB-052 | Stable result-scoped row IDs MUST precede search of visible columns, structured filtering, multi-sort and pagination. CanvasTable MUST receive all loaded rows, page display IDs and all filtered selection IDs. Hidden selections and source numbering MUST survive presentation changes; result replacement MUST reset result-scoped state.                                          |
+| LN-NB-053 | Inspector data previews MUST use CanvasTable and structured filtering only over their existing first-five-loaded-row sample, visibly label that boundary, and preserve lazy loading, errors and empty states. Schema and variable navigation listings MUST remain unchanged.                                                                                                           |
+| LN-NB-054 | Integrated Notebook and Design Core UI review MUST precede broad qualification and publication. Review MUST use checksum-verified archives inside an isolated Docker worker, registry-portable tracked manifests/locks, real WorkspaceShell stories and a fatal runtime guard through teardown. New handwritten JS/TS/Svelte files MUST remain within 300 physical lines.              |
+
+The UI review implementation uses one typed NotebookCanvasTable adapter, real public FilterBuilder popovers, original typed selection values and explicit App-owned inspector metadata. The user approved the integrated UI on 31 October 2026; released-registry Docker qualification passed 510 units, 67 interaction/axe stories and both cold public consumers. Exact-head CI remains the merge gate (LN-NB-050–054).
+
+LN-NB-050 row disclosure uses decorative Lucide right/down chevrons for collapsed/expanded states. The native button exposes the matching Expand/Collapse row label and aria-expanded state, and supports pointer and keyboard activation.
+
+LN-NB-050 custom column headers reserve 144 CSS pixels when summaries are shown (64 without summaries). Title/type controls and chart/range content MUST fit that shared header geometry. Notebook header snippets use sans typography, border-box summary widths, and public Design Core chart/muted colour tokens so histograms and boolean distributions remain visible in supported themes.
+
+The toolbar MUST omit the redundant total-row count while retaining optional query timing; pagination remains the row-count display. Boolean-summary counts MUST appear beside the decorative bars at full text opacity on the header background. The shared CanvasTable MUST use Design Core ScrollArea for the actual viewport, preserving both-axis alignment, keyboard access and teardown.
+
+Private dataframe filter notifications now carry the structured tree, matching the new editor and raw-value evaluator rather than flattening Any/None groups into incorrect All semantics; no public output wire format changes. Shared viewport width filling owns scrollbar accounting for narrow input data.
+
+The isolated review and final registry intake MUST apply the exact checksum-verified Bits UI 2.20.2 consumer patch required by published Design Core 0.8; source fixes remain in the shared owner and upstream Bits UI. This does not authorize any new package patch or waive focused portal/focus checks.
+
+LN-NB-050 header actions MUST provide visible hover and keyboard-focus feedback on the summary background. Row density MUST use a required single-choice Compact/Default/Relaxed segmented ToggleGroup. The visible-column popover MUST follow Bases' searchable property-list presentation with type icons and checked visibility indicators, without importing plugin code. Search and toggling MUST preserve column identity and settings.
+
+LN-NB-054 Tables and Input Tables review families MUST use the document background (white in the light theme), including independent instances, while retaining the theme's dark document surface in dark mode. Story-only surface styling MUST NOT override private production presentation.
+
+LN-NB-050 Notebook tables MUST expose Wrap text and Column colours toggles beside Filters, using the shared display settings without mutating typed data, selection or input events. Wrapping MUST update central row geometry and retain rich cells. Standalone table/input adapters MUST have a rounded, bordered surface; dataframe shells keep their existing rounded frame without a duplicate inner border. Filter popovers MUST retain at least 12 CSS pixels of viewport clearance.
+
+LN-NB-050/052 basic adapter headers MUST reuse the dataframe's unsorted/ascending/descending Lucide icons and sort-state implementation, including Shift-assisted multiple sort, priority indicators and return to unsorted. Display-only and sort changes MUST NOT emit input-selection events.
+
+The standalone adapter toolbar MUST have a bottom divider. Column-colour mode MUST tint custom header backgrounds consistently with the shared default canvas, without masking that paint in Notebook snippets.
+
+LN-NB-051/052 render adapters accept a transient `resultIdentity` generation key, defaulting to the source rows reference. Value/array replacement within a supplied generation MUST preserve applied filters, modes and selected source IDs; a new generation MUST reset result-scoped filters, sorting, selection and expansion. Losing the final focused result row MUST return focus to Filters. A disabled sorting option MUST disable header sorting. No identity is persisted or added to output wire formats.
+
+LN-NB-054 disposable packed-consumer acceptance MAY reuse the exact worker archive inventory after rechecking package identity and checksums. This projection MUST be rejected outside the isolated worker and MUST leave tracked manifests/lockfiles unchanged. Design Core’s published Bits patch metadata supplies the existing qualified consumer-root patch; private build helpers MUST NOT be copied.
+
+Superseded private DOM table and flat filter renderers are removed after shared-adapter regression coverage. Pure typed helpers and their retained regression tests remain Notebook-owned.
+
+LN-NB-050 rich result/input/preview row highlights MUST remain attached to their content during native scrolling, including delayed viewport notifications. This shared paint defect is fixed in Design Core; Notebook MUST consume the verified owner archive for focused acceptance, then its released registry version.
+
+LN-NB-050/052 Notebook tables are read-only: data-cell clicks and row keyboard
+navigation MUST select whole rows through shared CanvasTable behavior. Plain click
+selects one row, Ctrl/Meta-click toggles rows and Shift-click selects a displayed-order
+range. Single/required/disabled Inputs rules and original typed row values remain
+authoritative. Row selection changes emit one bubbling input; filter/sort, repeated
+unchanged selection and interactive cell actions emit none.
+
+On a new resultIdentity generation the adapter MUST recreate only its shared grid to reset local row focus/anchors; same-generation updates, sorting, filtering and Input value replacement MUST retain the existing grid. Focus MUST return to the owning Filters trigger before a focused grid is removed. Shell assertions MUST exercise the shared grid semantics, borders and scrolling rather than removed private DOM-table selectors.

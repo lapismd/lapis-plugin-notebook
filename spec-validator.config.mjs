@@ -57,7 +57,7 @@ export default defineConfig(tableRequirements(), {
     qmd: { collection: "lapis-plugin-notebook-spec" },
     packageManifest: {
       name: "@lapis-notes/lapis-plugin-notebook",
-      version: "0.1.0",
+      version: "0.2.0",
       privateAllowed: false,
       portableDependencies: true,
       manifestPath: "manifest.json",

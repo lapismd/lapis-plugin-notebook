@@ -14,6 +14,7 @@ import {
 } from "./model.mjs";
 import { activeOwnedRuns, collect } from "./reports.mjs";
 import { output, docker, sendDirectory } from "./docker.mjs";
+import { forwardReview } from "./review-forward.mjs";
 import { snapshot } from "./source.mjs";
 
 export const revision = (root) =>
@@ -174,12 +175,18 @@ export async function remoteRun(config, root, lane, args) {
         cache,
         dependencies,
         image: selected.tag,
+        review: lane === "storybook:review",
       }),
     );
     await sendDirectory(config, ["cp", "-", `${run}:/input`], directory);
     let failure;
     try {
-      await docker(config, ["start", "--attach", run]);
+      if (lane === "storybook:review") {
+        await docker(config, ["start", run]);
+        const stopForward = await forwardReview(config, config.reviewPort ?? 10529);
+        try { await docker(config, ["logs", "--follow", run]); }
+        finally { stopForward(); }
+      } else await docker(config, ["start", "--attach", run]);
     } catch (error) {
       failure = error;
     }
