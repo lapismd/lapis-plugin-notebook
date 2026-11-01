@@ -9,7 +9,7 @@ overrides:
   katex: ">=0.18.2"
   # Converge the published peer graph onto API 0.2.4's host cohort.
   # These registry pins keep one kernel instance for runtime and typechecks.
-  "@lapismd/design-core": "0.9.0"
+  "@lapismd/design-core": "0.10.1"
   "@lapismd/mira": "0.1.4"
   "@lapis-notes/ui": "0.1.6"
   "@codemirror/autocomplete": "6.20.3"
