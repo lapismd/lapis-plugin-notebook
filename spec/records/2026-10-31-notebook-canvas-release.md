@@ -133,3 +133,18 @@ new signed head `30437df70725ea71973b0e8724ab11e6bd0c55b9` is in full CI
 Markdown's 0.9 range/catalog intake is prepared locally but waits for Notes'
 API/UI/Workspace/Explorer registry patches to remove temporary Core peer
 mismatches before its final CI. No newly mismatched graph will be published.
+
+### Notes feature merged — 1 November, 01:23 UTC
+
+Notes #60 exact head `30437df70725ea71973b0e8724ab11e6bd0c55b9` passed
+all ten required CI jobs at run `41259587797`, including web acceptance,
+Storybook interaction/accessibility and Validate; 0 failures. GitHub reported
+CLEAN before merging. Merge source: `8b08baccb133a18ae644b6b8a3c7d23a81e897bc`.
+The normal release/version workflow `41260873808` is queued to prepare the
+version PR. None of the new Notes versions is claimed published yet.
+
+Remote main was fetched after merge. Notes' default checkout still has active
+overlapping session/startup/dependency edits (`mlwtkxom`); its working-copy
+parent remains preserved. Complete that checkout refresh after a safe owner
+checkpoint rather than rewriting ongoing work. No unrelated image-pin PR was
+merged as part of this feature.
