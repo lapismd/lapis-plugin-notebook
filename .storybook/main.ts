@@ -71,6 +71,7 @@ const config: StorybookConfig = {
     },
   ],
   addons: [
+    "@lapismd/storybook-addon-visual-delta",
     "@storybook/addon-docs",
     "@storybook/addon-a11y",
     "@storybook/addon-svelte-csf",

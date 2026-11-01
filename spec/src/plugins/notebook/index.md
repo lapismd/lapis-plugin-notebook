@@ -282,3 +282,13 @@ authoritative. Row selection changes emit one bubbling input; filter/sort, repea
 unchanged selection and interactive cell actions emit none.
 
 On a new resultIdentity generation the adapter MUST recreate only its shared grid to reset local row focus/anchors; same-generation updates, sorting, filtering and Input value replacement MUST retain the existing grid. Focus MUST return to the owning Filters trigger before a focused grid is removed. Shell assertions MUST exercise the shared grid semantics, borders and scrolling rather than removed private DOM-table selectors.
+
+## Website media selection
+
+`stories/catalog/website-media.json` selects the Workspace, Inputs
+and Panels production-shell stories by exact ID. These dedicated scenes inherit
+the catalog theme instead of pinning light mode. The public Visual Delta addon
+exposes settled render/play readiness. Website captures use
+the public Visual Delta API at 1200x800 and 2x density in both Lapis themes.
+The stories retain their existing interaction assertions and visual-pending
+status; media import does not approve baselines or qualify native services.

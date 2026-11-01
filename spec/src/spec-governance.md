@@ -174,3 +174,10 @@ archive input MUST use registry packages. When input is explicitly supplied, a
 missing or malformed inventory, invalid path, identity mismatch or checksum
 mismatch MUST remain fatal; absence of a requested inventory is not a registry
 fallback. Tracked manifests and locks remain unchanged in both modes.
+
+Website media inventory is `stories/catalog/website-media.json`; its fixed
+Workspace, Inputs, and Panels stories use CSF-Svelte so the production-root
+audit follows the same render path as the rest of the catalog. Visual Delta
+readiness is a capture boundary only. These stories keep accessibility checks
+enabled; recorded existing runtime limitations are not passing tests or baseline
+approval.

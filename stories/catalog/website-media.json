@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/lapismd/lapis-plugin-notebook",
+  "captures": [
+    {
+      "id": "notebook-workspace",
+      "storyId": "plugins-notebook-website-media--workspace",
+      "alt": "A notebook with executed cells in the real Notes workspace."
+    },
+    {
+      "id": "notebook-inputs",
+      "storyId": "plugins-notebook-website-media--inputs",
+      "alt": "Interactive Notebook inputs and calculated outputs in the workspace."
+    },
+    {
+      "id": "notebook-panels",
+      "storyId": "plugins-notebook-website-media--panels",
+      "alt": "A notebook beside its shared workspace side-panel group."
+    }
+  ]
+}
