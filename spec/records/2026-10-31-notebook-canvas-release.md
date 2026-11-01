@@ -1,7 +1,9 @@
 # Notebook canvas cohort release preparation
 
-The integrated UI was approved on 31 October 2026. Local qualification is in
-progress. This record authorizes no push, merge, registry publication or signing.
+The integrated UI was approved on 31 October 2026. On 1 November the user
+authorized watching, merging and releasing the four migration PRs as their
+required checks complete. Publication retains each owner's protected workflow
+and exact-source qualification gates.
 
 | Owner           | Proposed release | Reason                                                                                                     |
 | --------------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -9,6 +11,7 @@ progress. This record authorizes no push, merge, registry publication or signing
 | Notes API       | 0.2.4 patch      | Public renderer build adapter, module admission and dependency compatibility; retain existing plugin peers |
 | Notes UI        | 0.1.6 patch      | Core dependency compatibility                                                                              |
 | Notes Workspace | 0.3.2 patch      | Core dependency compatibility                                                                              |
+| File Explorer   | 0.2.1 patch      | Admit the shared Core release without installing a second older Core                                       |
 | Markdown        | 0.2.1 patch      | Core dependency compatibility; no runtime changes                                                          |
 | Notebook        | 0.2.0 proposed   | Shared result/input/preview tables and structured filters                                                  |
 
@@ -50,7 +53,30 @@ startup disconnect receipts. Do not replay failed runs as passes or publish the
 old-version qualification archives.
 
 Remaining work requires the release cohort: publish through owner workflows only
-after separate authorization, refresh all affected consumers to the released
+after successful exact-head qualification, refresh all affected consumers to the released
 registry ranges, and run the final registry-only matrix and supported-host
 acceptance. Candidate package versions and peer warnings are explicitly
 temporary; no publishable file/link/archive dependencies were introduced.
+
+## Release watch — 1 November 2026
+
+| PR                  | Signed head | Observed CI disposition                                                                                                                  |
+| ------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Design Core #51     | 70457606    | Unit, interaction/accessibility, governance, static Storybook passed; remaining lanes running                                            |
+| Notes #60           | b12c89c0    | Registry fixture/build-cache passed; two canonical mapping findings cancelled downstream jobs; documentation correction verified locally |
+| Plugins #49         | 46f601ac    | Prerequisites/build-cache passed; downstream lanes running                                                                               |
+| Notebook #7 (draft) | 397b9f95    | Build fails on released API missing rendererHostModulePlugin; wait for upstream releases, refresh registry pins and rerun                |
+
+Workspace inventory: `.local/release-watch/2026-11-01/workspace-inventory.json`.
+All noncandidate workspace work is excluded; the default checkouts and existing
+Storybooks remain preserved. No open Dependabot PRs were found during initial
+preflight; recheck before each push. Planned versions above require registry
+existence checks, since latest dist-tags lag some already published host versions.
+The File Explorer compatibility floor was discovered during cohort inspection
+and must be included in the Notes owner before final registry qualification.
+
+Resume in dependency order: merge qualified Core #51; qualify/merge its version
+PR and verify 0.9.0 publication; refresh Notes and Markdown to that registry
+release; qualify/merge/release those owners; refresh and version Notebook;
+complete registry-only validation and cold packed-host acceptance before merging
+and publishing Notebook. Do not rerun Notebook's unchanged known failing head.
