@@ -1,7 +1,7 @@
 import type { StorybookConfig } from "@storybook/svelte-vite";
 import { svelte, vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import tailwindcss from "@tailwindcss/vite";
-import { existsSync, realpathSync } from "node:fs";
+import { existsSync, realpathSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { mergeConfig, searchForWorkspaceRoot } from "vite";
@@ -10,6 +10,9 @@ import { notebookPackagesPlugin } from "../scripts/vite-notebook-packages";
 
 const storybookDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(storybookDir, "..");
+mkdirSync(path.join(repoRoot, ".local/visual-delta/artifacts"), {
+  recursive: true,
+});
 const packageLib = path.resolve(storybookDir, "../src/lib");
 
 const linkedSiblingPackages = [
@@ -71,6 +74,16 @@ const config: StorybookConfig = {
     },
   ],
   addons: [
+    {
+      name: "@lapismd/storybook-addon-visual-delta",
+      options: {
+        visualDelta: {
+          snapshotDir: ".local/visual-delta/artifacts",
+          readOnly: true,
+          affectedTests: false,
+        },
+      },
+    },
     "@storybook/addon-docs",
     "@storybook/addon-a11y",
     "@storybook/addon-svelte-csf",

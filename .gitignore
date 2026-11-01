@@ -12,3 +12,5 @@ AGENTS.override.md
 .local/
 .qmd/index.sqlite*
 .turbo/
+
+.release/

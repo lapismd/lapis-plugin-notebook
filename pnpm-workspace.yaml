@@ -5,6 +5,8 @@ packages:
 linkWorkspacePackages: true
 
 overrides:
+  # Patched KaTeX supported by the published Markdown/Mermaid dependency.
+  katex: ">=0.18.2"
   # Converge the published peer graph onto API 0.2.4's host cohort.
   # These registry pins keep one kernel instance for runtime and typechecks.
   "@lapismd/design-core": "0.9.0"
@@ -29,3 +31,8 @@ overrides:
 # Exact published Design Core consumer requirement; see patches/README.md.
 patchedDependencies:
   bits-ui@2.20.2: patches/bits-ui@2.20.2.patch
+
+# Same documented, user-approved exception as Tasks; no patched release exists.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-gcqx-w48m-w2h4

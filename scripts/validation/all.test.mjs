@@ -19,6 +19,9 @@ describe("aggregate Docker validation", () => {
       "build-storybook",
       "test:storybook",
       "spec:check",
+      "registry:check",
+      "registry:media:check",
+      "registry:prepare",
     ];
     expect(aggregateLanes).toEqual(gates);
     expect(events).toEqual(

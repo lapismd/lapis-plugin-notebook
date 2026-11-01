@@ -100,8 +100,13 @@ try {
       overrides: { ...pkg.pnpm?.overrides, ...overrides },
     };
     try {
-      const { projectArchiveWorkspace } = await import(join(root, "scripts/validation/archive-projection.mjs"));
-      await writeFile(workspacePath, projectArchiveWorkspace(originalWorkspace, archives));
+      const { projectArchiveWorkspace } = await import(
+        join(root, "scripts/validation/archive-projection.mjs")
+      );
+      await writeFile(
+        workspacePath,
+        projectArchiveWorkspace(originalWorkspace, archives),
+      );
       await writeFile(packagePath, JSON.stringify(pkg));
       await execute(
         "pnpm",
@@ -144,7 +149,9 @@ try {
   );
   const { runNative } = await import(join(root, "scripts/validation.mjs"));
   if (request.lane === "storybook:review") {
-    const { serveReview } = await import(join(root, "scripts/validation/review-server.mjs"));
+    const { serveReview } = await import(
+      join(root, "scripts/validation/review-server.mjs")
+    );
     await serveReview(root);
   } else await runNative(request.lane, request.args, root);
   result.status = "passed";
@@ -164,6 +171,8 @@ try {
     "spec/book",
     "storybook-static",
     "dist",
+    "registry-assets",
+    ".release",
     "test-results",
     "playwright-report",
   ]) {

@@ -28,5 +28,8 @@
     "kind": "integration",
     "requirement": "LN-NB-055",
     "reason": "Exercises shared read-only row navigation through actual Notebook results and lazy Inputs.table, including modifiers, typed values, event counts and disabled/required controls."
+  },
+  "src/stories/RegistryScreenshots.stories.svelte": {
+    "kind": "application"
   }
 }

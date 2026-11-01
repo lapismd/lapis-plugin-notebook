@@ -1,0 +1,144 @@
+{
+  "$schema": "https://registry.lapis.md/schemas/plugin-source.schema.json",
+  "schemaVersion": 2,
+  "categories": [
+    "data",
+    "productivity"
+  ],
+  "highlights": [
+    "Execute JavaScript, TypeScript and SQL cells in portable Markdown notebooks.",
+    "Connect live inputs to reactive results, charts and rich tables.",
+    "Keep analysis and narrative together in the Lapis workspace."
+  ],
+  "documentationUrl": "https://github.com/lapismd/lapis-plugin-notebook#readme",
+  "appearance": {
+    "icon": "file-code-2",
+    "accent": "#8B5CF6"
+  },
+  "media": {
+    "banner": {
+      "alt": "Notebook in the real Lapis workspace with Explorer, a regional revenue analysis, live results and a structured table.",
+      "images": {
+        "preview": {
+          "path": "registry-assets/banner.preview.webp"
+        },
+        "full": {
+          "path": "registry-assets/banner.full.webp"
+        },
+        "light": {
+          "path": "registry-assets/banner.light.webp"
+        },
+        "dark": {
+          "path": "registry-assets/banner.dark.webp"
+        }
+      },
+      "capture": {
+        "storyId": "plugins-notebook-registry-screenshots--research-notebook",
+        "focus": "full-shell"
+      }
+    },
+    "overview": {
+      "alt": "Notebook with a labelled growth slider, revenue table and a reactive forecast in the Lapis workspace.",
+      "images": {
+        "preview": {
+          "path": "registry-assets/overview.preview.webp"
+        },
+        "full": {
+          "path": "registry-assets/overview.full.webp"
+        },
+        "light": {
+          "path": "registry-assets/overview.light.webp"
+        },
+        "dark": {
+          "path": "registry-assets/overview.dark.webp"
+        }
+      },
+      "capture": {
+        "storyId": "plugins-notebook-registry-screenshots--interactive-analysis",
+        "focus": "full-shell"
+      }
+    }
+  },
+  "gallery": [
+    {
+      "alt": "Notebook in the real Lapis workspace with Explorer, a regional revenue analysis, live results and a structured table.",
+      "images": {
+        "preview": {
+          "path": "registry-assets/gallery/research.preview.webp"
+        },
+        "full": {
+          "path": "registry-assets/gallery/research.full.webp"
+        },
+        "light": {
+          "path": "registry-assets/gallery/research.light.webp"
+        },
+        "dark": {
+          "path": "registry-assets/gallery/research.dark.webp"
+        }
+      },
+      "capture": {
+        "storyId": "plugins-notebook-registry-screenshots--research-notebook",
+        "focus": "full-shell"
+      },
+      "id": "research",
+      "card": {
+        "headline": [
+          {
+            "text": "Keep the reasoning",
+            "tone": "neutral"
+          },
+          {
+            "text": "with the results",
+            "tone": "violet"
+          }
+        ],
+        "description": [
+          {
+            "text": "Live results in your notes.",
+            "tone": "neutral"
+          }
+        ]
+      }
+    },
+    {
+      "alt": "Notebook with a labelled growth slider, revenue table and a reactive forecast in the Lapis workspace.",
+      "images": {
+        "preview": {
+          "path": "registry-assets/gallery/interactive.preview.webp"
+        },
+        "full": {
+          "path": "registry-assets/gallery/interactive.full.webp"
+        },
+        "light": {
+          "path": "registry-assets/gallery/interactive.light.webp"
+        },
+        "dark": {
+          "path": "registry-assets/gallery/interactive.dark.webp"
+        }
+      },
+      "capture": {
+        "storyId": "plugins-notebook-registry-screenshots--interactive-analysis",
+        "focus": "full-shell"
+      },
+      "id": "interactive",
+      "card": {
+        "headline": [
+          {
+            "text": "Live inputs",
+            "tone": "neutral"
+          },
+          {
+            "text": "clear results",
+            "tone": "violet"
+          }
+        ],
+        "description": [
+          {
+            "text": "Adjust. Run. Explore.",
+            "tone": "neutral"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -86,7 +86,13 @@ export function validationConfig(local = {}, env = process.env) {
     (typeof config.context !== "string" || !config.context.trim())
   )
     throw Error("Invalid Docker context");
-  if (config.reviewPort != null && (!Number.isInteger(config.reviewPort) || config.reviewPort < 1024 || config.reviewPort > 65535)) throw Error("Invalid reviewPort");
+  if (
+    config.reviewPort != null &&
+    (!Number.isInteger(config.reviewPort) ||
+      config.reviewPort < 1024 ||
+      config.reviewPort > 65535)
+  )
+    throw Error("Invalid reviewPort");
   for (const key of ["cpus", "memoryGiB", "shmGiB"])
     if (!Number.isFinite(config[key]) || config[key] <= 0)
       throw Error(`Invalid ${key}`);
@@ -117,6 +123,8 @@ export function browserInvocations(args, fileCount = Number.POSITIVE_INFINITY) {
 export function auditRouting(scripts, lanes) {
   const findings = [];
   const native = {
+    "registry:publish": "node scripts/registry-release.mjs publish",
+    "registry:sign": "node scripts/registry-release.mjs sign",
     storybook:
       "WATCHPACK_POLLING=250 node scripts/storybook-run.mjs --no-open --config-dir .storybook",
     "storybook:stop": "bash scripts/storybook-stop.sh",
@@ -159,7 +167,9 @@ export function workerArguments(
     `${label}=run`,
     "--label",
     `${label}.workspace=${owner}`,
-    ...(review ? ["--publish", `127.0.0.1:${config.reviewPort ?? 10529}:6006`] : []),
+    ...(review
+      ? ["--publish", `127.0.0.1:${config.reviewPort ?? 10529}:6006`]
+      : []),
     "--init",
     "--cap-drop=ALL",
     "--cpus",

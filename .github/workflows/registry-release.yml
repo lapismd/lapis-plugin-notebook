@@ -1,0 +1,145 @@
+name: Publish plugin to registry
+
+on:
+  release:
+    types: [published]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Published stable tag (blank selects the current package version)
+        type: string
+        default: ""
+      dry_run:
+        description: Verify and prepare without signing, uploading or dispatching
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  checks: read
+
+concurrency:
+  group: registry-release-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'release' && !github.event.release.prerelease) ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event != 'pull_request' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      ready: ${{ steps.source.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Resolve an admitted published source using trusted main code
+        id: source
+        run: node scripts/registry-resolve.mjs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}
+          REGISTRY_AUTOMATIC: ${{ github.event_name == 'workflow_run' }}
+      - uses: actions/checkout@v7
+        if: steps.source.outputs.ready == 'true'
+        with:
+          ref: ${{ steps.source.outputs.commit }}
+          fetch-depth: 0
+          path: release-source
+      - name: Install the exact release toolchain
+        if: steps.source.outputs.ready == 'true'
+        working-directory: release-source
+        run: |
+          pnpm install --frozen-lockfile --ignore-pnpmfile
+          node scripts/validation/install-tools.mjs --ci
+      - name: Select the exact source and qualify registry artifacts in Docker
+        if: steps.source.outputs.ready == 'true'
+        working-directory: release-source
+        env:
+          RELEASE_COMMIT: ${{ steps.source.outputs.commit }}
+        run: |
+          jj git init --colocate .
+          jj --ignore-immutable edit "$RELEASE_COMMIT"
+          pnpm registry:check
+          pnpm registry:media:check
+          pnpm registry:prepare
+          mkdir -p .release/registry
+          cp -a .local/validation/runs/*/.release/registry/. .release/registry/
+      - uses: actions/upload-artifact@v7
+        if: steps.source.outputs.ready == 'true'
+        with:
+          name: registry-candidate
+          path: release-source/.release/registry/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: prepare
+    if: needs.prepare.outputs.ready == 'true' && (inputs.dry_run || vars.REGISTRY_PUBLICATION_APPROVED == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ inputs.dry_run && 'registry-verification' || 'registry-production' }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-pnpmfile
+      - uses: actions/download-artifact@v8
+        with:
+          name: registry-candidate
+          path: .release/registry
+      - name: Sign and verify the deterministic archive with the pinned release key
+        if: ${{ !inputs.dry_run }}
+        env:
+          LAPIS_PUBLICATION_APPROVED: "true"
+          LAPIS_PLUGIN_RELEASE_KEY_ID: ${{ secrets.LAPIS_PLUGIN_RELEASE_KEY_ID }}
+          LAPIS_PLUGIN_RELEASE_PRIVATE_KEY: ${{ secrets.LAPIS_PLUGIN_RELEASE_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          key_file="$(mktemp "$RUNNER_TEMP/plugin-key.XXXXXX")"
+          trap 'rm -f "$key_file"' EXIT
+          chmod 600 "$key_file"
+          printf '%s' "$LAPIS_PLUGIN_RELEASE_PRIVATE_KEY" > "$key_file"
+          export LAPIS_PLUGIN_RELEASE_PRIVATE_KEY_FILE="$key_file"
+          unset LAPIS_PLUGIN_RELEASE_PRIVATE_KEY
+          pnpm registry:sign
+      - uses: actions/create-github-app-token@v3
+        id: registry-app
+        if: ${{ !inputs.dry_run }}
+        with:
+          client-id: ${{ secrets.LAPIS_REGISTRY_APP_CLIENT_ID }}
+          private-key: ${{ secrets.LAPIS_REGISTRY_APP_PRIVATE_KEY }}
+          owner: lapismd
+          repositories: plugin-registry
+          permission-contents: write
+      - name: Verify published assets and submit the one-file registry request
+        run: pnpm registry:publish
+        env:
+          LAPIS_PUBLICATION_APPROVED: "true"
+          REGISTRY_DRY_RUN: ${{ inputs.dry_run || false }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY_GITHUB_TOKEN: ${{ steps.registry-app.outputs.token }}
+      - name: Record the outcome
+        run: echo "Registry artifact verification completed; see the publish step for the submitted coordinates or read-only result." >> "$GITHUB_STEP_SUMMARY"

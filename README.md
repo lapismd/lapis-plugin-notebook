@@ -13,9 +13,22 @@ workspace.
 The plugin owns notebook documents, execution, panels, and settings. Hosts
 own routing, vault state, persistence, and application policy.
 
+[![Plugin workspace](registry-assets/banner.preview.webp)](registry-assets/banner.full.webp)
+
+<details>
+<summary>Plugin screenshots</summary>
+
+[![Research notebook](registry-assets/gallery/research.preview.webp)](registry-assets/gallery/research.full.webp)
+
+[![Interactive analysis](registry-assets/gallery/interactive.preview.webp)](registry-assets/gallery/interactive.full.webp)
+
+</details>
+
+Registry publication and manual verification: [publishing guide](docs/registry-publishing.md).
+
 ## Current package status
 
-- Package version: `@lapis-notes/lapis-plugin-notebook@0.2.0`. Validation uses
+- Prepared package version: `@lapis-notes/lapis-plugin-notebook@0.2.1` (publication pending). Validation uses
   published registry dependencies; qualification and publication evidence is
   tracked in `spec/records/2026-10-31-notebook-canvas-release.md`.
 - Runtime plugin id: `lapis-notebook` (preserved from the legacy plugin so
