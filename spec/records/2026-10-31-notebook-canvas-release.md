@@ -169,3 +169,22 @@ was cancelled after confirming the replacement's identical source SHA; its
 cancellation is not a validation pass. The publishing workflow retains the
 complete required validation and protected npm gate. Publication/verification
 remain pending; approve only its eligible cohort deployment after those checks.
+
+### Notes registry cohort released — 1 November, 02:06 UTC
+
+Run `41262301909` passed full release-candidate validation and publication.
+The first verification job failed once while npm was still processing
+Workspace 0.3.2 (`ERR_PNPM_NO_MATCHING_VERSION` after its existing bounded
+retries). After all four versions became visible, reran only failed jobs;
+attempt 2 passed registry installation, integrity/provenance and GitHub releases.
+No source change, retry-policy increase, republish or assertion waiver occurred.
+All four releases are now verified from `ff088a423a939fe3c08406aebbe95c795f290f47`:
+API 0.2.4, UI 0.1.6, Workspace 0.3.2 and File Explorer 0.2.1 (existing next-tag
+policy retained). The original failed receipt remains part of the record.
+
+Markdown's final registry graph now uses these packages and Core 0.9.0;
+the two temporary Core peer warnings are gone. Focused isolated Docker checks
+passed strict checking/build/publint, 154 units, package metadata/boundaries,
+App/native CSS/story parity and audit (only its unchanged two ignored lows).
+Specifications and formatting passed; refreshed PR #49 goes through full CI
+before merge. No CSV or other plugin runtime file changed.
