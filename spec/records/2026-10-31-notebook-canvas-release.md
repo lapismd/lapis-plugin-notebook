@@ -219,3 +219,24 @@ merged source, preserving its prior named snapshot. Existing unrelated local
 bookmark conflicts were not rewritten. Normal version workflow `41265857176`
 is preparing the Changesets PR. Expect Markdown 0.2.1 plus the separate History
 0.2.1 metadata intent; publication remains selected for Markdown only.
+
+### Plugin version merged and scoped release started — 02:52 UTC
+
+Version PR #50 exact head `b6e43b7492fc733f2e7106f16c1d8c4ec3867915`
+passed full CI `41266192666` (0 failing applicable jobs). Reviewed scope was
+the two expected 0.2.1 versions and matching manifests/README/changelogs;
+no extra bumps or lock churn. Merge source:
+`f1b8823d3f1ce8e238a61f529d0fb5c66deabb43`.
+Preflight found no Dependabot PRs, inspected all nine workspaces without
+snapshotting, and preserved one unrelated dirty release workspace. Receipt:
+`.local/release-watch/2026-11-01/plugins-version-preflight-0251.json`.
+
+Fetched main and updated the clean default Plugins checkout to the versioned
+source. Dispatched normal static `release.yml` run `41266913507` on that exact
+main SHA, with Markdown true and every other plugin, including History, false;
+asset replacement false. Inputs are retained in ignored
+`markdown-021-release-inputs.json`. First CLI dispatch failed before creating
+a run because gh requires string input values; corrected that representation
+and the exact scoped dispatch succeeded. No publication or asset replacement
+occurred from the failed invocation. Protected release gates remain intact;
+Markdown publication/verification are pending and History is not selected.
