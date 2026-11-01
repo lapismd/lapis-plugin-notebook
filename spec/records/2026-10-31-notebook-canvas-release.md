@@ -116,3 +116,20 @@ Core's default checkout now has active, unrelated Button/Storybook edits on
 the feature-merged source. Remote main is fetched, but updating its working-copy
 parent to the version merge is deferred to avoid rewriting an active owner's
 work. The existing checkout is preserved; refresh it after a safe checkpoint.
+
+### Core 0.9 released — 1 November, 01:01 UTC
+
+Release workflow `41258271966` completed all five jobs, including trusted npm
+publication, clean installed-package integrity/provenance and GitHub tag/release.
+Published source: `a31e02a7eb8a96f9d1df6b4caf6fd39352780b44`.
+Registry integrity: `sha512-xIqcgSbzrUnSxRtTmfi5DsUyjgbi3ggiW3UNgHhdED9YfT8SSRayTIVZD78nMvzJxl7MgKRepwrhgovsqskjjg==`.
+Release: https://github.com/lapismd/design-core/releases/tag/design-core%400.9.0.
+
+Notes' eight manifests and registry lock now target/admit published Core 0.9.0,
+preserving supported public ranges. Focused spec-first/validation, formatting
+and Docker package policies/100 release tests passed (0 failures). Notes #60
+new signed head `30437df70725ea71973b0e8724ab11e6bd0c55b9` is in full CI
+`41259587797`. This includes the Explorer compatibility patch intent.
+Markdown's 0.9 range/catalog intake is prepared locally but waits for Notes'
+API/UI/Workspace/Explorer registry patches to remove temporary Core peer
+mismatches before its final CI. No newly mismatched graph will be published.
