@@ -365,3 +365,14 @@ CI, merge or Notebook publication has occurred. The next step requires restoring
 the configured 1Password signer, then a fresh Dependabot/workspace preflight and
 signed push of the qualified feature plus receipts. Require full exact-head CI
 before ready/merge, and fresh merged-source Docker packing before publication.
+
+A read-only follow-up found that 1Password's own SSH socket lists the configured
+public signing key, unlike the ordinary SSH agent. One push attempt explicitly
+selected that socket while retaining the existing key, backend/program and
+`git.sign-on-push=true`; it still failed before GitHub with
+`1Password: agent returned an error`. The fresh Dependabot audit was empty and
+all seven workspace revisions were unchanged. Public-key listing therefore does
+not establish signing readiness. Do not issue more signing requests solely
+because the key remains listed; await signer restoration or user steering.
+Ignored `notebook-signer-state.json` records the observed 1Password process
+identity for detecting a service restart without requesting signatures.
