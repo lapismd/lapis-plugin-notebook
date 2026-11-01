@@ -100,3 +100,19 @@ and update their default checkouts after landing, preserving unrelated changes.
 Notes' active overlapping session work remains untouched. Core version PR #52
 is prepared for 0.9.0 at `047b9fdc`; normal CI `41256135610` was triggered by
 human reopen after its initial bot run failed before executing jobs.
+
+### Core version merged — 1 November, 00:47 UTC
+
+Version PR #52 exact head `047b9fdcb3e343c70832cbe3e4a0c0b05da5d2de`
+passed all 11 required jobs at CI `41256135610`; 0 failures. The exact-head
+merge produced `a31e02a7eb8a96f9d1df6b4caf6fd39352780b44`. Publication is
+pending its normal protected release workflow, not yet claimed complete.
+Preflight refreshed remote main, found no Dependabot PRs, and inspected all 23
+Core workspaces without snapshotting active work. Receipt:
+`.local/release-watch/2026-11-01/core-version-preflight-0046.json`.
+Nine roots were unavailable; all unrelated work remains excluded and preserved.
+
+Core's default checkout now has active, unrelated Button/Storybook edits on
+the feature-merged source. Remote main is fetched, but updating its working-copy
+parent to the version merge is deferred to avoid rewriting an active owner's
+work. The existing checkout is preserved; refresh it after a safe checkpoint.
