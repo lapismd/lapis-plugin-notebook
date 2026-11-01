@@ -376,3 +376,15 @@ not establish signing readiness. Do not issue more signing requests solely
 because the key remains listed; await signer restoration or user steering.
 Ignored `notebook-signer-state.json` records the observed 1Password process
 identity for detecting a service restart without requesting signatures.
+
+### Signing restored and final CI started — 1 November, 09:16 UTC
+
+On the user's explicit retry, a fresh no-Dependabot audit and seven-workspace
+revision inspection passed. The unchanged configured 1Password signer worked
+through its own SSH socket; Jujutsu signed 15 commits and pushed the explicit
+`feat/shared-canvas-tables` bookmark through `codex-https`. Final remote head:
+`05747fceeef640beb81a182f4268ccfc7b26ea1b`. Full normal PR CI
+`41288148911` is running on that exact head. No source or test change was needed
+to restore the push. GitHub's signature API reports `unknown_key` for the SSH
+key, so a GitHub Verified badge is not claimed; cryptographic signatures and
+repository protections remain intact.
