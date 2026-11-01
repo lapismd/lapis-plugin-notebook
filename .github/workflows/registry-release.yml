@@ -125,7 +125,7 @@ jobs:
           export LAPIS_PLUGIN_RELEASE_PRIVATE_KEY_FILE="$key_file"
           unset LAPIS_PLUGIN_RELEASE_PRIVATE_KEY
           pnpm registry:sign
-      - uses: actions/create-github-app-token@v3
+      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3
         id: registry-app
         if: ${{ !inputs.dry_run }}
         with:

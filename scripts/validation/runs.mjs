@@ -1,3 +1,8 @@
+import { specificationDockerArguments } from "../dependency-automation/spec-policy.mjs";
+const docker = (config, args) =>
+  dockerWithoutPrContext(config, specificationDockerArguments(args));
+const output = (config, args) =>
+  outputWithoutPrContext(config, specificationDockerArguments(args));
 import { execFileSync } from "node:child_process";
 import { writeFile, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
@@ -13,7 +18,11 @@ import {
   leaseReleaseAllowed,
 } from "./model.mjs";
 import { activeOwnedRuns, collect } from "./reports.mjs";
-import { output, docker, sendDirectory } from "./docker.mjs";
+import {
+  output as outputWithoutPrContext,
+  docker as dockerWithoutPrContext,
+  sendDirectory,
+} from "./docker.mjs";
 import { forwardReview } from "./review-forward.mjs";
 import { snapshot } from "./source.mjs";
 
@@ -183,9 +192,15 @@ export async function remoteRun(config, root, lane, args) {
     try {
       if (lane === "storybook:review") {
         await docker(config, ["start", run]);
-        const stopForward = await forwardReview(config, config.reviewPort ?? 10529);
-        try { await docker(config, ["logs", "--follow", run]); }
-        finally { stopForward(); }
+        const stopForward = await forwardReview(
+          config,
+          config.reviewPort ?? 10529,
+        );
+        try {
+          await docker(config, ["logs", "--follow", run]);
+        } finally {
+          stopForward();
+        }
       } else await docker(config, ["start", "--attach", run]);
     } catch (error) {
       failure = error;
