@@ -421,3 +421,12 @@ The exact focused rerun passed 12/12 (0 failures), report
 `lapis-notebook-run-d4182d57-cc73-4363-9a32-047ab340f976`. Existing negative
 archive cases remain required; the new explicit-missing-inventory rejection
 passes before and after the repair. Cold packed-consumer acceptance follows.
+
+Cold Docker `pnpm packages:pack` passed from the committed repair, report
+`lapis-notebook-run-67d5062b-5324-4900-ae6a-9418d6372b6d`: fresh build, publint,
+public declaration checking, registry-only installation and development/production
+App/plugin boot and teardown, with fatal diagnostics retained. No candidate
+archives were installed. Packed bytes still hash to
+`6a88c5d7dff151260f4209a5dd768f3fe93f4f32a2bc5305b5a3348ce4be49d3`,
+confirming that the CI-input repair does not alter the runtime payload. A new full
+CI run on the signed repair head remains mandatory.
