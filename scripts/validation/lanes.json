@@ -27,5 +27,7 @@
   "registry:prepare": "pnpm build:bundle && node scripts/registry-release.mjs prepare",
   "registry:media:capture": "node scripts/registry-media.mjs",
   "registry:media:check": "node scripts/registry-media.mjs --check",
-  "registry:check": "vitest run --project unit scripts/registry-*.test.mjs --maxWorkers=1 --no-file-parallelism"
+  "registry:check": "vitest run --project unit scripts/registry-*.test.mjs --maxWorkers=1 --no-file-parallelism",
+  "release:check": "vitest run --project unit scripts/release*.test.mjs --maxWorkers=1 --no-file-parallelism",
+  "release:prepare": "pnpm build && node scripts/release.mjs prepare"
 }

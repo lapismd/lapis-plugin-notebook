@@ -14,6 +14,8 @@ export const aggregateLanes = Object.freeze([
   "registry:check",
   "registry:media:check",
   "registry:prepare",
+  "release:check",
+  "release:prepare",
 ]);
 
 /** The outer Docker runner owns the one snapshot, lease and installation. */
