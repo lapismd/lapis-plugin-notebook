@@ -300,3 +300,49 @@ The first nested-checkout attempt stopped before checks when the parent
 working-copy documentation update rebased its empty child, making the checkout
 stale during image selection. The source refresh is committed before updating
 the qualification checkout and retrying; no running check is counted as a pass.
+
+### Isolated registry qualification evidence
+
+Committed refresh `4225a758401b7d9ec7f4de80a2cc9bbcb6133412` is under test
+through its identical-tree empty qualification child `13814341d67f348f98e4d2926948635e0916ad23`.
+Remote report: `lapis-notebook-run-e1b6953b-6e19-477e-bafa-c83ecfa6e11f`.
+Full strict checks and 510 units passed, as did build, publint, public declaration
+usage and both cold development/production npm consumers with real App/plugin
+load and teardown. The packed tarball SHA-256 was
+`6a88c5d7dff151260f4209a5dd768f3fe93f4f32a2bc5305b5a3348ce4be49d3`;
+its `candidateArchives` list was empty. Static Storybook also passed.
+All 67 interaction/axe stories passed across three fresh shards (18 + 18 + 31),
+and final specification/mdBook/spec-first/App checks passed. The complete eight-lane
+`pnpm validation:all` finished successfully at 03:51:36 UTC on 1 November.
+No candidate archives or local dependency resolutions were used.
+
+The disposable npm consumer install reported 11 advisories (10 low, 1 high).
+Its temporary directory was removed after successful acceptance before an audit
+capture could be made. A separate read-only worker `pnpm audit --json` of the
+tracked frozen graph reports 3 low, 6 moderate, 3 high and 2 critical advisories.
+Repeating that exact audit against the pre-refresh `397b9f95` package/workspace/lock
+files in a separate worker temporary directory gives identical advisory IDs,
+versions and counts. Full receipts are retained as ignored
+`notebook-registry-audit.json` and `notebook-baseline-audit.json`.
+
+The high/critical findings are unchanged development tooling: Vite 6.4.3
+(GHSA-587h-7wmj-h5pm; patched 6.4.4) and Storybook/addon-vitest 10.5.7
+(GHSA-f2ph-cmg5-wxc8 and GHSA-px85-f4q5-jh77; patched 10.6.2).
+Notebook owns that separate toolchain follow-up. This is not an audit pass,
+CVE ignore or baseline approval; no audit policy, dependency script approval,
+assertion, diagnostic guard or running review server was changed. The standard
+Notebook qualification lanes have no audit gate; their results remain separately
+reported from this additional diagnostic.
+
+Push preflight inspected all seven live Notebook workspaces without snapshotting
+other owners and found no open Dependabot PRs. Historical/unrelated work remains
+excluded and preserved; the nested qualification checkout is an identical-tree
+copy of the selected source. Receipt:
+`.local/release-watch/2026-11-01/notebook-registry-preflight.json`.
+Full GitHub CI on the final signed head remains mandatory before merge.
+
+Final canonical verification/receipt edits passed formatter, QMD index refresh
+and Docker `pnpm spec:check`, report
+`lapis-notebook-run-9724d63b-5023-4eeb-b5ec-cd8c219559bd` (specification,
+mdBook, spec-first, story/routing and App audit passed). No product suite was
+repeated for those documentation-only edits.

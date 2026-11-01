@@ -409,3 +409,12 @@ UI and typed selection/lifecycle implementation are retained. Historical
 Docker qualification, cold packed-plugin supported-host acceptance and exact-head
 CI. Those final gates are now in progress; visual baselines remain unapproved.
 See the release record for exact coordinates and receipts.
+
+Final registry-only `pnpm validation:all` passed on 1 November at 03:51 UTC:
+510 units, 67 interaction/axe stories, strict checks, build/publint, static
+Storybook, specification checks and cold development/production public consumers.
+Report: `lapis-notebook-run-e1b6953b-6e19-477e-bafa-c83ecfa6e11f` in the
+nested qualification checkout. No candidate archives were used. GitHub exact-head
+CI, merge and publication remain separate gates. Existing development-tool
+audit findings reproduce unchanged in the prior dependency graph; see the release
+record for their IDs and owner follow-up. Visual baselines remain unapproved.
