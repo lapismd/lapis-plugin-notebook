@@ -41,16 +41,23 @@ describe("Notebook automatic Changesets releases", () => {
       ),
     );
     expect(workflow.on.push.branches).toEqual(["main"]);
-    expect(workflow.jobs.version.if).toBe("github.ref == 'refs/heads/main'");
+    expect(workflow.jobs.version.if).toBe(
+      "github.ref == 'refs/heads/main' && vars.LAPIS_DEPENDENCY_VERSION_PR_ENABLED == 'true'",
+    );
     const action = workflow.jobs.version.steps.find((step) =>
       step.uses?.startsWith("changesets/action@"),
     );
     expect(action.with.version).toBe("pnpm release:version");
     expect(action.with.commitMode).toBe("github-api");
-    expect(workflow.permissions).toEqual({
-      contents: "write",
-      "pull-requests": "write",
-    });
+    expect(workflow.permissions).toEqual({ contents: "read" });
+    expect(action.env.GITHUB_TOKEN).toBe("${{ steps.app.outputs.token }}");
+    const app = workflow.jobs.version.steps.find((step) => step.id === "app");
+    expect(app.with.owner).toBe("${{ github.repository_owner }}");
+    expect(app.with.repositories).toBe("${{ github.event.repository.name }}");
+    expect(app.with["permission-contents"]).toBe("write");
+    expect(app.with["permission-pull-requests"]).toBe("write");
+    expect(action.with.publish).toBeUndefined();
+    expect(action.with.createGithubReleases).toBe(false);
   });
   it("qualifies one immutable artifact before allowing main-source publication", () => {
     const workflow = parse(
@@ -76,6 +83,12 @@ describe("Notebook automatic Changesets releases", () => {
     expect(workflow.jobs["release-plan"].if).toContain(
       "github.event_name != 'pull_request'",
     );
+    const notification = workflow.jobs["notify-dependencies"];
+    expect(notification.needs).toEqual(["publish"]);
+    expect(notification.if).toBe(
+      "always() && needs.publish.result == 'success'",
+    );
+    expect(notification.with["source-sha"]).toBe("${{ github.sha }}");
     const publish = workflow.jobs.publish;
     expect(publish.needs).toEqual(["validate", "release-plan"]);
     expect(publish.if).toBe("needs.release-plan.outputs.publish == 'true'");
