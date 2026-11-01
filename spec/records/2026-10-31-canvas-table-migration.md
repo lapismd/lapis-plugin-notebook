@@ -398,3 +398,14 @@ Resume with spec/records/2026-10-31-notebook-canvas-release.md. Publication,
 registry refresh/registry-only acceptance, pushing and merging remain separately
 authorized gates. The registered Docker review worker restores loopback port
 10529; original Storybooks 10329/10429 and default workspaces are preserved.
+
+### Released host cohort refresh — 1 November
+
+Core 0.9.0, API 0.2.4, UI 0.1.6, Workspace 0.3.2, File Explorer 0.2.1 and
+Markdown 0.2.1 are verified releases. Notebook 0.2.0 now consumes those registry
+packages in its runtime peer minimums/development graph. The previously approved
+UI and typed selection/lifecycle implementation are retained. Historical
+510-unit/67-story candidate evidence does not replace final registry-only
+Docker qualification, cold packed-plugin supported-host acceptance and exact-head
+CI. Those final gates are now in progress; visual baselines remain unapproved.
+See the release record for exact coordinates and receipts.

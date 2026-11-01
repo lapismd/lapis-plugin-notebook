@@ -15,12 +15,13 @@ own routing, vault state, persistence, and application policy.
 
 ## Current package status
 
-- Public package: `@lapis-notes/lapis-plugin-notebook@0.1.0`. The repository
-  validates against published registry dependencies.
+- Package version: `@lapis-notes/lapis-plugin-notebook@0.2.0`. Validation uses
+  published registry dependencies; qualification and publication evidence is
+  tracked in `spec/records/2026-10-31-notebook-canvas-release.md`.
 - Runtime plugin id: `lapis-notebook` (preserved from the legacy plugin so
   persisted plugin-data keys stay compatible).
-- Runtime peers: `@lapis-notes/api@^0.2.2`, `@lapis-notes/markdown@^0.2.0`,
-  `@lapismd/design-core@^0.7.2`, `@lapis-notes/ui@^0.1.5`, `svelte@^5`.
+- Runtime peers: `@lapis-notes/api@^0.2.4`, `@lapis-notes/markdown@^0.2.1`,
+  `@lapismd/design-core@^0.9.0`, `@lapis-notes/ui@^0.1.6`, `svelte@^5`.
 - Canonical repository: `lapismd/lapis-plugin-notebook`.
 - Live catalog: <https://lapismd.github.io/lapis-plugin-notebook/>.
 - The port is staged per `spec/src/plugins/notebook/`; verification

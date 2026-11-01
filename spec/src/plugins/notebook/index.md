@@ -20,10 +20,10 @@ its six private support packages from `legacy-lapis-notes`. Ported behavior
 keeps its legacy regression evidence; presentation remaps onto public
 `@lapismd/design-core` exports instead of re-creating primitives. The tracked
 dependency cohort resolves published registry versions — peers
-`@lapismd/design-core@^0.7.2`, `@lapis-notes/api@^0.2.2`, and
-`@lapis-notes/markdown@^0.2.0` and `@lapis-notes/ui@^0.1.5`, with the Storybook host cohort pinned in
-development at `@lapis-notes/ui@0.1.5`, `@lapis-notes/workspace@0.3.1`,
-`@lapis-notes/file-explorer@0.2.0`, `@lapis-notes/search@0.1.4`, and
+`@lapismd/design-core@^0.9.0`, `@lapis-notes/api@^0.2.4`, and
+`@lapis-notes/markdown@^0.2.1` and `@lapis-notes/ui@^0.1.6`, with the Storybook host cohort pinned in
+development at `@lapis-notes/ui@0.1.6`, `@lapis-notes/workspace@0.3.2`,
+`@lapis-notes/file-explorer@0.2.1`, `@lapis-notes/search@0.1.4`, and
 `@lapismd/mira@0.1.3`; local sibling source snapshots MAY replace matching
 installs through `.pnpmfile.cjs` per LPN-SPEC-005. The runtime
 plugin id `lapis-notebook` is preserved from the legacy plugin so persisted
@@ -31,6 +31,12 @@ plugin data keys remain compatible. The DuckDB-WASM engine dependency is
 pinned exactly at `1.33.1-dev45.0` in root dependencies per LPN-SPEC-004 so
 query behavior cannot drift independently from the ported compatibility
 tests.
+
+Notebook 0.2.0 requires the released CanvasTable/FilterBuilder host cohort above.
+Package and runtime manifest versions MUST both be 0.2.0. Typed rows, selection,
+execution, persistence and renderer ABI 5.56.10 retain their existing contracts.
+Final publication requires registry-only qualification and cold packed-plugin
+acceptance against the supported hosts.
 
 Development tooling includes registry Turbo for the container CI build, quality
 and unit task cache; it adds no runtime dependency or published export.

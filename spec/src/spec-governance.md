@@ -18,10 +18,10 @@ LPN-SPEC-021. Containers use four standard public-runner CPUs, bounded to
 timeouts remain unchanged. Both open action updates are consolidated into
 one dependency PR.
 
-Tracked dependencies use registry Design Core `0.7.2` and Mira `0.1.3`, with
-the published Lapis host cohort at `@lapis-notes/api@0.2.2`,
-`@lapis-notes/ui@0.1.5`, `@lapis-notes/workspace@0.3.1`,
-`@lapis-notes/file-explorer@0.2.0`, `@lapis-notes/markdown@0.2.0`, and
+Tracked dependencies use registry Design Core `0.9.0` and Mira `0.1.3`, with
+the published Lapis host cohort at `@lapis-notes/api@0.2.4`,
+`@lapis-notes/ui@0.1.6`, `@lapis-notes/workspace@0.3.2`,
+`@lapis-notes/file-explorer@0.2.1`, `@lapis-notes/markdown@0.2.1`, and
 `@lapis-notes/search@0.1.4`. Explicit temporary source acceptance follows
 LPN-SPEC-014 with verified sibling archives in isolated worker installations;
 publication and consumer adoption remain separate gates. Source ownership and

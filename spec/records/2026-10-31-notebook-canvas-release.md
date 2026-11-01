@@ -240,3 +240,63 @@ a run because gh requires string input values; corrected that representation
 and the exact scoped dispatch succeeded. No publication or asset replacement
 occurred from the failed invocation. Protected release gates remain intact;
 Markdown publication/verification are pending and History is not selected.
+
+### Markdown released and registry intake merged — 1 November
+
+Scoped static workflow `41266913507` passed from
+`f1b8823d3f1ce8e238a61f529d0fb5c66deabb43`, selecting only Markdown.
+`@lapis-notes/markdown@0.2.1` is published with integrity
+`sha512-/G7S3fHWE+NJEdMSB6KCGEhbgB/bSpeJ9SkOaMYIRZ3q7ELuCvDfhO1rdRIE2J5VA8GJY0g69G7n7nCQrZugCA==`.
+The owner `verifiedPublishedCoordinates` helper independently verified the
+6,001,101-byte archive, checksum, Ed25519 signature, signed file list, package
+coordinates and tag-to-source commit. GitHub release:
+<https://github.com/lapismd/lapis-plugins/releases/tag/markdown%400.2.1>.
+History 0.2.1 remains versioned but unpublished and outside the selection.
+
+Registry intake PR #58 added only `submissions/markdown/0.2.1.jsonc`; exact
+head `479bd5c781a5bfde441f5057a8d3ccf13bc25035` passed checks
+`41269152825` and merged as `d97e63faf188634bbeb293b05d1844d807bf8338`.
+Registry publication PR #55 contains unrelated PDF entries; it is outside this
+cohort and must not be merged without separate scope authorization.
+
+### Final Notebook registry refresh started
+
+Package and runtime manifest advance together to 0.2.0. Runtime peer minimums
+are API 0.2.4, Markdown 0.2.1, UI 0.1.6 and Core 0.9.0. The development host
+cohort additionally pins Workspace 0.3.2 and File Explorer 0.2.1. Existing
+Search 0.1.4, Mira 0.1.3, CodeMirror/Lezer and renderer Svelte 5.56.10 remain.
+Registry-only lock regeneration passed without peer warnings. No runtime
+behavior, typed row, selection, lifecycle, persistence or wire-format change.
+
+Latest Deno-free validator remains 0.2.0. `pnpm exec spec-validator doctor`
+passed 10 checks with the expected Docker wrapper script-alias warning;
+`pnpm spec:search "canvas table released registry cohort"` and `pnpm spec:index`
+passed. An earlier literal `--` search invocation was rejected before search;
+the supported invocation passed. `pnpm validation:all` now runs through Docker
+with registry-only installs and no candidate archives; final results pending.
+
+The first aggregate attempt, `lapis-notebook-run-ee35c0be-b491-49c0-8d7d-02278d9ea7af`,
+stopped before installation/checks because the preserved remote 10529 review
+worker holds this checkout's lease. No worker or lease was removed. The supported
+Docker Desktop `desktop-linux` daemon is available independently, so the same
+registry-only aggregate was restarted there through the normal Docker runner.
+This is a Docker transport change in ignored local configuration, with no native
+fallback, tracked runner change or review-process interruption.
+
+Docker Desktop run `lapis-notebook-run-fae81592-1227-4e04-b236-b8035a55468a`
+passed full strict checking (0 errors/0 warnings), routing/story/App/CSS audits,
+specification validation and all 510 units in 88 files. It then failed during
+bundle chunk rendering: Docker inspect confirms `OOMKilled: true` and a Docker
+OOM event. The Desktop VM provides about 3 GiB; no product diagnostic preceded
+the resource kill. Later aggregate lanes did not run and are not counted passed.
+
+Created an independent JJ qualification checkout under this authorized root at
+`.local/release-watch/2026-11-01/registry-qualification`, with its own checkout
+lease and immutable source snapshot. Its normal `pnpm validation:all` uses the
+remote omarchy Docker daemon, without disturbing the review checkout or changing
+global Docker capacity. No checks, resource assertions or runner policy changed.
+
+The first nested-checkout attempt stopped before checks when the parent
+working-copy documentation update rebased its empty child, making the checkout
+stale during image selection. The source refresh is committed before updating
+the qualification checkout and retrying; no running check is counted as a pass.
