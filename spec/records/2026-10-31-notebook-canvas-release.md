@@ -346,3 +346,22 @@ and Docker `pnpm spec:check`, report
 `lapis-notebook-run-9724d63b-5023-4eeb-b5ec-cd8c219559bd` (specification,
 mdBook, spec-first, story/routing and App audit passed). No product suite was
 repeated for those documentation-only edits.
+
+### Signed push blocked — 1 November, 03:56 UTC
+
+The qualified source and receipt commits are `4225a758401b7d9ec7f4de80a2cc9bbcb6133412`
+and `c368cd6aa112a0a841117881968519a94e0fdd42`. After fresh no-Dependabot
+audits, two explicit `jj git push --remote codex-https --bookmark
+feat/shared-canvas-tables` attempts failed before reaching GitHub. Both returned:
+`Signing error: SSH sign failed with exit status 1: 1Password: failed to fill whole buffer`.
+The configured SSH signer is the 1Password `op-ssh-sign` program;
+`git.sign-on-push=true` remains enabled. The configured key was not available
+through the ordinary SSH agent as an alternative. No signing configuration,
+key, policy or protection was changed, and no unsigned push was attempted.
+
+Remote PR #7 remains draft at `397b9f95881d26828def243ba92e2bd0dd2dceb3`;
+its updated description records the final local registry qualification. No new
+CI, merge or Notebook publication has occurred. The next step requires restoring
+the configured 1Password signer, then a fresh Dependabot/workspace preflight and
+signed push of the qualified feature plus receipts. Require full exact-head CI
+before ready/merge, and fresh merged-source Docker packing before publication.
