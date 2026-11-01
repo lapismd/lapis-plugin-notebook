@@ -205,3 +205,17 @@ separate from the selected Markdown release. Updated PR #49 describes the final
 scope and is pushed at `bb3a6a4526a7eb5826b2b8763d18c61142248ea5`; full CI
 `41265025659` must pass before merge. Retain the original failure receipt and
 the exact before/after Docker receipts in the Plugins compatibility record.
+
+### Plugins compatibility merged — 1 November, 02:35 UTC
+
+PR #49 exact head `bb3a6a4526a7eb5826b2b8763d18c61142248ea5` passed all
+required lanes at CI `41265025659` (13 successful jobs, 0 failures; the normal
+optional specification job was skipped, with source specification checks already
+passed as recorded). GitHub reported CLEAN before the exact-head merge.
+Merge source: `edefb28f0c126c7bdbb5777782886b9095528540`.
+
+Fetched remote main and updated the clean default Plugins workspace to that
+merged source, preserving its prior named snapshot. Existing unrelated local
+bookmark conflicts were not rewritten. Normal version workflow `41265857176`
+is preparing the Changesets PR. Expect Markdown 0.2.1 plus the separate History
+0.2.1 metadata intent; publication remains selected for Markdown only.
