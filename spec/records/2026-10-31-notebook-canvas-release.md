@@ -92,3 +92,11 @@ been published yet. Plugins #49's initial CI `41254770785` also passed its
 aggregate, but its Core 0.9 range refresh still precedes merge/release.
 Notes corrected-head run `41255428727` passed governance, unit, quality,
 static Storybook and release artifacts; browser lanes were still running.
+
+The user additionally requested default checkout refresh after every merge.
+Core's default workspace now has a clean empty change on merged remote main
+`b426f975`; the previous snapshot remains recoverable. Fetch the other owners
+and update their default checkouts after landing, preserving unrelated changes.
+Notes' active overlapping session work remains untouched. Core version PR #52
+is prepared for 0.9.0 at `047b9fdc`; normal CI `41256135610` was triggered by
+human reopen after its initial bot run failed before executing jobs.
