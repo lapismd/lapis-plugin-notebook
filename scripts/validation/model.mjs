@@ -123,6 +123,10 @@ export function browserInvocations(args, fileCount = Number.POSITIVE_INFINITY) {
 export function auditRouting(scripts, lanes) {
   const findings = [];
   const native = {
+    "release:version": "node scripts/release.mjs version",
+    "release:plan": "node scripts/release.mjs plan",
+    "release:publish": "node scripts/release.mjs publish",
+    "release:verify": "node scripts/release.mjs verify",
     "registry:publish": "node scripts/registry-release.mjs publish",
     "registry:sign": "node scripts/registry-release.mjs sign",
     storybook:

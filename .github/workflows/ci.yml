@@ -16,12 +16,13 @@ defaults:
 
 concurrency:
   group: notebook-ci-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   # The native port runs inside the pinned, isolated job container, as in Plugins.
   LAPIS_NOTEBOOK_VALIDATION_RUNTIME: native
   LAPIS_NOTEBOOK_VALIDATION_WORKER: "1"
+  LAPIS_NOTEBOOK_VALIDATION_ARCHIVE_COUNT: "0"
   COREPACK_HOME: /tmp/lapis-notebook-corepack
   PLAYWRIGHT_BROWSERS_PATH: /tmp/lapis-notebook-browsers
   TURBO_API: ${{ vars.TURBO_API }}
@@ -127,6 +128,14 @@ jobs:
       - run: pnpm exec publint
       - name: Validate the public npm package in cold browser consumers
         run: pnpm packages:pack -- --already-built
+      - name: Prepare the exact qualified npm artifact
+        run: node scripts/release.mjs prepare
+      - uses: actions/upload-artifact@v7
+        with:
+          name: notebook-npm-${{ github.sha }}
+          path: .release/npm/
+          include-hidden-files: true
+          if-no-files-found: error
       - name: Report package cache restoration
         run: node scripts/report-turbo-cache.mjs --github-summary
 
@@ -193,3 +202,58 @@ jobs:
         env:
           CI_JOB_RESULTS: ${{ toJSON(needs) }}
         run: node scripts/aggregate-ci.mjs
+
+  release-plan:
+    name: Select an unpublished version
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.plan.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Hold publication while changesets remain or the version is already published
+        id: plan
+        run: node scripts/release.mjs plan
+
+  publish:
+    name: Publish and verify npm release
+    needs: [validate, release-plan]
+    if: needs.release-plan.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: npm-production
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - name: Install frozen registry dependencies and the current npm publisher
+        run: |
+          pnpm install --frozen-lockfile --ignore-pnpmfile
+          npm install --global npm@12.0.2
+      - uses: actions/download-artifact@v8
+        with:
+          name: notebook-npm-${{ github.sha }}
+          path: .release/npm
+      - name: Publish the qualified archive with trusted npm provenance and verify it
+        run: pnpm release:publish
+        env:
+          LAPIS_NOTEBOOK_RELEASE_APPROVED: "1"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: notebook-registry-receipt-${{ github.sha }}
+          path: .release/npm/
+          include-hidden-files: true
+          if-no-files-found: error

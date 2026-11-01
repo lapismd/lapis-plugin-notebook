@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import {
   defineConfig,
   singleIdVerification,
@@ -57,7 +58,9 @@ export default defineConfig(tableRequirements(), {
     qmd: { collection: "lapis-plugin-notebook-spec" },
     packageManifest: {
       name: "@lapis-notes/lapis-plugin-notebook",
-      version: "0.2.1",
+      version: JSON.parse(
+        readFileSync(new URL("./package.json", import.meta.url), "utf8"),
+      ).version,
       privateAllowed: false,
       portableDependencies: true,
       manifestPath: "manifest.json",

@@ -71,6 +71,7 @@ try {
   process.env.LAPIS_NOTEBOOK_VALIDATION_INPUT = input;
   process.env.CI = "true";
   const archives = validateArchives(source.archives);
+  process.env.LAPIS_NOTEBOOK_VALIDATION_ARCHIVE_COUNT = String(archives.length);
   const packagePath = join(root, "package.json"),
     lockPath = join(root, "pnpm-lock.yaml");
   const workspacePath = join(root, "pnpm-workspace.yaml");

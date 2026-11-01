@@ -1,5 +1,9 @@
 # Registry publication
 
+Source publication follows the automatic Changesets flow in [Package
+releases](releases.md): main pushes open a version PR, and merging that PR
+qualifies the package before protected npm publication and this registry flow.
+
 `registry.json` is the source of listing copy, banner, overview, gallery order,
 alt text and fixed screenshot story IDs. `pnpm registry:media:capture` generates
 cards in Docker. Copy `registry-assets/` from that run's report into this checkout

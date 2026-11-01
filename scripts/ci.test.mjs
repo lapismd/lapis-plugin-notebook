@@ -31,7 +31,9 @@ describe("Notebook CI gates", () => {
     expect(workflow.jobs.validate.if).toBe("always()");
     expect([...workflow.jobs.validate.needs].sort()).toEqual(
       Object.keys(workflow.jobs)
-        .filter((name) => name !== "validate")
+        .filter(
+          (name) => !["validate", "release-plan", "publish"].includes(name),
+        )
         .sort(),
     );
     expect(workflow.jobs.validate.steps.at(-1).env.CI_JOB_RESULTS).toBe(
@@ -67,6 +69,8 @@ describe("Notebook CI gates", () => {
     expect(browser.steps.at(-1).run).toBe(
       "pnpm test:storybook -- --shard=${{ matrix.shard }}/3",
     );
-    expect(JSON.stringify(workflow)).not.toContain("actions/setup-node");
+    for (const job of Object.values(workflow.jobs))
+      if (job.container)
+        expect(JSON.stringify(job)).not.toContain("actions/setup-node");
   });
 });
