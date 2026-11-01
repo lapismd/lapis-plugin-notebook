@@ -80,3 +80,15 @@ PR and verify 0.9.0 publication; refresh Notes and Markdown to that registry
 release; qualify/merge/release those owners; refresh and version Notebook;
 complete registry-only validation and cold packed-host acceptance before merging
 and publishing Notebook. Do not rerun Notebook's unchanged known failing head.
+
+### Core feature merged — 1 November, 00:16 UTC
+
+Core #51 exact head `7045760617b39fbd7d1d886c181e389a1d42a239` passed all
+11 CI jobs at run `41254765867`, including dependency audits and Validate;
+0 failing, cancelled or skipped required lanes. GitHub reported CLEAN before
+the exact-head merge. Merge source: `b426f97541aabed3a95b6c038aa1cdf4ba559224`.
+Automatic release/version workflow `41256032414` has started; 0.9.0 has not
+been published yet. Plugins #49's initial CI `41254770785` also passed its
+aggregate, but its Core 0.9 range refresh still precedes merge/release.
+Notes corrected-head run `41255428727` passed governance, unit, quality,
+static Storybook and release artifacts; browser lanes were still running.
