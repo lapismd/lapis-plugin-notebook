@@ -32,7 +32,13 @@ describe("Notebook CI gates", () => {
     expect([...workflow.jobs.validate.needs].sort()).toEqual(
       Object.keys(workflow.jobs)
         .filter(
-          (name) => !["validate", "release-plan", "publish"].includes(name),
+          (name) =>
+            ![
+              "validate",
+              "release-plan",
+              "publish",
+              "notify-dependencies",
+            ].includes(name),
         )
         .sort(),
     );

@@ -262,3 +262,16 @@ jobs:
           path: .release/npm/
           include-hidden-files: true
           if-no-files-found: error
+
+  notify-dependencies:
+    name: Notify dependency consumers
+    needs: [publish]
+    if: always() && needs.publish.result == 'success'
+    permissions:
+      contents: read
+    uses: lapismd/dependency-automation/.github/workflows/notify.yml@3ddac66ddc72da323f62a07a8fa7036626d6c051
+    with:
+      automation-ref: 3ddac66ddc72da323f62a07a8fa7036626d6c051
+      source-sha: ${{ github.sha }}
+    secrets:
+      app-private-key: ${{ secrets.LAPIS_DEPENDENCY_APP_PRIVATE_KEY }}
