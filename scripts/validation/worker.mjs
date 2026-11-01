@@ -68,6 +68,7 @@ try {
     throw Error("Source ancestry mismatch");
   process.env.LAPIS_NOTEBOOK_VALIDATION_RUNTIME = "native";
   process.env.LAPIS_NOTEBOOK_VALIDATION_WORKER = "1";
+  process.env.LAPIS_NOTEBOOK_VALIDATION_INPUT = input;
   process.env.CI = "true";
   const archives = validateArchives(source.archives);
   const packagePath = join(root, "package.json"),

@@ -166,3 +166,11 @@ sibling `file:` specifiers fails the worker install fail-closed.
 LPN-SPEC-022 review workers now project verified archive overrides over existing worker-only pins, restore tracked package/workspace/lock inputs, retain actual installed graphs, and expose only a checkout-owned loopback endpoint. Exact focused receipts remain separate from full qualification.
 
 LPN-SPEC-022 packed-consumer qualification MUST revalidate candidate archive identities and checksums inside the isolated worker, retain registry-portable tracked inputs, and verify strict public types plus cold development/production App boot and teardown. The generated consumer MUST own App creation in a mounted Svelte lifecycle and retain fatal runtime diagnostics through unmount.
+
+LPN-SPEC-022 the isolated-worker marker alone MUST NOT request candidate archive
+projection. A local snapshot worker MUST explicitly supply its verified inventory
+directory through `LAPIS_NOTEBOOK_VALIDATION_INPUT`. A hosted CI job with no
+archive input MUST use registry packages. When input is explicitly supplied, a
+missing or malformed inventory, invalid path, identity mismatch or checksum
+mismatch MUST remain fatal; absence of a requested inventory is not a registry
+fallback. Tracked manifests and locks remain unchanged in both modes.

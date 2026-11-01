@@ -15,10 +15,10 @@ export async function consumerArchiveConfiguration(
   target,
   {
     worker = process.env.LAPIS_NOTEBOOK_VALIDATION_WORKER,
-    input = "/input",
+    input = process.env.LAPIS_NOTEBOOK_VALIDATION_INPUT ?? null,
   } = {},
 ) {
-  if (worker !== "1") return null;
+  if (worker !== "1" || input == null) return null;
   const inventory = JSON.parse(
     await readFile(join(input, "source.json"), "utf8"),
   );

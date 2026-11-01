@@ -3,11 +3,12 @@ import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createHash } from "node:crypto";
-import { afterEach, expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { consumerArchiveConfiguration } from "./consumer-archives.mjs";
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const roots = [];
 afterEach(async () => {
+  vi.unstubAllEnvs();
   for (const root of roots.splice(0))
     await rm(root, { recursive: true, force: true });
 });
@@ -108,4 +109,35 @@ it("rejects changed public patch bytes", async () => {
   await expect(
     consumerArchiveConfiguration(f.target, { worker: "1", input: f.input }),
   ).rejects.toThrow(/patch checksum/);
+});
+
+it("uses registry packages when an isolated CI job has no archive input", async () => {
+  expect(
+    await consumerArchiveConfiguration("/unused", { worker: "1", input: null }),
+  ).toBeNull();
+});
+it("reads the explicitly supplied worker input from its environment", async () => {
+  const f = await fixture();
+  vi.stubEnv("LAPIS_NOTEBOOK_VALIDATION_INPUT", f.input);
+  const value = await consumerArchiveConfiguration(f.target, { worker: "1" });
+  expect(value.receipts).toEqual([f.entry]);
+});
+it("rejects a missing explicitly supplied archive inventory", async () => {
+  const f = await fixture();
+  await expect(
+    consumerArchiveConfiguration(f.target, {
+      worker: "1",
+      input: join(f.input, "missing"),
+    }),
+  ).rejects.toMatchObject({ code: "ENOENT" });
+});
+it("keeps an explicitly empty worker archive inventory on registry packages", async () => {
+  const f = await fixture();
+  await f.inventory([]);
+  expect(
+    await consumerArchiveConfiguration(f.target, {
+      worker: "1",
+      input: f.input,
+    }),
+  ).toBeNull();
 });

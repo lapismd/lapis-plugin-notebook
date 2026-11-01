@@ -388,3 +388,36 @@ through its own SSH socket; Jujutsu signed 15 commits and pushed the explicit
 to restore the push. GitHub's signature API reports `unknown_key` for the SSH
 key, so a GitHub Verified badge is not claimed; cryptographic signatures and
 repository protections remain intact.
+
+### Hosted CI packed-consumer input regression
+
+Exact-head CI `41288148911` completed with the package job and its blocking
+aggregate failing; every other job, including all three interaction/axe shards,
+passed. Package job `124794236952` failed at
+`pnpm packages:pack -- --already-built` with one
+`ENOENT: /input/source.json` before consumer installation. Hosted CI legitimately
+sets the isolated-worker marker but does not have a local source-pack inventory.
+The previous local full aggregate had that inventory, so it did not expose this
+mode distinction. No product runtime or dependency defect is inferred.
+
+Added focused regression coverage, then ran the exact Docker
+`pnpm test -- scripts/consumer-archives.test.mjs`: 2 failed / 10 passed, report
+`lapis-notebook-run-7bf586a4-ad52-4317-aafb-629b8f69ec2f`. New cases distinguish
+registry-only CI, explicit worker input, absent requested inventory and an empty
+verified archive inventory. Existing identity/checksum/path/duplicate/public
+patch rejection cases remain intact.
+
+The owning repair makes archive input explicit through
+`LAPIS_NOTEBOOK_VALIDATION_INPUT`, set by the verified local snapshot worker.
+A plain isolated CI job uses the registry graph without looking for local
+archive metadata; explicitly supplied missing or invalid inventories still
+fail. No catch-and-ignore of ENOENT, test weakening, peer suppression, registry
+manifest/lock change, or CI/protection change is used. Focused rerun and
+packed-consumer acceptance are pending before the new signed-head CI.
+
+The exact focused rerun passed 12/12 (0 failures), report
+`lapis-notebook-run-8c5e3e0b-5b0c-4037-8e47-85f3eb3489c7`. Docker
+`pnpm spec:check` also passed, report
+`lapis-notebook-run-d4182d57-cc73-4363-9a32-047ab340f976`. Existing negative
+archive cases remain required; the new explicit-missing-inventory rejection
+passes before and after the repair. Cold packed-consumer acceptance follows.
