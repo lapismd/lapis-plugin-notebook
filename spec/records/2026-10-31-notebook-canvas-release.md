@@ -148,3 +148,24 @@ overlapping session/startup/dependency edits (`mlwtkxom`); its working-copy
 parent remains preserved. Complete that checkout refresh after a safe owner
 checkpoint rather than rewriting ongoing work. No unrelated image-pin PR was
 merged as part of this feature.
+
+### Notes version merged — 1 November, 01:44 UTC
+
+Version PR #61 exact head `7945bceb7def9f377520c6d3ae587aad31b75cba`
+passed every required job at CI `41261229317`, 0 failures. Reviewed scope:
+API 0.2.4, UI 0.1.6, Workspace 0.3.2 and File Explorer 0.2.1, matching internal
+ranges, changelogs, generated API version metadata and four lock specifiers.
+Merge source: `ff088a423a939fe3c08406aebbe95c795f290f47`.
+
+Preflight inspected all 11 registered Notes workspaces without snapshotting,
+preserved three unrelated dirty workspaces, and found no Dependabot PRs. None
+of the four new versions was already published. Receipt:
+`.local/release-watch/2026-11-01/notes-version-preflight-0143.json`.
+Remote main was fetched; active default-workspace edits remain preserved.
+
+Dispatched the normal `release.yml` with `publish=true` on exact versioned main:
+run `41262301909`. The redundant nonpublishing push workflow `41262288942`
+was cancelled after confirming the replacement's identical source SHA; its
+cancellation is not a validation pass. The publishing workflow retains the
+complete required validation and protected npm gate. Publication/verification
+remain pending; approve only its eligible cohort deployment after those checks.
