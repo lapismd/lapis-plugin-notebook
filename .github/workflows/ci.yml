@@ -41,7 +41,7 @@ jobs:
     outputs:
       reference: ${{ steps.image.outputs.reference }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - name: Resolve the pinned CI image
         id: image
         run: |
@@ -60,7 +60,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
       options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/ci-setup
       - name: Build the package and audit the bundle
         run: node scripts/run-turbo.mjs build
@@ -78,7 +78,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
       options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
       - uses: ./.github/actions/ci-setup
@@ -106,7 +106,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
       options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/ci-setup
       - name: Run all unit tests
         run: node scripts/run-turbo.mjs test
@@ -124,7 +124,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
       options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/ci-setup
         with:
           browsers: "true"
@@ -155,7 +155,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
       options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/ci-setup
         with:
           turbo-cache: "false"
@@ -178,7 +178,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
       options: --user=1001:1001 --init --cap-drop=ALL --cpus=4 --memory=7g --shm-size=2g
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/ci-setup
         with:
           browsers: "true"
@@ -202,7 +202,7 @@ jobs:
       ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - name: Aggregate all blocking lanes
         env:
           CI_JOB_RESULTS: ${{ toJSON(needs) }}
@@ -216,7 +216,7 @@ jobs:
     outputs:
       publish: ${{ steps.plan.outputs.publish }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -235,7 +235,7 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
