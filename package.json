@@ -1,6 +1,6 @@
 {
   "name": "@lapis-notes/lapis-plugin-notebook",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Executable .notebook.md notebooks with reactive cells and rich outputs for Lapis Notes",
   "license": "AGPL-3.0-or-later",
   "repository": {
