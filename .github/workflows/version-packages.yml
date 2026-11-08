@@ -41,10 +41,9 @@ jobs:
           permission-pull-requests: write
       - uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          version: pnpm release:version
-          commitMode: github-api
-          createGithubReleases: false
-          title: "chore: version Notebook package"
-          commit: "chore: version Notebook package"
-        env:
-          GITHUB_TOKEN: ${{ steps.app.outputs.token }}
+          github-token: ${{ steps.app.outputs.token }}
+          version-script: pnpm release:version
+          push-with-git-cli: false
+          create-github-releases: false
+          pr-title: "chore: version Notebook package"
+          commit-message: "chore: version Notebook package"
