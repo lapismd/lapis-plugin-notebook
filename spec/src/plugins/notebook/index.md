@@ -24,12 +24,14 @@ its six private support packages from `legacy-lapis-notes`. Ported behavior
 keeps its legacy regression evidence; presentation remaps onto public
 `@lapismd/design-core` exports instead of re-creating primitives. The tracked
 dependency cohort resolves published registry versions — peers
-`@lapismd/design-core@^0.9.0`, `@lapis-notes/api@^0.2.4`, and
+`@lapismd/design-core@^0.9.0 || ^0.10.0`, `@lapis-notes/api@^0.2.4`,
 `@lapis-notes/markdown@^0.2.1` and `@lapis-notes/ui@^0.1.6`, with the Storybook host cohort pinned in
-development at `@lapis-notes/ui@0.1.6`, `@lapis-notes/workspace@0.3.2`,
-`@lapis-notes/file-explorer@0.2.1`, `@lapis-notes/search@0.1.4`, and
-`@lapismd/mira@0.1.3`; local sibling source snapshots MAY replace matching
-installs through `.pnpmfile.cjs` per LPN-SPEC-005. The runtime
+development at `@lapismd/design-core@0.10.1`, `@lapis-notes/ui@0.1.6`,
+`@lapis-notes/workspace@0.3.2`, `@lapis-notes/file-explorer@0.2.1`,
+`@lapis-notes/search@0.1.4`, and `@lapismd/mira@0.1.4`. Storybook visual
+review uses `@lapismd/storybook-addon-visual-delta@0.1.0`; local sibling source
+snapshots MAY replace matching installs through `.pnpmfile.cjs` per
+LPN-SPEC-005. The runtime
 plugin id `lapis-notebook` is preserved from the legacy plugin so persisted
 plugin data keys remain compatible. The DuckDB-WASM engine dependency is
 pinned exactly at `1.33.1-dev45.0` in root dependencies per LPN-SPEC-004 so

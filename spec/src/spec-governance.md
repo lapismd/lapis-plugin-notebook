@@ -128,6 +128,11 @@ Dependabot maintains registry currency with weekly grouped pull requests
 for the npm and GitHub Actions ecosystems; the exact `@duckdb/duckdb-wasm`
 engine pin is excluded from automated updates because LPN-SPEC-004 keeps
 engine bumps owned by the ported compatibility tests.
+Grouped bot updates that introduce a local `pnpmfileChecksum` MUST be
+consolidated through the registry-pure lockfile workflow before merge. The
+consolidated dependency change may also carry the reviewed GitHub Actions and
+Changesets action updates, but it retains the existing protected release and
+short-lived credential boundaries.
 
 `spec-first` maps notebook document model, parser, and file-identity sources to
 [Documents](plugins/notebook/documents.md); execution, commands, settings, and
