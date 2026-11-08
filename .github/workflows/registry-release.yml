@@ -39,7 +39,7 @@ jobs:
     outputs:
       ready: ${{ steps.source.outputs.ready }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           ref: main
       - uses: pnpm/action-setup@v6
@@ -54,7 +54,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}
           REGISTRY_AUTOMATIC: ${{ github.event_name == 'workflow_run' }}
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         if: steps.source.outputs.ready == 'true'
         with:
           ref: ${{ steps.source.outputs.commit }}
@@ -97,7 +97,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           ref: main
       - uses: pnpm/action-setup@v6

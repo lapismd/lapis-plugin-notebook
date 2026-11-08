@@ -53,6 +53,14 @@ runtime: the `Run inputs` story proves the viewof input mount on Design Core
 primitives with `aria-label` wired from the input's `label` option, and the
 debounced targeted rerun of downstream cells on input change.
 
+The Design Core 0.10 compatibility cohort keeps the shared editor kernel on
+CodeMirror autocomplete 6.20.4, commands 6.11.1, language 6.13.1, search
+6.7.2, state 6.7.6 and view 6.43.15, with Lezer common 1.5.5, highlight 1.2.5,
+LR 1.4.12 and Markdown 1.8.1. The workspace overrides and development pins
+MUST move together so Notebook, Mira, Design Core and the host shell observe
+one runtime instance. The private input package accepts both its qualified
+Design Core 0.6 line and the 0.10 compatibility line.
+
 The notebook editor-view contribution registers with
 `priority: "exclusive"` and the specific `*.notebook.md` pattern (the
 transcript plugin contract): markdown claims `*.md` exclusively, and the
