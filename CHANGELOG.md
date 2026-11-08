@@ -1,5 +1,11 @@
 # Notebook
 
+## 0.2.3
+
+### Patch Changes
+
+- 7887742: Refresh first-party Lapis dependencies and the compatible editor, Storybook, build, and CI dependency cohort.
+
 ## 0.2.2
 
 ### Patch Changes
