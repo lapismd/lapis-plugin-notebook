@@ -47,17 +47,24 @@ describe("Notebook automatic Changesets releases", () => {
     const action = workflow.jobs.version.steps.find((step) =>
       step.uses?.startsWith("changesets/action@"),
     );
-    expect(action.with.version).toBe("pnpm release:version");
-    expect(action.with.commitMode).toBe("github-api");
+    expect(action.with["version-script"]).toBe("pnpm release:version");
+    expect(action.with["push-with-git-cli"]).toBe(false);
     expect(workflow.permissions).toEqual({ contents: "read" });
-    expect(action.env.GITHUB_TOKEN).toBe("${{ steps.app.outputs.token }}");
+    expect(action.with["github-token"]).toBe("${{ steps.app.outputs.token }}");
     const app = workflow.jobs.version.steps.find((step) => step.id === "app");
     expect(app.with.owner).toBe("${{ github.repository_owner }}");
     expect(app.with.repositories).toBe("${{ github.event.repository.name }}");
     expect(app.with["permission-contents"]).toBe("write");
     expect(app.with["permission-pull-requests"]).toBe("write");
-    expect(action.with.publish).toBeUndefined();
-    expect(action.with.createGithubReleases).toBe(false);
+    expect(action.with["publish-script"]).toBeUndefined();
+    expect(action.with["create-github-releases"]).toBe(false);
+    expect(action.with["pr-title"]).toBe("chore: version Notebook package");
+    expect(action.with["commit-message"]).toBe(
+      "chore: version Notebook package",
+    );
+    expect(action.with.version).toBeUndefined();
+    expect(action.with.commitMode).toBeUndefined();
+    expect(action.with.createGithubReleases).toBeUndefined();
   });
   it("qualifies one immutable artifact before allowing main-source publication", () => {
     const workflow = parse(
