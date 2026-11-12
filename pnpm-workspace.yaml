@@ -10,7 +10,7 @@ overrides:
   # Converge the published peer graph onto API 0.2.4's host cohort.
   # These registry pins keep one kernel instance for runtime and typechecks.
   "@lapismd/design-core": "0.10.1"
-  "@lapismd/mira": "0.1.4"
+  "@lapismd/mira": "0.1.5"
   "@lapis-notes/ui": "0.1.6"
   "@codemirror/autocomplete": "6.20.4"
   "@codemirror/commands": "6.11.1"
