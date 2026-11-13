@@ -111,7 +111,7 @@
     "@lapis-notes/api": "^0.2.4",
     "@lapis-notes/markdown": "^0.2.1",
     "@lapis-notes/ui": "^0.1.6",
-    "@lapismd/design-core": "^0.9.0 || ^0.10.0",
+    "@lapismd/design-core": "^0.9.0 || ^0.10.0 || ^0.13.0",
     "svelte": "^5.0.0"
   },
   "devDependencies": {
@@ -135,7 +135,7 @@
     "@lapis-notes/search": "0.1.4",
     "@lapis-notes/ui": "0.1.6",
     "@lapis-notes/workspace": "0.3.2",
-    "@lapismd/design-core": "0.10.1",
+    "@lapismd/design-core": "0.13.0",
     "@lapismd/mira": "0.1.5",
     "@lapismd/spec-validator": "^0.2.0",
     "@lapismd/storybook-addon-visual-delta": "0.1.0",
