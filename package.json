@@ -136,7 +136,7 @@
     "@lapis-notes/ui": "0.1.6",
     "@lapis-notes/workspace": "0.3.2",
     "@lapismd/design-core": "0.13.1",
-    "@lapismd/mira": "0.1.5",
+    "@lapismd/mira": "0.2.0",
     "@lapismd/spec-validator": "^0.2.0",
     "@lapismd/storybook-addon-visual-delta": "0.1.0",
     "@lezer/common": "1.5.5",
