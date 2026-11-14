@@ -29,7 +29,7 @@ dependency cohort resolves published registry versions — peers
 development at `@lapismd/design-core@0.10.1`, `@lapis-notes/ui@0.1.6`,
 `@lapis-notes/workspace@0.3.2`, `@lapis-notes/file-explorer@0.2.1`,
 `@lapis-notes/search@0.1.4`, and `@lapismd/mira@0.1.4`. Storybook visual
-review uses `@lapismd/storybook-addon-visual-delta@0.1.0`; local sibling source
+review uses `@lapismd/storybook-addon-visual-delta@0.1.5`; local sibling source
 snapshots MAY replace matching installs through `.pnpmfile.cjs` per
 LPN-SPEC-005. The runtime
 plugin id `lapis-notebook` is preserved from the legacy plugin so persisted

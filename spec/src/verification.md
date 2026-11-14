@@ -99,3 +99,7 @@ package, static Storybook and all three interaction shards before merge.
 The full update initially lacked both mapped canonical chapters; the repair
 checks the range from `611171b4168b1c53d19fe40eabccbaffa889674d`, rather
 than only its documentation commit.
+
+Visual Delta `0.1.5` development intake is covered by the
+[qualification record](../records/2026-11-14-visual-delta-015-canonical.md).
+Runtime version `0.2.4` and existing release gates remain unchanged.
