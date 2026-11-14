@@ -213,7 +213,12 @@ configuration rather than untrusted application data. Remove the exception when
 a patched upstream version exists; every other full/production audit finding
 remains fatal. No runtime or browser diagnostic is suppressed.
 
-The Mira 0.2 development-catalog intake retains the released Core 0.13.1
+The Mira 0.2 development-catalog intake retains the released Core 0.13.2
 cohort, normal registry resolution and existing Notebook runtime contracts.
 Public API admission, App ownership and all functional release gates remain
 unchanged; dependency proposals still require mapped canonical evidence on main.
+
+The Core 0.13.2 patch intake advances the development dependency and shared
+registry override together. Qualification uses the exact Core update PR 30 check matrix. The public
+peer range and all runtime, accessibility and release gates remain
+unchanged.

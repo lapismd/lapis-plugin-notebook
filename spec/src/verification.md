@@ -92,3 +92,10 @@ being killed with exit 137 at chunk rendering under a 6 GiB heap/7 GiB container
 A 4 GiB native diagnostic exhausted V8 old-space. The static job instead
 reserves process headroom with a 5 GiB Node heap; the exact
 static build and required hosted matrix qualify that candidate separately.
+
+Core 0.13.2 intake: PR 30 head
+`4b43b32afe1caf358bf1ca23e1cf0d18cc15feb9` passed quality, unit,
+package, static Storybook and all three interaction shards before merge.
+The full update initially lacked both mapped canonical chapters; the repair
+checks the range from `611171b4168b1c53d19fe40eabccbaffa889674d`, rather
+than only its documentation commit.

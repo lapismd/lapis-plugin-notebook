@@ -295,6 +295,6 @@ Release package and runtime manifest version: `0.2.4`.
 
 LPN-SPEC-024 adds automatic Changesets version PRs and approved, provenance-backed npm/GitHub publication. A patch Changeset collects registry onboarding and release automation into the next generated version. Private support packages stay at their existing versions and are bundled into the public root package. The first generated patch is 0.2.2 because main already contains the unpublished 0.2.1 preparation. Merging its version PR starts the existing CI lanes before npm-production approval; registry submission follows successful source publication.
 
-The maintenance catalog intake uses released Mira 0.2 alongside Core 0.13.1.
+The maintenance catalog intake uses released Mira 0.2 alongside Core 0.13.2.
 It changes no Notebook runtime ID, execution authority or persisted notebook
 state contract. Complete package and catalog acceptance remain required.
