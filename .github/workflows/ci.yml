@@ -161,7 +161,7 @@ jobs:
           turbo-cache: "false"
       - run: pnpm build-storybook
         env:
-          NODE_OPTIONS: --max-old-space-size=6144
+          NODE_OPTIONS: --max-old-space-size=5120
 
   storybook-interaction:
     needs: [image-pin, build-cache]
