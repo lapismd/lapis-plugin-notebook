@@ -222,3 +222,7 @@ The Core 0.13.2 patch intake advances the development dependency and shared
 registry override together. Qualification uses the exact Core update PR 30 check matrix. The public
 peer range and all runtime, accessibility and release gates remain
 unchanged.
+
+The frozen catalog development graph resolves registry Visual Delta `0.1.5`.
+This tooling intake keeps Notebook `0.2.4` runtime contracts, dependency audit
+gates, comparison-only visual review and explicit baseline approval unchanged.
