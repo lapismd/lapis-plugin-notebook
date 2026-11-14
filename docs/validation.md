@@ -88,7 +88,8 @@ Docker default. The image/build stage is followed by parallel quality, unit,
 package lint, static Storybook and three browser-shard jobs, then the stable
 `Validation lanes` aggregate. All jobs must succeed, including every shard.
 Containers use four CPUs from the standard public Ubuntu runner, bounded to
-7 GiB memory and 2 GiB shared memory.
+7 GiB memory and 2 GiB shared memory. The hosted static Storybook job uses a
+5 GiB Node heap so chunk rendering retains process and native-buffer headroom.
 
 The shared CI setup installs once per job with frozen registry resolution and
 caches the container pnpm store. Turbo caches root build/check/test tasks and
