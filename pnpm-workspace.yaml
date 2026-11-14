@@ -4,6 +4,12 @@ packages:
 
 linkWorkspacePackages: true
 
+# Dependabot supplies a three-day release-age gate. Coordinated first-party
+# releases must remain resolvable while every third-party package keeps it.
+minimumReleaseAgeExclude:
+  - "@lapis-notes/*"
+  - "@lapismd/*"
+
 overrides:
   # Patched KaTeX supported by the published Markdown/Mermaid dependency.
   katex: ">=0.18.2"

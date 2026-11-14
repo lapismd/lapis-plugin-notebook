@@ -6,7 +6,17 @@ import { validateCiResults } from "./aggregate-ci.mjs";
 const workflow = parse(
   readFileSync(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8"),
 );
+const workspace = parse(
+  readFileSync(new URL("../pnpm-workspace.yaml", import.meta.url), "utf8"),
+);
 describe("Notebook CI gates", () => {
+  it("limits the dependency release-age bypass to first-party packages", () => {
+    expect(workspace.minimumReleaseAge).toBeUndefined();
+    expect(workspace.minimumReleaseAgeExclude).toEqual([
+      "@lapis-notes/*",
+      "@lapismd/*",
+    ]);
+  });
   it("shares the immutable local Docker base", () => {
     const pin = JSON.parse(
       readFileSync(new URL("../.ci/images.json", import.meta.url), "utf8"),
