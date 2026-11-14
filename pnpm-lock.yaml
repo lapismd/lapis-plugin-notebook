@@ -135,8 +135,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       '@lapismd/storybook-addon-visual-delta':
-        specifier: 0.1.0
-        version: 0.1.0(playwright@1.64.1)(react@19.2.8)(storybook@10.6.5(@types/react@19.3.0)(react@19.2.8))(svelte@5.56.10)(vite@6.4.5(@types/node@22.20.5)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))
+        specifier: 0.1.5
+        version: 0.1.5(playwright@1.64.1)(react@19.2.8)(storybook@10.6.5(@types/react@19.3.0)(react@19.2.8))(svelte@5.56.10)(vite@6.4.5(@types/node@22.20.5)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))
       '@lezer/common':
         specifier: 1.5.5
         version: 1.5.5
@@ -1260,8 +1260,8 @@ packages:
     engines: {node: '>=22'}
     hasBin: true
 
-  '@lapismd/storybook-addon-visual-delta@0.1.0':
-    resolution: {integrity: sha512-DK1a3u3+0/yGSNGunJotDp7mSTzx5O4DF33NVSyaD+A56jnw5zN+PQlITdJOPF/7xuXFrncEDBs0GFiPVfoeGg==}
+  '@lapismd/storybook-addon-visual-delta@0.1.5':
+    resolution: {integrity: sha512-psAM/V+C8BsrLpINIyioHM1j2uWe/nMBG3lbPlD97AeUsoddsClVmMuoYZn/UbVcBV9ce39Ka1UqLMkMXCo1xg==}
     hasBin: true
     peerDependencies:
       playwright: '*'
@@ -3945,8 +3945,8 @@ packages:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
 
-  pixelmatch@7.2.0:
-    resolution: {integrity: sha512-xhcb4yHu9sM/G7foGzoLtXYcC0zHEaOXXjRKhGup0fw78Nf2Tkiapv4EQyMzrbcmQPsllAI7DbFY2UT7PlI9Pg==}
+  pixelmatch@8.0.0:
+    resolution: {integrity: sha512-cIqOLfh5k52us715qf3B3+kTOxZv+WDv77HN7xokLScYQGYQHi4m/ynoDIPpvF2LvCyUJGyvzY64i0QCXtzu1g==}
     hasBin: true
 
   pkce-challenge@5.0.1:
@@ -6209,11 +6209,11 @@ snapshots:
       jiti: 2.7.0
       typescript: 5.9.3
 
-  '@lapismd/storybook-addon-visual-delta@0.1.0(playwright@1.64.1)(react@19.2.8)(storybook@10.6.5(@types/react@19.3.0)(react@19.2.8))(svelte@5.56.10)(vite@6.4.5(@types/node@22.20.5)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))':
+  '@lapismd/storybook-addon-visual-delta@0.1.5(playwright@1.64.1)(react@19.2.8)(storybook@10.6.5(@types/react@19.3.0)(react@19.2.8))(svelte@5.56.10)(vite@6.4.5(@types/node@22.20.5)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))':
     dependencies:
       '@storybook/icons': 2.2.0(react@19.2.8)
       html-to-image: 1.11.13
-      pixelmatch: 7.2.0
+      pixelmatch: 8.0.0
       pngjs: 7.0.0
       react: 19.2.8
       storybook: 10.6.5(@types/react@19.3.0)(react@19.2.8)
@@ -9108,7 +9108,7 @@ snapshots:
 
   picomatch@4.0.7: {}
 
-  pixelmatch@7.2.0:
+  pixelmatch@8.0.0:
     dependencies:
       pngjs: 7.0.0
 
