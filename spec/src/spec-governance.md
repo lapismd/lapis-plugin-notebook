@@ -226,3 +226,9 @@ unchanged.
 The frozen catalog development graph resolves registry Visual Delta `0.1.5`.
 This tooling intake keeps Notebook `0.2.4` runtime contracts, dependency audit
 gates, comparison-only visual review and explicit baseline approval unchanged.
+
+The subsequent Core 0.13.3 intake updates the exact development dependency,
+registry override and frozen lock together while retaining public peer support.
+Its canonical evidence belongs in this chapter and the Notebook index under
+LPN-SPEC-002, including when a trusted dependency PR skipped specification
+checks: main still runs the complete specification and functional gates.
