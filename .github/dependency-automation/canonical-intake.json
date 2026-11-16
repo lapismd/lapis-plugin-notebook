@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "kind": "single-development-dependency",
+  "repository": "lapismd/lapis-plugin-notebook",
+  "dependency": "@lapismd/design-core",
+  "slot": "core-development",
+  "chapters": [
+    "spec/src/plugins/notebook/index.md",
+    "spec/src/spec-governance.md"
+  ]
+}

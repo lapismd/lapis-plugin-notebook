@@ -73,6 +73,7 @@ qualification may retain the documented verified host archives under LPN-SPEC-01
 | LPN-SPEC-002 | Protected package, manifest, source, sub-package, Storybook, validation, and CI changes MUST update an owning canonical chapter in the same Jujutsu change. Host plugin-class registration is specified in LN-NB-002 and does not move governance ownership.                                                                                                                                                                                                                                                                                                                                                                                 |
 | LPN-SPEC-003 | Every normative requirement ID MUST be unique and MUST have exactly one verification row with concrete evidence.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | LPN-SPEC-004 | Published package manifests MUST use portable semver ranges and MUST NOT contain `workspace:`, `link:`, `file:`, or machine-specific dependency paths. Registry packages MAY be added when the notebook document model, render layer, or runtime needs them. DuckDB-WASM execution MUST pin `@duckdb/duckdb-wasm` exactly so engine behavior cannot drift independently from its compatibility tests.                                                                                                                                                                                                                                        |
+| LPN-SPEC-025 | Core development patch intake MUST carry exact registry facts in both owned canonical slots, and an ordinary offline functional check MUST verify the actual candidate, source opt-in and bounded catalog scope while preserving main spec-first and every existing gate.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | LPN-SPEC-005 | Published LapisMD dependencies MUST resolve through npm semver ranges. Local package source or artifacts MAY replace matching install dependencies through `.pnpmfile.cjs` only when those paths exist; absent local paths and CI MUST retain registry resolution. External repositories MUST NOT become workspace members or mutate dependency `node_modules`. Workspace overrides MUST pin the CodeMirror and Lezer packages used by Storybook shell hosts and MUST converge the published API peer graph (`@lapismd/design-core`, `@lapismd/mira`, `@lapis-notes/ui`) onto one instance so typecheck and runtime observe a single kernel. When dependency automation applies a minimum release age, only the coordinated `@lapismd/*` and `@lapis-notes/*` scopes MAY bypass it; third-party packages MUST retain the updater's quarantine. |
 | LPN-SPEC-006 | Package Storybook MUST expose checkout-owned `storybook`, `storybook:stop`, and `storybook:restart` commands. They MUST default to port 7040, honour `.env.storybook.local`, reuse one supervisor per checkout, refuse to replace a listener owned by another checkout, apply exactly one Svelte transform pipeline to package and linked-source modules in both the dev server and browser-test project, and synchronously apply the selected preview theme before story play functions run.                                                                                                                                                |
 | LPN-SPEC-007 | Tracked agent guidance MUST require explicit or context-owned App access, restrict `globalThis.app`, and require the package ownership audit for App-related changes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
@@ -227,8 +228,46 @@ The frozen catalog development graph resolves registry Visual Delta `0.1.5`.
 This tooling intake keeps Notebook `0.2.4` runtime contracts, dependency audit
 gates, comparison-only visual review and explicit baseline approval unchanged.
 
-The subsequent Core 0.13.3 intake updates the exact development dependency,
+The historical Core 0.13.3 intake updates the exact development dependency,
 registry override and frozen lock together while retaining public peer support.
 Its canonical evidence belongs in this chapter and the Notebook index under
 LPN-SPEC-002, including when a trusted dependency PR skipped specification
 checks: main still runs the complete specification and functional gates.
+
+## Bounded Core development intake
+
+Notebook opts into source-owned canonical preparation for a forward patch of
+its Core development dependency and existing matching registry override.
+The coordinator updates only the managed factual slots in this chapter and the
+Notebook index, after validating the exact admitted source and mechanical lock
+closure. Product code, public peer support, other package identities and release
+authority remain outside that profile. Unknown policy, stale/manual slot edits,
+ambiguous markers and unexpected changes require source review.
+
+`check:dependency-intake` is an ordinary portable functional lane in `check`;
+it verifies actual catalog inputs and both managed slots outside bot-exempt
+specification commands. It uses only installed source tools and local history,
+with no network/bootstrap or copied shared renderer. Main spec-first and all
+existing functional, audit, packaging, signing and publication gates remain.
+
+<!-- dependency-intake:core-development:start -->
+
+```json
+{
+  "schemaVersion": 1,
+  "kind": "development-dependency-intake",
+  "dependency": "@lapismd/design-core",
+  "version": "0.13.3",
+  "peer": "^0.9.0 || ^0.10.0 || ^0.13.0",
+  "integrity": "sha512-VpzlcMhzfPefS8HYiinkL/Jw/+pZgKITGb9TGDhec+5nCiuRCDOzNVY4cTIWDdhZTSdZXdJL4VovpJMACjNRxw==",
+  "importers": {
+    ".": {
+      "specifier": "0.13.3",
+      "version": "0.13.3(svelte@5.56.10)(tailwindcss@4.1.12)"
+    }
+  },
+  "policySha256": "548b0f7c7c4c02f2eac7dd4df5b3e8cec6c1c5cfe276fae752de9f3202e3979d"
+}
+```
+
+<!-- dependency-intake:core-development:end -->

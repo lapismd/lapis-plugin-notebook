@@ -47,8 +47,9 @@ acceptance against the supported hosts.
 Development tooling includes registry Turbo for the container CI build, quality
 and unit task cache; it adds no runtime dependency or published export.
 
-The current Core 0.13.3 development intake uses the published registry package
-for the root catalog dependency and shared override. The supported public peer
+The bounded Core development intake uses the published registry package
+for the root catalog dependency and shared override, with exact current facts
+in the managed slot below. The supported public peer
 contract remains `^0.9.0 || ^0.10.0 || ^0.13.0`; this patch intake changes no
 Notebook runtime registration, execution, persistence, or exported contract.
 
@@ -303,3 +304,32 @@ LPN-SPEC-024 adds automatic Changesets version PRs and approved, provenance-back
 The maintenance catalog intake uses released Mira 0.2 alongside Core 0.13.2.
 It changes no Notebook runtime ID, execution authority or persisted notebook
 state contract. Complete package and catalog acceptance remain required.
+
+## Current Core development facts
+
+The following managed facts describe prepared registry inputs, not successful
+CI, publication or a new runtime contract. Public peer support remains the
+source-owned range above; only a verified compatible development patch and its
+existing override/lock closure may use automatic canonical preparation.
+
+<!-- dependency-intake:core-development:start -->
+
+```json
+{
+  "schemaVersion": 1,
+  "kind": "development-dependency-intake",
+  "dependency": "@lapismd/design-core",
+  "version": "0.13.3",
+  "peer": "^0.9.0 || ^0.10.0 || ^0.13.0",
+  "integrity": "sha512-VpzlcMhzfPefS8HYiinkL/Jw/+pZgKITGb9TGDhec+5nCiuRCDOzNVY4cTIWDdhZTSdZXdJL4VovpJMACjNRxw==",
+  "importers": {
+    ".": {
+      "specifier": "0.13.3",
+      "version": "0.13.3(svelte@5.56.10)(tailwindcss@4.1.12)"
+    }
+  },
+  "policySha256": "548b0f7c7c4c02f2eac7dd4df5b3e8cec6c1c5cfe276fae752de9f3202e3979d"
+}
+```
+
+<!-- dependency-intake:core-development:end -->
