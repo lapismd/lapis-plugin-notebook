@@ -47,6 +47,11 @@ acceptance against the supported hosts.
 Development tooling includes registry Turbo for the container CI build, quality
 and unit task cache; it adds no runtime dependency or published export.
 
+The current Core 0.13.3 development intake uses the published registry package
+for the root catalog dependency and shared override. The supported public peer
+contract remains `^0.9.0 || ^0.10.0 || ^0.13.0`; this patch intake changes no
+Notebook runtime registration, execution, persistence, or exported contract.
+
 The npm runtime entry is the compiled bundle, and its declaration entry bundles
 the private support types. Prepack produces both entries and their CSS/assets;
 source-resolution output stays under ignored build staging. Publication rejects
