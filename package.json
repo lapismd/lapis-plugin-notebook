@@ -138,7 +138,7 @@
     "@lapis-notes/workspace": "0.3.2",
     "@lapismd/design-core": "0.13.4",
     "@lapismd/mira": "0.2.0",
-    "@lapismd/spec-validator": "^0.2.0",
+    "@lapismd/spec-validator": "^0.2.1",
     "@lapismd/storybook-addon-visual-delta": "0.1.5",
     "@lezer/common": "1.5.5",
     "@lezer/highlight": "1.2.5",

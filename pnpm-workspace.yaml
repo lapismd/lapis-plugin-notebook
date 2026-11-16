@@ -38,7 +38,3 @@ overrides:
 patchedDependencies:
   bits-ui@2.20.2: patches/bits-ui@2.20.2.patch
 
-# Same documented, user-approved exception as Tasks; no patched release exists.
-auditConfig:
-  ignoreGhsas:
-    - GHSA-gcqx-w48m-w2h4

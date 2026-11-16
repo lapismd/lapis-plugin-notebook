@@ -35,8 +35,25 @@ the published Lapis host cohort at `@lapis-notes/api@0.2.4`,
 LPN-SPEC-014 with verified sibling archives in isolated worker installations;
 publication and consumer adoption remain separate gates. Source ownership and
 public contracts remain unchanged. Shared specification tooling resolves the
-Deno-free `@lapismd/spec-validator@0.2.0` from npm; QMD-backed specification
+Deno-free `@lapismd/spec-validator@0.2.1` from npm; QMD-backed specification
 search uses the spec-validator-pinned system `qmd` binary (LPN-SPEC-020).
+
+The validator doctor patch retains normal specification validation and the
+intentional Docker-routing script aliases. Version preparation keeps Node
+24.15.0, pnpm 10.32.1, Changesets 3 and the existing source-owned
+`node scripts/release.mjs version` command. Its full recipe and root/runtime/
+canonical version outputs require separate qualification before a shared guard
+can be adopted. This development-only preparation creates no package release.
+
+The obsolete `GHSA-gcqx-w48m-w2h4` audit ignore is removed after GitHub withdrew
+that advisory on November 16, 2026. Every other finding remains visible and
+blocking; no replacement exception or dependency override is introduced.
+
+The same development-only intake refreshes the existing MCP SDK's compatible
+Hono lock entries to `hono@4.13.19` and `@hono/node-server@2.1.8`. The normal
+recursive pnpm update also selects Babel runtime 7.29.14 within its existing
+range. No host/API/SDK manifest range changes. The original six MODERATE and
+one LOW development findings become zero; the production audit remains clean.
 
 The Storybook catalog declares `@observablehq/plot@0.6.17`, `d3@7.9.0` and
 `htl@0.3.1` as development dependencies, matching the private stdlib's existing
