@@ -41,3 +41,22 @@ Core package identities remain distinct, including when slots are forged to
 match the candidate. A read-only cross-repository check also applied the merged
 shared preparer to the actual Notebook opt-in layout plus PR36-shaped inputs;
 both exact chapter outputs were accepted without touching PR36 or source files.
+
+## Independent peer-edge review
+
+Root review reproduced an additional adapter gap on the actual retained graph:
+the OXC WASI binding could select the other existing wasm-runtime1.2.6 context,
+changing emnapi1.9.2 to1.11.0, while the adapter accepted the candidate. The shared
+producer already rejected this change; source verification must retain its own
+dependency associations. The exact new Docker test fails once before repair.
+
+The catalog now preserves readable peer contexts and selected Core's own peer
+suffixes. It normalizes only the selected Core identity and opaque labels,
+rejecting ambiguous opaque collisions rather than collecting unassociated
+variants. The genuine PR36-shaped Core patch still passes. All15 focused tests
+pass, including the new unrelated-edge and ambiguity negatives. Full default
+Docker validation passed in run186a9b7e-6af8-4f65-9e3b-207a98d65253:565 units,
+all69 interaction/axe cases, both cold packed consumers, static Storybook,
+specification and every configured build/package/registry/release lane. Final
+record formatting and specification checks run before committing this review;
+fresh hosted checks on the pushed head remain required before merge.

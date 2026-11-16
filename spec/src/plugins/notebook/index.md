@@ -312,6 +312,9 @@ CI, publication or a new runtime contract. Public peer support remains the
 source-owned range above; only a verified compatible development patch and its
 existing override/lock closure may use automatic canonical preparation.
 
+That closure preserves unrelated resolved peer contexts. Choosing another
+same-version runtime context is a dependency-edge change and remains blocked.
+
 <!-- dependency-intake:core-development:start -->
 
 ```json

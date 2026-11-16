@@ -92,14 +92,18 @@ function slot(text) {
 // Notebook owns its catalog audit; it compares package identities, metadata and
 // direct dependency edges independently from the coordinator's string renderer.
 function catalog(lock, version) {
-  const identity = (s) => {
-    const base = s.split("(")[0];
-    return base === `${core}@${version}` ? `${core}@<Core>` : base;
-  };
+  const coreIdentity = new RegExp(
+    `(^|\\()${core}@${version.replaceAll(".", "\\.")}(?=$|[()])`,
+    "g",
+  );
+  const identity = (s) =>
+    s
+      .replace(coreIdentity, (_match, prefix) => `${prefix}${core}@<Core>`)
+      .replace(/\([a-f0-9]{32}\)/g, "(<peer-context>)");
   const reference = (name, value) =>
     name === core
-      ? identity(value) === version
-        ? "<Core>"
+      ? value.split("(")[0] === version
+        ? `<Core>${identity(value.slice(version.length))}`
         : fail("unexpected Core lock reference")
       : identity(value);
   const entries = (rows, make) =>
@@ -134,10 +138,9 @@ function catalog(lock, version) {
         normalized[section] = Object.fromEntries(
           Object.entries(row[section]).map(([n, v]) => [n, reference(n, v)]),
         );
-    (snapshots[key] ??= []).push(normalized);
+    if (Object.hasOwn(snapshots, key)) fail("ambiguous opaque peer contexts");
+    snapshots[key] = normalized;
   }
-  for (const rows of Object.values(snapshots))
-    rows.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
   const importers = Object.fromEntries(
     Object.entries(lock.importers ?? {}).map(([path, row]) => [
       path,

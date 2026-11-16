@@ -44,6 +44,37 @@ function input() {
   };
 }
 describe("source-owned Core intake verification", () => {
+  it("preserves unrelated same-version peer-context dependency edges", () => {
+    const data = input();
+    const lock = parse(data.files["pnpm-lock.yaml"]);
+    const dependencies =
+      lock.snapshots["@oxc-parser/binding-wasm32-wasi@0.127.0"].dependencies;
+    expect(dependencies["@napi-rs/wasm-runtime"]).toBe(
+      "1.2.6(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)",
+    );
+    dependencies["@napi-rs/wasm-runtime"] =
+      "1.2.6(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)";
+    data.files["pnpm-lock.yaml"] = stringify(lock);
+    expect(() => verifyNotebookCanonicalIntake(data)).toThrow(
+      /unexpected public contract or registry catalog change/,
+    );
+  });
+  it("holds ambiguous opaque peer contexts instead of losing their association", () => {
+    const data = input();
+    for (const files of [data.before, data.files]) {
+      const lock = parse(files["pnpm-lock.yaml"]);
+      const key = Object.keys(lock.snapshots).find((name) =>
+        /^@lapis-notes\/api@[^()]+\([a-f0-9]{32}\)$/.test(name),
+      );
+      expect(key).toBeTruthy();
+      const duplicate = key.replace(/\([a-f0-9]{32}\)$/, `(${"a".repeat(32)})`);
+      lock.snapshots[duplicate] = structuredClone(lock.snapshots[key]);
+      files["pnpm-lock.yaml"] = stringify(lock);
+    }
+    expect(() => verifyNotebookCanonicalIntake(data)).toThrow(
+      /ambiguous opaque peer contexts/,
+    );
+  });
   it("verifies the actual Core PR36 candidate independently of shared rendering", () => {
     expect(verifyNotebookCanonicalIntake(input()).version).toBe("0.13.4");
   });
