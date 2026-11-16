@@ -61,7 +61,8 @@
     "release:publish": "node scripts/release.mjs publish",
     "release:verify": "node scripts/release.mjs verify",
     "release:prepare": "node scripts/validation.mjs run release:prepare",
-    "release:check": "node scripts/validation.mjs run release:check"
+    "release:check": "node scripts/validation.mjs run release:check",
+    "check:dependency-intake": "node scripts/validation.mjs run check:dependency-intake"
   },
   "files": [
     "dist",
