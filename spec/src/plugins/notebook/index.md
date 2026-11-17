@@ -308,6 +308,12 @@ withdrawn advisory ignore add no runtime change or release intent. Actual
 whole-recipe proof and final-head CI remain required before guard adoption;
 Node CLI metadata alone does not qualify source-owned helpers.
 
+The pinned shared guard now checks the qualified Node recipe and actual release
+intent before minting version-writer authority. Empty maintenance notes skip
+both the App and Changesets action. Hosted whole-recipe qualification preserves
+runtime ID `lapis-notebook`, all six private manifests and the lock graph;
+source evidence is in `spec/records/2026-11-17-version-runtime-guard.md`.
+
 The maintenance catalog intake uses released Mira 0.2 alongside Core 0.13.2.
 It changes no Notebook runtime ID, execution authority or persisted notebook
 state contract. Complete package and catalog acceptance remain required.

@@ -117,4 +117,45 @@ describe("Notebook automatic Changesets releases", () => {
       "${{ github.event_name == 'pull_request' }}",
     );
   });
+  it("qualifies version inputs and actual release intent before minting version writer authority", () => {
+    const workflow = parse(
+      readFileSync(
+        new URL("../.github/workflows/version-packages.yml", import.meta.url),
+        "utf8",
+      ),
+    );
+    const steps = workflow.jobs.version.steps;
+    const guardIndex = steps.findIndex((step) => step.id === "version-runtime");
+    const appIndex = steps.findIndex((step) => step.id === "app");
+    const actionIndex = steps.findIndex((step) =>
+      step.uses?.startsWith("changesets/action@"),
+    );
+    expect(guardIndex).toBeGreaterThan(-1);
+    expect(guardIndex).toBeLessThan(appIndex);
+    expect(appIndex).toBeLessThan(actionIndex);
+    expect(steps[guardIndex].uses).toBe(
+      "lapismd/lapis-ci/actions/guard-version-runtime@ae1be182813d6049eddf0fb57bc33e66cbf049c5",
+    );
+    expect(steps[guardIndex].with).toEqual({
+      "qualification-file": ".github/versioning-runtime.json",
+      "detect-release-intent": "true",
+    });
+    for (const index of [appIndex, actionIndex])
+      expect(steps[index].if).toBe(
+        "steps.version-runtime.outputs.hasChangesets == 'true'",
+      );
+    const qualification = JSON.parse(
+      readFileSync(
+        new URL("../.github/versioning-runtime.json", import.meta.url),
+        "utf8",
+      ),
+    );
+    expect(qualification.nodeMajor).toBe(24);
+    expect(qualification.cliVersion).toBe("3.0.3");
+    expect(qualification.packageManager).toBe("pnpm@10.32.1");
+    expect(qualification.formatterPolicy).toBe("unconfigured");
+    expect(qualification.scripts).toEqual({
+      "release:version": "node scripts/release.mjs version",
+    });
+  });
 });
