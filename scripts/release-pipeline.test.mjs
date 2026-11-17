@@ -2,6 +2,46 @@ import { existsSync, readFileSync } from "node:fs";
 import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
 
+describe("Notebook dependency completion", () => {
+  it("uses only the pinned trusted verifier after successful owned workflows", () => {
+    const workflow = parse(
+      readFileSync(
+        new URL(
+          "../.github/workflows/dependency-completed.yml",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+    expect(workflow.on.workflow_run).toEqual({
+      workflows: [
+        "CI",
+        "Publish Storybook to GitHub Pages",
+        "Version packages",
+      ],
+      types: ["completed"],
+    });
+    expect(workflow.permissions).toEqual({
+      contents: "read",
+      actions: "read",
+      "pull-requests": "read",
+    });
+    const job = workflow.jobs.notify;
+    expect(job.if).toBe("github.event.workflow_run.conclusion == 'success'");
+    expect(job.uses).toMatch(
+      /^lapismd\/dependency-automation\/\.github\/workflows\/completion\.yml@[a-f0-9]{40}$/,
+    );
+    expect(job.with["automation-ref"]).toBe(job.uses.split("@")[1]);
+    expect(job.steps).toBeUndefined();
+    expect(job["runs-on"]).toBeUndefined();
+    expect(job.secrets).toEqual({
+      "app-private-key": "${{ secrets.LAPIS_DEPENDENCY_APP_PRIVATE_KEY }}",
+    });
+    expect(workflow.on.pull_request_target).toBeUndefined();
+    expect(workflow.on.push).toBeUndefined();
+  });
+});
+
 describe("Notebook automatic Changesets releases", () => {
   it("keeps the canonical release version aligned with both public manifests", () => {
     const read = (path) =>
