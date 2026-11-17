@@ -301,6 +301,19 @@ Release package and runtime manifest version: `0.2.4`.
 
 LPN-SPEC-024 adds automatic Changesets version PRs and approved, provenance-backed npm/GitHub publication. A patch Changeset collects registry onboarding and release automation into the next generated version. Private support packages stay at their existing versions and are bundled into the public root package. The first generated patch is 0.2.2 because main already contains the unpublished 0.2.1 preparation. Merging its version PR starts the existing CI lanes before npm-production approval; registry submission follows successful source publication.
 
+The Node version-tooling preparation preserves LPN-SPEC-024, every private
+support-package version, the public package/runtime identity and the canonical
+version marker above. The root-only validator doctor patch and retirement of a
+withdrawn advisory ignore add no runtime change or release intent. Actual
+whole-recipe proof and final-head CI remain required before guard adoption;
+Node CLI metadata alone does not qualify source-owned helpers.
+
+The pinned shared guard now checks the qualified Node recipe and actual release
+intent before minting version-writer authority. Empty maintenance notes skip
+both the App and Changesets action. Hosted whole-recipe qualification preserves
+runtime ID `lapis-notebook`, all six private manifests and the lock graph;
+source evidence is in `spec/records/2026-11-17-version-runtime-guard.md`.
+
 The maintenance catalog intake uses released Mira 0.2 alongside Core 0.13.2.
 It changes no Notebook runtime ID, execution authority or persisted notebook
 state contract. Complete package and catalog acceptance remain required.
