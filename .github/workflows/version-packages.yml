@@ -31,7 +31,7 @@ jobs:
       - run: pnpm install --frozen-lockfile --ignore-pnpmfile
       - name: Qualify source-owned version inputs and actual release intent
         id: version-runtime
-        uses: lapismd/lapis-ci/actions/guard-version-runtime@ae1be182813d6049eddf0fb57bc33e66cbf049c5
+        uses: lapismd/lapis-ci/actions/guard-version-runtime@dd71275c5b2618afceae0b97ee0a071649781971
         with:
           qualification-file: .github/versioning-runtime.json
           detect-release-intent: "true"

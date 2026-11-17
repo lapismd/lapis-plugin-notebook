@@ -3,6 +3,45 @@ import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
 
 describe("Notebook dependency completion", () => {
+  it("checks reviewed version inputs before merging dependency candidates", () => {
+    const workflow = parse(
+      readFileSync(
+        new URL("../.github/workflows/ci.yml", import.meta.url),
+        "utf8",
+      ),
+    );
+    const quality = workflow.jobs.quality.steps;
+    const guard = quality.find(
+      (step) => step.name === "Guard reviewed version inputs before merge",
+    );
+    expect(guard?.uses).toMatch(
+      /^lapismd\/lapis-ci\/actions\/guard-version-runtime@[a-f0-9]{40}$/,
+    );
+    expect(guard.with).toEqual({
+      "qualification-file": ".github/versioning-runtime.json",
+    });
+    expect(guard.if).toBeUndefined();
+    expect(quality.indexOf(guard)).toBeGreaterThan(
+      quality.findIndex((step) => step.uses === "./.github/actions/ci-setup"),
+    );
+    const q = JSON.parse(
+      readFileSync(
+        new URL("../.github/versioning-runtime.json", import.meta.url),
+        "utf8",
+      ),
+    );
+    expect(q.workspacePolicy.developmentOverride).toEqual({
+      dependency: "@lapismd/design-core",
+      series: "0.13",
+      minimumPatch: 4,
+    });
+    expect(q.workspacePolicy.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(q.files["pnpm-workspace.yaml"]).toBeUndefined();
+    expect(Object.keys(q.files).sort()).toEqual([
+      "scripts/release-candidate.mjs",
+      "scripts/release.mjs",
+    ]);
+  });
   it("uses only the pinned trusted verifier after successful owned workflows", () => {
     const workflow = parse(
       readFileSync(
@@ -174,7 +213,7 @@ describe("Notebook automatic Changesets releases", () => {
     expect(guardIndex).toBeLessThan(appIndex);
     expect(appIndex).toBeLessThan(actionIndex);
     expect(steps[guardIndex].uses).toBe(
-      "lapismd/lapis-ci/actions/guard-version-runtime@ae1be182813d6049eddf0fb57bc33e66cbf049c5",
+      "lapismd/lapis-ci/actions/guard-version-runtime@dd71275c5b2618afceae0b97ee0a071649781971",
     );
     expect(steps[guardIndex].with).toEqual({
       "qualification-file": ".github/versioning-runtime.json",

@@ -82,6 +82,10 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/ci-setup
+      - name: Guard reviewed version inputs before merge
+        uses: lapismd/lapis-ci/actions/guard-version-runtime@dd71275c5b2618afceae0b97ee0a071649781971
+        with:
+          qualification-file: .github/versioning-runtime.json
       - name: Install the pinned Jujutsu bootstrap
         run: node scripts/validation/install-tools.mjs --ci
       - name: Select the exact CI source revision

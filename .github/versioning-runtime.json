@@ -9,8 +9,16 @@
     "release:version": "node scripts/release.mjs version"
   },
   "files": {
-    "pnpm-workspace.yaml": "794d93bf2404310b972f1570c8f92de5e6f1aceee017238b3dbcf8dd244c7964",
     "scripts/release.mjs": "0e21c80d9580927f61f2faa8f155d4b2f5d343a505227b1174ed6cba4c82e28f",
     "scripts/release-candidate.mjs": "7f2bbebf7f9a6fdaf150044ca35da5ac1302a4515c4459a73e83053cc66a5e40"
+  },
+  "workspacePolicy": {
+    "schemaVersion": 1,
+    "sha256": "1ee11996c7e0a434716de23b031f294b602d3c178d1bce45d0bf368a00475bd1",
+    "developmentOverride": {
+      "dependency": "@lapismd/design-core",
+      "series": "0.13",
+      "minimumPatch": 4
+    }
   }
 }
