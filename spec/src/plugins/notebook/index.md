@@ -335,13 +335,13 @@ same-version runtime context is a dependency-edge change and remains blocked.
   "schemaVersion": 1,
   "kind": "development-dependency-intake",
   "dependency": "@lapismd/design-core",
-  "version": "0.13.5",
+  "version": "0.13.6",
   "peer": "^0.9.0 || ^0.10.0 || ^0.13.0",
-  "integrity": "sha512-90tQddxbljFiW/MIQbJQ6YWB8oHbGp08g7P/LIMD++dta9AR36Vye3HoQxQbcVUELJ30gq+gxyIQcefZDM7FtA==",
+  "integrity": "sha512-YSXDpWXFMCI+gEdRGSJ10Ts9ryfRpoCBh08coo8LABouERbQLuv+RKbH+/hW7Bv2Q+IMgzcclDVxh5S/98ETfA==",
   "importers": {
     ".": {
-      "specifier": "0.13.5",
-      "version": "0.13.5(svelte@5.56.10)(tailwindcss@4.1.12)"
+      "specifier": "0.13.6",
+      "version": "0.13.6(svelte@5.56.10)(tailwindcss@4.1.12)"
     }
   },
   "policySha256": "548b0f7c7c4c02f2eac7dd4df5b3e8cec6c1c5cfe276fae752de9f3202e3979d"
