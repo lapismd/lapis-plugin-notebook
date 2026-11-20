@@ -144,7 +144,7 @@
     "@lezer/highlight": "1.2.5",
     "@lezer/lr": "1.4.12",
     "@lezer/markdown": "1.8.1",
-    "@observablehq/plot": "0.6.17",
+    "@observablehq/plot": "0.6.19",
     "@storybook/addon-a11y": "10.6.5",
     "@storybook/addon-docs": "10.6.5",
     "@storybook/addon-svelte-csf": "5.1.6",
