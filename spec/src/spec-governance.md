@@ -287,13 +287,13 @@ associations require review rather than collapsing multiple graph variants.
   "schemaVersion": 1,
   "kind": "development-dependency-intake",
   "dependency": "@lapismd/design-core",
-  "version": "0.13.6",
+  "version": "0.13.7",
   "peer": "^0.9.0 || ^0.10.0 || ^0.13.0",
-  "integrity": "sha512-YSXDpWXFMCI+gEdRGSJ10Ts9ryfRpoCBh08coo8LABouERbQLuv+RKbH+/hW7Bv2Q+IMgzcclDVxh5S/98ETfA==",
+  "integrity": "sha512-oJXRalyUybTYYK1wJG++zaEQk2GoRgt4GubMKXmQaSSBTH5senGHxT3dBlvMnKAH0MzpMhlRcDMhCtTGvjPZ0w==",
   "importers": {
     ".": {
-      "specifier": "0.13.6",
-      "version": "0.13.6(svelte@5.56.10)(tailwindcss@4.1.12)"
+      "specifier": "0.13.7",
+      "version": "0.13.7(svelte@5.56.10)(tailwindcss@4.1.12)"
     }
   },
   "policySha256": "548b0f7c7c4c02f2eac7dd4df5b3e8cec6c1c5cfe276fae752de9f3202e3979d"
