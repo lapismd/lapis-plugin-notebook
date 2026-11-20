@@ -47,6 +47,17 @@ acceptance against the supported hosts.
 Development tooling includes registry Turbo for the container CI build, quality
 and unit task cache; it adds no runtime dependency or published export.
 
+The qualified third-party maintenance cohort keeps Storybook on `10.6.7`
+(`@storybook/addon-svelte-csf` remains `5.1.6`), CodeMirror lint on `6.9.8`,
+TanStack Table Core on `^9.3.1`, Observable Plot on `0.6.19`, and
+`es-module-lexer` on `^3.0.5`. These registry updates do not change Notebook's
+public package, runtime-registration, persistence, or execution contracts.
+They remain protected package inputs: the complete resolved graph must pass
+the ordinary quality, unit, packaging, Storybook, and public-consumer lanes,
+and the combined default-branch result must retain this canonical ownership
+record even when the individual trusted-bot PRs use the specification-check
+exemption.
+
 The bounded Core development intake uses the published registry package
 for the root catalog dependency and shared override, with exact current facts
 in the managed slot below. The supported public peer
