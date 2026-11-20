@@ -14,7 +14,7 @@
   },
   "workspacePolicy": {
     "schemaVersion": 1,
-    "sha256": "1ee11996c7e0a434716de23b031f294b602d3c178d1bce45d0bf368a00475bd1",
+    "sha256": "f1bdf71dcd4b50f33f5d35ee1dff8d9ac8e0a28853b7a64ff029e473ee46f4ea",
     "developmentOverride": {
       "dependency": "@lapismd/design-core",
       "series": "0.13",
