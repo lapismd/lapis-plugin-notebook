@@ -96,7 +96,7 @@
     "@lezer/highlight": "1.2.5",
     "@lucide/svelte": "^0.523.0",
     "@tanstack/svelte-virtual": "^3.13.12",
-    "@tanstack/table-core": "^8.21.3",
+    "@tanstack/table-core": "^9.3.1",
     "date-fns": "^4.1.0",
     "vega-embed": "^7.1.0",
     "yaml": "^2.9.0"
