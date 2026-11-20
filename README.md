@@ -211,15 +211,16 @@ refresh the snapshots:
 
 ```sh
 pnpm storybook:stop
-pnpm install --lockfile=false --force
+pnpm install --lockfile=false --force --ignore-pnpmfile=false
 pnpm test
 pnpm test:storybook
 pnpm storybook
 ```
 
-This temporary local validation setup leaves the registry lockfile
-unchanged. Validate releases and CI against the published registry
-dependencies.
+The repository defaults to `ignore-pnpmfile=true` so automated dependency
+updates and ordinary installs retain the registry graph. The explicit false
+override above opts into the local sibling hook without changing the tracked
+lockfile. Validate releases and CI against the published registry dependencies.
 
 The preview inherits DM Sans Variable and Source Code Pro Variable from
 Design Core, matching the Lapis hosts.
