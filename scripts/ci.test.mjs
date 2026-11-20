@@ -9,7 +9,19 @@ const workflow = parse(
 const workspace = parse(
   readFileSync(new URL("../pnpm-workspace.yaml", import.meta.url), "utf8"),
 );
+const npmrc = readFileSync(new URL("../.npmrc", import.meta.url), "utf8");
+const lockfile = readFileSync(
+  new URL("../pnpm-lock.yaml", import.meta.url),
+  "utf8",
+);
 describe("Notebook CI gates", () => {
+  it("keeps automated updates on the registry-pure lock graph", () => {
+    expect(npmrc).toMatch(/^ignore-pnpmfile=true\s*$/m);
+    expect(lockfile).not.toContain("pnpmfileChecksum:");
+    expect(lockfile).not.toMatch(
+      /(?:@lapis-notes|@lapismd)\/[\w-]+:\s*\n\s+specifier: file:/,
+    );
+  });
   it("limits the dependency release-age bypass to first-party packages", () => {
     expect(workspace.minimumReleaseAge).toBeUndefined();
     expect(workspace.minimumReleaseAgeExclude).toEqual([

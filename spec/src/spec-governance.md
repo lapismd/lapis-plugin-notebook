@@ -168,7 +168,10 @@ Grouped bot updates that introduce a local `pnpmfileChecksum` MUST be
 consolidated through the registry-pure lockfile workflow before merge. The
 consolidated dependency change may also carry the reviewed GitHub Actions and
 Changesets action updates, but it retains the existing protected release and
-short-lived credential boundaries.
+short-lived credential boundaries. Repository npm configuration disables the
+local pnpm hook by default so automated updaters produce that registry-pure
+lockfile directly; local sibling-source acceptance explicitly opts the hook
+back in without writing the tracked lockfile.
 
 `spec-first` maps notebook document model, parser, and file-identity sources to
 [Documents](plugins/notebook/documents.md); execution, commands, settings, and
@@ -209,7 +212,7 @@ WorkspaceShell. The tracked lockfile MUST be regenerated without local pnpm hook
 (`pnpm install --lockfile-only --ignore-pnpmfile`) so it stays registry-pure
 and matches the Docker workers' frozen `--ignore-pnpmfile` installation;
 local development then relinks sibling sources with
-`pnpm install --lockfile=false`. A lockfile carrying pnpmfile checksums or
+`pnpm install --lockfile=false --ignore-pnpmfile=false`. A lockfile carrying pnpmfile checksums or
 sibling `file:` specifiers fails the worker install fail-closed.
 
 ## Shared-table review worker
